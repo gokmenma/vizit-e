@@ -103,7 +103,7 @@ class SgkViziteService
     /**
      * Tüm SOAP isteklerini yapan merkezi cURL fonksiyonu. (Geliştirilmiş Versiyon)
      */
-    private function sendRequest($methodName, $params, $retryCount = 0)
+    private function sendRequest($methodName, $params)
     {
         $paramXml = '';
         foreach ($params as $key => $value) {
@@ -134,37 +134,20 @@ XML;
             'Content-Length: ' . strlen($xml_request),
             'SOAPAction: ' . $soapAction,
             'Expect:',
-            'Connection: keep-alive', // Bağlantıyı açık tutmayı deneyelim
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) SGK-Vizite-Client/1.0'
+            'Connection: close'
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Yönlendirmeleri takip et
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20); // Bağlantı için 20 saniye
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);        // Toplam işlem için 60 saniye
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1); // HTTP 1.1 zorla
 
         $responseXml = curl_exec($ch);
-        $curlError = curl_error($ch);
-        $curlErrno = curl_errno($ch);
+
+        if (curl_errno($ch)) {
+            throw new Exception("cURL Hatası: " . curl_error($ch));
+        }
         curl_close($ch);
-
-        if ($curlErrno) {
-            // Eğer bağlantı hatasıysa ve retry hakkımız varsa tekrar dene
-            if ($retryCount < 2) {
-                usleep(1000000); // 1 saniye bekle ve tekrar dene
-                return $this->sendRequest($methodName, $params, $retryCount + 1);
-            }
-            throw new Exception("cURL Hatası ({$curlErrno}): " . $curlError);
-        }
-
-        // Cevap boşsa ve retry hakkımız varsa tekrar dene (Bazen sunucu boş dönebiliyor)
-        if (empty($responseXml) && $retryCount < 2) {
-            usleep(1000000);
-            return $this->sendRequest($methodName, $params, $retryCount + 1);
-        }
 
         // Cevap boşsa veya bir HTML hata sayfasıysa
         if (empty($responseXml) || strpos(trim($responseXml), '<') !== 0) {
@@ -276,6 +259,46 @@ XML;
     }
 
     /**
+     * Token'ı zorla geçersiz kılar. Bir sonraki getValidToken() çağrısında yeni token alınır.
+     */
+    private function invalidateToken()
+    {
+        $this->wsToken = null;
+        $this->tokenExpiresAt = 0;
+
+        // Session'daki token bilgilerini de temizle
+        if (php_sapi_name() !== 'cli') {
+            unset($_SESSION['wsToken'], $_SESSION['tokenExpiresAt'], $_SESSION['activeUserKey']);
+        }
+
+        // Cache dosyasını da sil
+        $currentUserKey = $this->kullaniciAdi . '|' . $this->isyeriKodu;
+        $cacheFile = __DIR__ . '/../../logs/sgk_tokens/sgk_token_' . md5($currentUserKey) . '.json';
+        if (file_exists($cacheFile)) {
+            @unlink($cacheFile);
+        }
+    }
+
+    /**
+     * SGK'dan gelen "Token hatalı" hatasını kontrol eder.
+     */
+    private function isTokenError(string $message): bool
+    {
+        $tokenErrors = [
+            'Token hatalı',
+            'Token süresi dolmuştur',
+            'Tekrar token alınız',
+            'token alınız',
+        ];
+        foreach ($tokenErrors as $err) {
+            if (mb_stripos($message, $err) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Verilen SGK bilgilerinin geçerli olup olmadığını wsLogin ile test eder.
      * Sadece doğrulama amaçlıdır, token'ı saklamaz.
      * @return object Dönen cevap objesi (sonucKod ve sonucAciklama içerir).
@@ -312,7 +335,7 @@ XML;
      * @return array Her zaman onaylanmış raporların bulunduğu saf bir PHP dizisi döndürür.
      * @throws Exception
      */
-    public function onayliRaporlariGetir(DateTime $tarih1, DateTime $tarih2)
+    public function onayliRaporlariGetir(DateTime $tarih1, DateTime $tarih2, $retried = false)
     {
         $params = [
             'kullaniciAdi' => $this->kullaniciAdi,
@@ -381,6 +404,11 @@ XML;
             $hataMesaji = isset($returnNode->sonucAciklama)
                 ? (string)$returnNode->sonucAciklama
                 : 'Bilinmeyen bir hata oluştu.';
+            // Token hatası ise: token'ı sıfırla ve bir kez daha dene
+            if (!$retried && $this->isTokenError($hataMesaji)) {
+                $this->invalidateToken();
+                return $this->onayliRaporlariGetir($tarih1, $tarih2, true);
+            }
             throw new Exception("Onaylı raporlar getirilemedi: " . $hataMesaji);
         }
 
@@ -450,7 +478,7 @@ XML;
      * @return array Her zaman raporların bulunduğu bir dizi döndürür.
      * @throws Exception
      */
-    public function raporlariGetir(DateTime $tarih, $arsiv = true)
+    public function raporlariGetir(DateTime $tarih, $arsiv = true, $retried = false)
 
     {
         $params = [
@@ -501,6 +529,11 @@ XML;
             // Rapor bulunamadı.
         } else {
             $hataMesaji = isset($returnNode->sonucAciklama) ? (string)$returnNode->sonucAciklama : 'Bilinmeyen Hata';
+            // Token hatası ise: token'ı sıfırla ve bir kez daha dene
+            if (!$retried && $this->isTokenError($hataMesaji)) {
+                $this->invalidateToken();
+                return $this->raporlariGetir($tarih, $arsiv, true);
+            }
             throw new Exception("Raporlar getirilemedi: " . $hataMesaji);
         }
 
@@ -518,7 +551,7 @@ XML;
      * @return SimpleXMLElement|array|null Raporları içeren nesne/dizi veya kayıt yoksa null.
      * @throws Exception
      */
-    public function raporAramaTarihleGetir(DateTime $tarih)
+    public function raporAramaTarihleGetir(DateTime $tarih, $retried = false)
     {
         $params = [
             'kullaniciAdi' => $this->kullaniciAdi,
@@ -547,6 +580,11 @@ XML;
             $hataMesaji = isset($returnNode->sonucAciklama)
                 ? (string)$returnNode->sonucAciklama
                 : 'Bilinmeyen bir hata oluştu.';
+            // Token hatası ise: token'ı sıfırla ve bir kez daha dene
+            if (!$retried && $this->isTokenError($hataMesaji)) {
+                $this->invalidateToken();
+                return $this->raporAramaTarihleGetir($tarih, true);
+            }
             throw new Exception("Raporlar getirilemedi: " . $hataMesaji);
         }
     }
