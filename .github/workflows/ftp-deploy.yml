@@ -33,6 +33,7 @@ jobs:
             **/README.md
             **/database.sql
             **/Database/db.php
+            **/admin/**
           log-level: standard
           dry-run: false
           dangerous-clean-slate: false
