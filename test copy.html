@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Aramıza Hoşgeldiniz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #2C2C2F;
+      color: #E4DEFF;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #ff6b6b, #8a2be2, #00bfff);
+      border-radius: 8px;
+      margin-right: 10px;
+      position: relative;
+      box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+      animation: logoGlow 3s infinite alternate;
+    }
+    @keyframes logoGlow {
+      0% {
+        box-shadow: 0 0 10px rgba(255, 107, 107, 0.6), 0 0 20px rgba(138, 43, 226, 0.3);
+      }
+      100% {
+        box-shadow: 0 0 15px rgba(138, 43, 226, 0.7), 0 0 30px rgba(0, 191, 255, 0.5);
+      }
+    }
+    .logo-text {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      text-shadow: 0 0 5px rgba(138, 43, 226, 0.5), 0 0 10px rgba(0, 191, 255, 0.3);
+      animation: textGlow 3s infinite alternate;
+    }
+    @keyframes textGlow {
+      0% {
+        text-shadow: 0 0 5px rgba(138, 43, 226, 0.5), 0 0 10px rgba(0, 191, 255, 0.3);
+      }
+      100% {
+        text-shadow: 0 0 8px rgba(138, 43, 226, 0.7), 0 0 15px rgba(0, 191, 255, 0.5);
+      }
+    }
+    .tagline {
+      color: #a8a8a8;
+      font-size: 14px;
+    }
+    .card {
+      background-color: rgb(41, 41, 41,0.8);
+      border-radius: 16px;
+      margin: 40px 0;
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+    .card-wrapper {
+      position: relative;
+      margin: 40px 0;
+      z-index: 1;
+    }
+    
+    .card-wrapper::before,
+    .card-wrapper::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      z-index: 0;
+      opacity: 0.7;
+      filter: blur(40px);
+      animation: spotGlow 8s ease-in-out infinite alternate;
+    }
+
+    .card-wrapper::before {
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(138, 43, 226, 0.8) 0%, rgba(138, 43, 226, 0.2) 70%, transparent 100%);
+      top: -50px;
+      left: 20%;
+      box-shadow: 0 0 100px rgba(138, 43, 226, 0.8);
+      animation-delay: 0.3s;
+    }
+
+    .card-wrapper::after {
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(0, 191, 255, 0.8) 0%, rgba(0, 191, 255, 0.2) 70%, transparent 100%);
+      bottom: -60px;
+      right: 25%;
+      box-shadow: 0 0 120px rgba(0, 191, 255, 0.8);
+      animation-delay: 0.7s;
+    }
+
+    .card-background {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+      opacity: 0.6;
+    }
+    
+    @keyframes spotGlow {
+      0% { 
+        opacity: 0.5;
+        filter: blur(40px);
+        transform: scale(0.9);
+      }
+      50% { 
+        opacity: 0.8;
+        filter: blur(50px);
+        transform: scale(1.1);
+      }
+      100% { 
+        opacity: 0.6;
+        filter: blur(45px);
+        transform: scale(1);
+      }
+    }
+    
+    /* Ek neon spotlar */
+    .card-wrapper .spot {
+      position: absolute;
+      border-radius: 50%;
+      z-index: 0;
+      filter: blur(35px);
+      opacity: 0.6;
+    }
+    
+    .card-wrapper .spot:nth-child(1) {
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(255, 107, 107, 0.8) 0%, rgba(255, 107, 107, 0.2) 70%, transparent 100%);
+      top: 15%;
+      right: -40px;
+      box-shadow: 0 0 90px rgba(255, 107, 107, 0.7);
+      animation: spotGlow 7s ease-in-out 0.5s infinite alternate;
+    }
+    
+    .card-wrapper .spot:nth-child(2) {
+      width: 130px;
+      height: 130px;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.7) 0%, rgba(255, 215, 0, 0.2) 70%, transparent 100%);
+      bottom: 25%;
+      left: -30px;
+      box-shadow: 0 0 80px rgba(255, 215, 0, 0.6);
+      animation: spotGlow 9s ease-in-out 1s infinite alternate-reverse;
+    }
+    
+    .card-wrapper .spot:nth-child(3) {
+      width: 110px;
+      height: 110px;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.7) 0%, rgba(0, 255, 255, 0.2) 70%, transparent 100%);
+      top: 60%;
+      left: 10%;
+      box-shadow: 0 0 70px rgba(0, 255, 255, 0.6);
+      animation: spotGlow 8s ease-in-out 1.5s infinite alternate;
+    }
+    
+    .card-wrapper .spot:nth-child(4) {
+      width: 90px;
+      height: 90px;
+      background: radial-gradient(circle, rgba(255, 0, 255, 0.7) 0%, rgba(255, 0, 255, 0.2) 70%, transparent 100%);
+      top: 40%;
+      right: 15%;
+      box-shadow: 0 0 60px rgba(255, 0, 255, 0.6);
+      animation: spotGlow 10s ease-in-out 2s infinite alternate-reverse;
+    }
+    
+    .card {
+      margin: 0;
+    }
+    
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      /* background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, transparent 50%, rgba(0, 191, 255, 0.2) 100%); */
+      pointer-events: none;
+      border-radius: 16px;
+      z-index: 1;
+      opacity: 0.8;
+    }
+
+    .card-content {
+      padding: 40px;
+      position: relative;
+      z-index: 2;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.2;
+      /* background: linear-gradient(90deg, #fff, #d0d0ff); */
+      /* color: #E4DEFF; */
+      /* -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; */
+      /* text-shadow: 0 0 10px rgba(138, 43, 226, 0.7); */
+      /* animation: headingGlow 4s infinite alternate; */
+    }
+    @keyframes headingGlow {
+      0% {
+        text-shadow: 0 0 10px rgba(138, 43, 226, 0.7), 0 0 20px rgba(0, 191, 255, 0.4);
+      }
+      100% {
+        text-shadow: 0 0 15px rgba(138, 43, 226, 0.9), 0 0 30px rgba(0, 191, 255, 0.6);
+      }
+    }
+    p {
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+    .screenshot {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 30px 0;
+    }
+    .btn {
+      background: linear-gradient(90deg, #8a2be2, #6a5acd);
+      color: white;
+      padding: 16px 32px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 18px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+      overflow: hidden;
+    }
+    .btn::before {
+      content: "";
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #ff6b6b, #8a2be2, #00bfff, #8a2be2);
+      background-size: 400% 400%;
+      z-index: -1;
+      border-radius: 32px;
+      animation: buttonBorderGlow 6s ease infinite;
+      filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    @keyframes buttonBorderGlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(138, 43, 226, 0.7), 0 0 40px rgba(0, 191, 255, 0.4);
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    }
+    .btn:hover::before {
+      opacity: 0.8;
+    }
+    .footer {
+      text-align: center;
+      padding: 30px 0;
+      color: #777;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon"></div>
+        <div class="logo-text">Vizit-e</div>
+      </div>
+    </div>
+    <div class="card-wrapper">
+      <div class="spot"></div>
+      <div class="spot"></div>
+      <div class="spot"></div>
+      <div class="spot"></div>
+      <div class="card-background"></div>
+      <div class="card">
+        <div class="card-content">
+          <h1>Vizit-e.com’a Hoş Geldiniz!</h1>
+          <p>Vizit-e.com ailesine katıldığınız için teşekkür ederiz. Artık sağlık raporlarını, bildirimleri ve onay süreçlerini çok daha hızlı ve zahmetsiz şekilde yönetebilirsiniz. 🚀</p>
+          
+          <ul>
+            <li>✅ Zaman kaybı olmadan otomatik onay</li>
+            <li>✅ İnsan hatasını en aza indiren akıllı sistem</li>
+            <li>✅ SMS doğrulamasına gerek kalmadan kolay kullanım</li>
+            <li>✅ Bekleyen raporları otomatik onaylama</li>
+          </ul>
+          <div style="text-align:center;">
+            <a href="#" class="btn">Hesabınıza Giriş Yapın</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      &copy; 2025 Vizit-e. Tüm hakları saklıdır.
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+[2025-09-04 08:31:43] [INFO] Otomatik Onay Cron Job Başlatıldı: 2025-09-04 08:31:43
+[2025-09-04 08:31:43] [INFO] Aktif Kullanıcı Sayısı: 2
+[2025-09-04 08:31:43] [INFO] İşlenen Kullanıcı ID: 1
+[2025-09-04 08:31:43] [INFO] Aktif İşyer Sayısı: 2
+[2025-09-04 08:31:43] [INFO] İşyeri Sorgulama Başladı: DU Hastane S&ouml;zleşmeli Person.
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 138715104
+[2025-09-04 08:31:44] [WARNING] Rapor Onaylanmadı: 138814238
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 138906134
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 138965174
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 138995932
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 139035284
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 139080211
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 139097468
+[2025-09-04 08:31:44] [WARNING] İşyeri İçin Onaylanacak Rapor Bulunamadı: DU Hastane S&ouml;zleşmeli Person.
+[2025-09-04 08:31:44] [INFO] İşyeri Sorgulama Başladı: İşçiler
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 138609688
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 138830778
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 138895177
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 138971545
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 139026004
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 139094246
+[2025-09-04 08:31:44] [INFO] Rapor Onaylanmak Üzere İşleme Alındı: 139169897 - Başlama Tarihi : 2025-09-01 - Bitiş Tarihi : 2025-09-03
+[2025-09-04 08:31:44] [INFO] Rapor Arşivlenmiş: 139170759
+[2025-09-04 08:31:44] [WARNING] Rapor Onaylanmadı: 139180541
+[2025-09-04 08:31:44] [INFO] İşyeri İçin Onaylanacak Rapor Sayısı: 1
+[2025-09-04 08:31:44] [INFO] Rapor Onaylandı: 139169897
+[2025-09-04 08:31:44] [INFO] Rapor Logları Kaydedildi: 139169897
+[2025-09-04 08:31:44] [INFO] Özet E-posta İçin Toplam Rapor Sayısı: 1
+[2025-09-04 08:31:44] [INFO] Kullanıcıya Özet E-posta Gönderildi: 1
+[2025-09-04 08:31:44] [INFO] İşlenen Kullanıcı ID: 42
+[2025-09-04 08:31:44] [INFO] Aktif İşyer Sayısı: 0
+[2025-09-04 08:31:44] [INFO] Kullanıcıya Ait Aktif İşyer Bulunamadı: 42
+[2025-09-04 08:31:44] [INFO] Otomatik Onay Cron Job Tamamlandı: 2025-09-04 08:31:44
+[2025-09-04 08:38:55] [INFO] Otomatik Onay Cron Job Başlatıldı: 2025-09-04 08:38:55
+[2025-09-04 08:38:55] [INFO] Aktif Kullanıcı Sayısı: 2
+[2025-09-04 08:38:55] [INFO] İşlenen Kullanıcı ID: 1
+[2025-09-04 08:38:55] [INFO] Aktif İşyer Sayısı: 2
+[2025-09-04 08:38:55] [INFO] İşyeri Sorgulama Başladı: DU Hastane S&ouml;zleşmeli Person.
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 138715104
+[2025-09-04 08:38:56] [WARNING] Rapor Onaylanmadı: 138814238
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 138906134
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 138965174
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 138995932
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 139035284
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 139080211
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 139097468
+[2025-09-04 08:38:56] [WARNING] İşyeri İçin Onaylanacak Rapor Bulunamadı: DU Hastane S&ouml;zleşmeli Person.
+[2025-09-04 08:38:56] [INFO] İşyeri Sorgulama Başladı: İşçiler
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 138609688
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 138830778
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 138895177
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 138971545
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 139026004
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 139094246
+[2025-09-04 08:38:56] [SUCCESS] Rapor Onaylanmak Üzere İşleme Alındı: 139169897 - Başlama Tarihi : 2025-09-01 - Bitiş Tarihi : 2025-09-03
+[2025-09-04 08:38:56] [INFO] Rapor Arşivlenmiş: 139170759
+[2025-09-04 08:38:56] [WARNING] Rapor Onaylanmadı: 139180541
+[2025-09-04 08:38:56] [INFO] İşyeri İçin Onaylanacak Rapor Sayısı: 1
+[2025-09-04 08:38:56] [INFO] Rapor Onaylandı: 139169897
+[2025-09-04 08:38:56] [INFO] Rapor Logları Kaydedildi: 139169897
+[2025-09-04 08:38:56] [INFO] Özet E-posta İçin Toplam Rapor Sayısı: 1
+[2025-09-04 08:38:56] [INFO] Kullanıcıya Özet E-posta Gönderildi: 1
+[2025-09-04 08:38:56] [INFO] İşlenen Kullanıcı ID: 42
+[2025-09-04 08:38:56] [INFO] Aktif İşyer Sayısı: 0
+[2025-09-04 08:38:56] [INFO] Kullanıcıya Ait Aktif İşyer Bulunamadı: 42
+[2025-09-04 08:38:56] [INFO] Otomatik Onay Cron Job Tamamlandı: 2025-09-04 08:38:56

@@ -1,0 +1,295 @@
+<?php
+
+
+require "vendor/autoload.php";
+session_start();
+if (php_sapi_name() === 'cli-server') {
+    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $file = __DIR__ . $path;
+    if ($path !== '/' && file_exists($file) && is_file($file)) {
+        return false;
+    }
+}
+
+
+class Router
+{
+    private $routes = [];
+    private $prefix = '';
+    private $basePath = 'pages/'; // Varsayılan base path
+
+    // Base path ayarla
+    public function setBasePath($path)
+    {
+        $this->basePath = rtrim($path, '/') . '/';
+        return $this;
+    }
+
+    // Prefix ve base path ile birlikte
+    public function prefix($prefix, $basePath = null)
+    {
+        $this->prefix = trim($prefix, '/');
+        if ($basePath !== null) {
+            $this->basePath = rtrim($basePath, '/') . '/';
+        }
+        return $this;
+    }
+
+    // Prefix'i sıfırla
+    public function resetPrefix()
+    {
+        $this->prefix = '';
+        $this->basePath = 'pages/'; // Varsayılan değere dön
+        return $this;
+    }
+    // GET route ekle
+    public function get($pattern, $callback)
+    {
+        if (is_string($callback)) {
+            // String callback'i base path ile birleştir
+            $callback = $this->basePath . $callback;
+            $actualCallback = function () use ($callback) {
+                require $callback;
+            };
+        } else {
+            $actualCallback = $callback;
+        }
+
+        $fullPattern = $this->prefix ? $this->prefix . '/' . ltrim($pattern, '/') : $pattern;
+        $this->routes[] = ['pattern' => $fullPattern, 'callback' => $actualCallback];
+        return $this;
+    }
+    // Grup tanımlama metodu
+    public function group($prefix, $basePath, $callback)
+    {
+        $oldPrefix = $this->prefix;
+        $oldBasePath = $this->basePath;
+
+        $this->prefix($prefix, $basePath);
+        $callback($this);
+
+        $this->prefix = $oldPrefix;
+        $this->basePath = $oldBasePath;
+        return $this;
+    }
+
+    // Router çalıştır
+    public function dispatch($url)
+    {
+
+        foreach ($this->routes as $route) {
+            $pattern = "@^" . preg_replace('/\{([^\/]+)\}/', '([^/]+)', $route['pattern']) . "$@";
+
+            if (preg_match($pattern, $url, $matches)) {
+                array_shift($matches); // ilk match (url) sil
+                return call_user_func_array($route['callback'], $matches);
+            }
+        }
+
+        // Hiçbir route eşleşmezse 404
+        http_response_code(404);
+        require 'pages/404.php';
+    }
+}
+
+// Router başlat
+$router = new Router();
+
+
+
+$router->get('abonelik-paketleri', function () {
+    require 'pages/abonelik-paketleri.php';
+});
+
+
+// ROUTES tanımla
+$router->get('index', function () {
+    require 'index.php';
+});
+
+
+
+$router->get('isyeri-sec', function () {
+    require 'pages/isyeri/isyeri_sec.php';
+});
+$router->get('isyerlerim', function () {
+    require 'pages/isyeri/isyerlerim.php';
+});
+$router->get('excelden-yukle', function () {
+    require 'pages/isyeri/excelden_yukle.php';
+});
+
+//Kullanıcılar
+$router->get('kullanicilar', function () {
+    require 'pages/kullanicilar/liste.php';
+});
+
+
+//İletisim Bilgileri
+$router->get('iletisim-bilgileri', function () {
+    require 'pages/iletisim-bilgileri.php';
+});
+
+
+$router->get('tarihe-gore-rapor-ara', function () {
+    require 'pages/tarihe_gore_rapor_ara.php';
+});
+
+
+$router->get('mahsuplastirilacak-raporlar', function () {
+    require 'pages/mahsuplastirma/mahsuplastirilacak_raporlar.php';
+});
+
+//Mahsuplaştırılan Raporlar
+$router->get('mahsuplastirilan-raporlar', function () {
+    require 'pages/mahsuplastirma/mahsuplastirilan_raporlar.php';
+});
+
+//Mahsuplaştırılın Ödeme listesi
+$router->get('prim-borcuna-mahsup-edilen-odemeler', function () {
+    require 'pages/mahsuplastirma/prim-borcuna-mahsup-edilen-odemeler.php';
+});
+
+
+
+$router->get('onay-bekleyen-raporlar', function () {
+    require 'pages/onay_bekleyen_raporlar.php';
+});
+$router->get('onayli-rapor-ara', function () {
+    require 'pages/onayli_rapor_ara.php';
+});
+
+$router->get('onayli-raporlar', function () {
+    require 'pages/onayli_raporlar.php';
+});
+
+//Manuel rapor bildirimi
+$router->get('manuel-rapor-bildirimi', function () {
+    require 'pages/manuel-rapor/manuel_rapor_bildirimi.php';
+});
+
+//Maneul Rapor Görüntüleme
+$router->get('manuel-rapor-goruntule', function () {
+    require 'pages/manuel-rapor/manuel_rapor_goruntule.php';
+});
+
+//Manuel Rapor Güncelleme
+$router->get('manuel-rapor-guncelleme', function () {
+    require 'pages/manuel-rapor/manuel_rapor_guncelleme.php';
+});
+
+//iş Kazası Bildirimi
+$router->get('is-kazasi-bildirimi', function () {
+    require 'pages/is_kazasi_bildirimi.php';
+});
+
+//Arşivlenmiş Raporlar
+$router->get('arsivlenmis-raporlar', function () {
+    require 'pages/arsivlenmis_raporlar.php';
+});
+
+
+
+
+
+
+
+
+//Odeme sayfası
+$router->get('odeme-sayfasi', function () {
+    require 'pages/odeme_sayfasi.php';
+});
+
+//Rapor Onayı Göster
+$router->get('rapor-onay-goster', function () {
+    require 'pages/rapor_onay_goster.php';
+});
+
+/* Onaylı Rapor Göster */
+$router->get('onayli-rapor-goster', function () {
+    require 'pages/onayli-raporlar/rapor_goster.php';
+});
+
+
+
+$router->get('profile', function () {
+    require 'profile.php';
+});
+
+$router->get('forgot-password', function () {
+    require 'forgot_password.php';
+});
+
+//Reset Password
+$router->get('reset-password', function () {
+    require 'reset_password.php';
+});
+
+
+
+
+
+$router->get('temizle', function () {
+    require 'temizle.php';
+});
+
+
+
+// Giriş yap
+$router->get('sign-in', function () {
+    require 'sign-in.php';
+});
+
+// Kayıt ol
+$router->get('sign-up', function () {
+    require 'sign-up.php';
+});
+
+// Davet linki ile kayıt ol
+$router->get('sign-up/{davetid}', function ($davetid) {
+    require 'sign-up.php';
+});
+
+
+
+$router->prefix('admin', 'admin/')
+    ->get('sign-in', 'sign-in.php')
+    ->get('index', 'index.php')
+    ->get('logout', function () {
+        session_destroy();
+        header("Location: sign-in");
+        exit();
+    })
+    ->get("abonelikler", "pages/abonelikler.php")
+    ->get('kullanicilar', 'pages/kullanicilar.php')
+    ->get('kullanici-abonelikleri', 'kullanici_abonelikleri.php')
+    ->get('settings', 'settings.php')
+    ->resetPrefix();
+
+
+
+//Çıkış yap
+$router->get('logout', function () {
+    session_destroy();
+    header("Location: sign-in");
+    exit();
+});
+
+// Yetkiniz yok sayfası
+$router->get('unauthorize', function () {
+    require 'pages/unauthorize.php';
+});
+
+
+
+
+
+// Parametreli örnek: /rapor/2025-08-17
+$router->get('rapor/{tarih}', function ($tarih) {
+    // $tarih değişkeni dinamik geliyor
+    echo "Rapor tarihi: " . htmlspecialchars($tarih);
+});
+
+// Çalıştır
+$url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+$router->dispatch($url);

@@ -1,0 +1,141 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="500" fill="#f5f5f7" rx="8" ry="8"/>
+  
+  <!-- Sidebar -->
+  <rect x="10" y="10" width="180" height="480" fill="#ffffff" rx="6" ry="6" stroke="#e0e0e0" stroke-width="1"/>
+  
+  <!-- Sidebar Items -->
+  <rect x="20" y="60" width="160" height="30" fill="#f0f0f5" rx="4" ry="4"/>
+  <text x="50" y="80" font-family="Arial" font-size="12" fill="#333333">Home</text>
+  <circle cx="35" cy="75" r="6" fill="#6b5acd"/>
+  
+  <rect x="20" y="100" width="160" height="30" fill="#f0f0f5" rx="4" ry="4"/>
+  <text x="50" y="120" font-family="Arial" font-size="12" fill="#333333">Inbox</text>
+  <circle cx="35" cy="115" r="6" fill="#ff6b6b"/>
+  
+  <rect x="20" y="140" width="160" height="30" fill="#8a2be2" rx="4" ry="4"/>
+  <text x="50" y="160" font-family="Arial" font-size="12" fill="#ffffff">Dashboards</text>
+  <circle cx="35" cy="155" r="6" fill="#ffffff"/>
+  
+  <rect x="20" y="180" width="160" height="30" fill="#f0f0f5" rx="4" ry="4"/>
+  <text x="50" y="200" font-family="Arial" font-size="12" fill="#333333">Docs</text>
+  <circle cx="35" cy="195" r="6" fill="#00bfff"/>
+  
+  <text x="20" y="240" font-family="Arial" font-size="11" fill="#777777">SPACES</text>
+  
+  <rect x="20" y="250" width="160" height="30" fill="#f0f0f5" rx="4" ry="4"/>
+  <text x="50" y="270" font-family="Arial" font-size="12" fill="#333333">Everything</text>
+  <circle cx="35" cy="265" r="6" fill="#6b5acd"/>
+  
+  <rect x="20" y="290" width="160" height="30" fill="#f0f0f5" rx="4" ry="4"/>
+  <text x="50" y="310" font-family="Arial" font-size="12" fill="#333333">Strategic Planning</text>
+  <circle cx="35" cy="305" r="6" fill="#ff6b6b"/>
+  
+  <rect x="20" y="330" width="160" height="30" fill="#f0f0f5" rx="4" ry="4"/>
+  <text x="50" y="350" font-family="Arial" font-size="12" fill="#333333">Marketing</text>
+  <circle cx="35" cy="345" r="6" fill="#00bfff"/>
+  
+  <!-- Main Content Area -->
+  <rect x="200" y="10" width="590" height="480" fill="#ffffff" rx="6" ry="6" stroke="#e0e0e0" stroke-width="1"/>
+  
+  <!-- Search Bar -->
+  <rect x="220" y="20" width="300" height="30" fill="#f0f0f5" rx="15" ry="15"/>
+  <text x="250" y="40" font-family="Arial" font-size="12" fill="#777777">Search...</text>
+  <circle cx="235" cy="35" r="6" fill="#777777"/>
+  
+  <!-- User Icons -->
+  <circle cx="750" cy="35" r="15" fill="#f0f0f5"/>
+  <circle cx="710" cy="35" r="15" fill="#f0f0f5"/>
+  
+  <!-- Hierarchy Navigation -->
+  <rect x="220" y="70" width="550" height="40" fill="#f9f9f9" rx="4" ry="4"/>
+  
+  <text x="230" y="95" font-family="Arial" font-size="13" fill="#333333">Hierarchy</text>
+  <text x="310" y="95" font-family="Arial" font-size="13" fill="#333333">›</text>
+  <text x="330" y="95" font-family="Arial" font-size="13" fill="#333333">Campaign & Product Management</text>
+  <text x="550" y="95" font-family="Arial" font-size="13" fill="#333333">›</text>
+  <text x="570" y="95" font-family="Arial" font-size="13" fill="#333333">Campaigns</text>
+  
+  <!-- Tab Navigation -->
+  <rect x="220" y="120" width="550" height="30" fill="#ffffff"/>
+  
+  <text x="230" y="140" font-family="Arial" font-size="12" fill="#8a2be2">All My Work</text>
+  <text x="320" y="140" font-family="Arial" font-size="12" fill="#777777">All Campaigns</text>
+  <text x="420" y="140" font-family="Arial" font-size="12" fill="#777777">Board</text>
+  <text x="480" y="140" font-family="Arial" font-size="12" fill="#777777">Running Campaigns</text>
+  <text x="610" y="140" font-family="Arial" font-size="12" fill="#777777">Gantt</text>
+  
+  <line x1="220" y1="150" x2="770" y2="150" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="230" y1="150" x2="290" y2="150" stroke="#8a2be2" stroke-width="2"/>
+  
+  <!-- Filter Options -->
+  <rect x="220" y="160" width="550" height="30" fill="#ffffff"/>
+  
+  <rect x="230" y="165" width="80" height="20" fill="#f0f0f5" rx="10" ry="10"/>
+  <text x="250" y="180" font-family="Arial" font-size="11" fill="#333333">Group: Status</text>
+  
+  <rect x="320" y="165" width="100" height="20" fill="#f0f0f5" rx="10" ry="10"/>
+  <text x="340" y="180" font-family="Arial" font-size="11" fill="#333333">Schedule: By month</text>
+  
+  <rect x="430" y="165" width="60" height="20" fill="#f0f0f5" rx="10" ry="10"/>
+  <text x="445" y="180" font-family="Arial" font-size="11" fill="#333333">+ Filter</text>
+  
+  <rect x="500" y="165" width="60" height="20" fill="#f0f0f5" rx="10" ry="10"/>
+  <text x="515" y="180" font-family="Arial" font-size="11" fill="#333333">+ View</text>
+  
+  <line x1="220" y1="195" x2="770" y2="195" stroke="#e0e0e0" stroke-width="1"/>
+  
+  <!-- Task List Header -->
+  <rect x="220" y="205" width="550" height="30" fill="#ffffff"/>
+  
+  <text x="230" y="225" font-family="Arial" font-size="12" font-weight="bold" fill="#333333">Tasks</text>
+  <text x="280" y="225" font-family="Arial" font-size="12" fill="#777777">10</text>
+  
+  <text x="670" y="225" font-family="Arial" font-size="12" fill="#777777">Assignee</text>
+  <text x="740" y="225" font-family="Arial" font-size="12" fill="#777777">Due date</text>
+  
+  <line x1="220" y1="235" x2="770" y2="235" stroke="#e0e0e0" stroke-width="1"/>
+  
+  <!-- Task Items -->
+  <!-- Task 1 -->
+  <rect x="220" y="245" width="550" height="40" fill="#ffffff"/>
+  <circle cx="235" cy="265" r="8" fill="#8a2be2"/>
+  <text x="250" y="270" font-family="Arial" font-size="13" fill="#333333">Brand awareness campaign</text>
+  <circle cx="670" cy="265" r="12" fill="#f0f0f5"/>
+  <text x="740" y="270" font-family="Arial" font-size="12" fill="#777777">May 29</text>
+  
+  <!-- Task 2 -->
+  <rect x="220" y="285" width="550" height="40" fill="#ffffff"/>
+  <circle cx="235" cy="305" r="8" fill="#8a2be2"/>
+  <text x="250" y="310" font-family="Arial" font-size="13" fill="#333333">Teaser Fall campaign</text>
+  <circle cx="670" cy="305" r="12" fill="#f0f0f5"/>
+  <text x="740" y="310" font-family="Arial" font-size="12" fill="#777777">May 30</text>
+  
+  <!-- Task 3 -->
+  <rect x="220" y="325" width="550" height="40" fill="#ffffff"/>
+  <circle cx="235" cy="345" r="8" fill="#ff6b6b"/>
+  <text x="250" y="350" font-family="Arial" font-size="13" fill="#333333">"Find joy" campaign</text>
+  
+  <!-- Play Button -->
+  <circle cx="510" cy="345" r="15" fill="#8a2be2"/>
+  <polygon points="505,338 505,352 518,345" fill="#ffffff"/>
+  <text x="535" y="350" font-family="Arial" font-size="12" fill="#8a2be2">Play</text>
+  
+  <circle cx="670" cy="345" r="12" fill="#f0f0f5"/>
+  <text x="740" y="350" font-family="Arial" font-size="12" fill="#777777">May 16</text>
+  
+  <!-- Task 4 -->
+  <rect x="220" y="365" width="550" height="40" fill="#ffffff"/>
+  <circle cx="235" cy="385" r="8" fill="#00bfff"/>
+  <text x="250" y="390" font-family="Arial" font-size="13" fill="#333333">"Be you" campaign</text>
+  <circle cx="670" cy="385" r="12" fill="#f0f0f5"/>
+  <text x="740" y="390" font-family="Arial" font-size="12" fill="#777777">May 18</text>
+  
+  <!-- Task 5 -->
+  <rect x="220" y="405" width="550" height="40" fill="#ffffff"/>
+  <circle cx="235" cy="425" r="8" fill="#ff6b6b"/>
+  <text x="250" y="430" font-family="Arial" font-size="13" fill="#333333">Email marketing campaign</text>
+  <circle cx="670" cy="425" r="12" fill="#f0f0f5"/>
+  <text x="740" y="430" font-family="Arial" font-size="12" fill="#777777">May 12</text>
+</svg>

@@ -1,0 +1,72 @@
+[2025-08-24 12:16:37] [INFO] Cron Job Başlatıldı (Kullanıcı Başına Tek E-posta Modu): 2025-08-24 12:16:37
+
+[2025-08-24 12:16:37] [INFO] 4 adet kullanıcı için işlem başlatılıyor...
+[2025-08-24 12:16:37] [INFO] --------------------------------------------------
+[2025-08-24 12:16:37] [INFO] İşlenen Kullanıcı: beyzade83@gmail.com (ID: 1)
+[2025-08-24 12:16:37] [INFO]  - İşyeri sorgulanıyor: DU Hastane İşçiler
+
+[2025-08-24 12:16:37] [INFO]  - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+
+[2025-08-24 12:16:37] [INFO]  - Toplam 2 adet rapor bulundu. E-posta oluşturuluyor...
+
+[2025-08-24 12:16:39] [INFO]  - E-posta başarıyla gönderildi: beyzade83@gmail.com
+
+[2025-08-24 12:16:39] [INFO] --------------------------------------------------
+
+[2025-08-24 12:16:39] [INFO] İşlenen Kullanıcı: beyzade83@hotmail.com (ID: 20)
+[2025-08-24 12:16:40] [INFO]  - İşyeri sorgulanıyor: Hastane Sürekli İşçiler
+
+[2025-08-24 12:16:40] [INFO]  - İşyeri sorgulanıyor: Hastane Sözleşmeli Personeller
+
+[2025-08-24 12:16:40] [INFO]  - Toplam 2 adet rapor bulundu. E-posta oluşturuluyor...
+
+[2025-08-24 12:16:42] [INFO]  - E-posta başarıyla gönderildi: beyzade83@hotmail.com
+
+[2025-08-24 12:16:42] [INFO] --------------------------------------------------
+
+[2025-08-24 12:16:42] [INFO] İşlenen Kullanıcı: beyzade84@hotmail.com (ID: 25)
+[2025-08-24 12:16:42] [INFO]  - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+
+[2025-08-24 12:16:42] [INFO] İşlenen Kullanıcı: beyzade86@gmail.com (ID: 26)
+[2025-08-24 12:16:42] [INFO]  - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+
+[2025-08-24 12:16:42] [INFO] Cron Job Tamamlandı: 2025-08-24 12:16:42
+
+[2025-08-24 18:13:29] [INFO] Cron Job Başlatıldı (Kullanıcı Başına Tek E-posta Modu): 2025-08-24 18:13:29
+
+[2025-08-24 18:13:29] [INFO] 4 adet kullanıcı için işlem başlatılıyor...
+[2025-08-24 18:13:29] [INFO] --------------------------------------------------
+[2025-08-24 18:13:29] [INFO] İşlenen Kullanıcı: beyzade83@gmail.com (ID: 1)
+[2025-08-24 18:13:29] [INFO]  - İşyeri sorgulanıyor: DU Hastane İşçiler
+
+[2025-08-24 18:13:29] [INFO]  - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+
+[2025-08-24 18:13:29] [INFO]  - Toplam 2 adet rapor bulundu. E-posta oluşturuluyor...
+
+[2025-08-24 18:13:31] [INFO]  - E-posta başarıyla gönderildi: beyzade83@gmail.com
+
+[2025-08-24 18:13:31] [INFO] --------------------------------------------------
+
+[2025-08-24 18:13:31] [INFO] İşlenen Kullanıcı: beyzade83@hotmail.com (ID: 20)
+[2025-08-24 18:13:31] [INFO]  - İşyeri sorgulanıyor: Hastane Sürekli İşçiler
+
+[2025-08-24 18:13:31] [INFO]  - İşyeri sorgulanıyor: Hastane Sözleşmeli Personeller
+
+[2025-08-24 18:13:32] [INFO]  - Toplam 2 adet rapor bulundu. E-posta oluşturuluyor...
+
+[2025-08-24 18:13:33] [INFO]  - E-posta başarıyla gönderildi: beyzade83@hotmail.com
+
+[2025-08-24 18:13:33] [INFO] --------------------------------------------------
+
+[2025-08-24 18:13:33] [INFO] İşlenen Kullanıcı: beyzade84@hotmail.com (ID: 25)
+[2025-08-24 18:13:33] [INFO]  - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+
+[2025-08-24 18:13:33] [INFO] İşlenen Kullanıcı: beyzade86@gmail.com (ID: 26)
+[2025-08-24 18:13:33] [INFO]  - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+
+[2025-08-24 18:13:33] [INFO] Cron Job Tamamlandı: 2025-08-24 18:13:33
+

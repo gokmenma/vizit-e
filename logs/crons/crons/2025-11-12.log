@@ -1,0 +1,407 @@
+[2025-11-12 19:31:13] [INFO] <pre style='background-color: #1e1e1e; color: #ffffff; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: Consolas, monospace; font-size: 12px; line-height: 1.4;'>Cron Job Başlatıldı (Onaylanacak raporlar bildirimi): 2025-11-12 19:31:08
+26 adet kullanıcı için işlem başlatılıyor...
+--------------------------------------------------
+
+İşlenen Kullanıcı: beyzade83@gmail.com (ID: 1) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: ilknurersoy@duzce.edu.tr (ID: 30) - İşyeri sorgulanıyor: Düzce Üniversitesi Sağlık Uygulama Ve Araştırma Merkezi Döner Sermaye İşletmesi
+   - HATA: Düzce Üniversitesi Sağlık Uygulama Ve Araştırma Merkezi Döner Sermaye İşletmesi işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: jannissoon1@gmail.com (ID: 31) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: mostgrup81@gmail.com (ID: 33) - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+   - HATA: Most grup Yönetim danışmanlığı limited şirketi  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+   - HATA: Most grup Yönetim danışmanlığı limited şirketi  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+   - HATA: Most grup Yönetim danışmanlığı limited şirketi  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: ozkanyalli@gmail.com (ID: 34) - İşyeri sorgulanıyor: Hastane İşçiler
+   - HATA: Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: betularamak@duzce.edu.tr (ID: 37) - İşyeri sorgulanıyor: Özel Kalem 
+   - HATA: Özel Kalem  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: aliakmes@duzce.edu.tr (ID: 38) - İşyeri sorgulanıyor: Rektörlük İşçiler
+ - İşyeri sorgulanıyor: İŞKUR İşçiler
+ - Toplam 56 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: aliakmes@duzce.edu.tr
+--------------------------------------------------
+İşlenen Kullanıcı: emreakar@duzce.edu.tr (ID: 39) - İşyeri sorgulanıyor: İşçiler
+ - İşyeri sorgulanıyor: işkur işçileri
+   - HATA: işkur işçileri işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: KullanıcıAdi , KullanıcıKodu , Şifre  tekrar deneyin.
+ - Toplam 56 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: emreakar@duzce.edu.tr
+--------------------------------------------------
+İşlenen Kullanıcı: mehmetbayirbasi@duzce.edu.tr (ID: 40) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: gamzedemir@duzce.edu.tr (ID: 45) - İşyeri sorgulanıyor: Güvenlik
+   - HATA: Güvenlik işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: Teknik Servis
+   - HATA: Teknik Servis işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: Veri Personeli
+   - HATA: Veri Personeli işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: Zeynepmetin@duzce.edu.tr (ID: 46) - İşyeri sorgulanıyor: DÜ Hastane işçi 
+   - HATA: DÜ Hastane işçi  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DÜ Hastane sözleşmeli 
+   - HATA: DÜ Hastane sözleşmeli  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: bilgekazaz@gmail.com (ID: 48) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: senol@senoldonder.com.tr (ID: 52) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: emre.ipek643@gmail.com (ID: 53) - İşyeri sorgulanıyor: Cedetek
+   - HATA: Cedetek işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: KullanıcıAdi , KullanıcıKodu , Şifre  tekrar deneyin.
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: bilgekazaz21@gmail.com (ID: 54) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: ik@kukuroglu.com (ID: 55) - İşyeri sorgulanıyor: Kukuroğlu Tekstil
+   - HATA: Kukuroğlu Tekstil işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: KullanıcıAdi , KullanıcıKodu , Şifre  tekrar deneyin.
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: nusretgure@gngdanismanlik.com (ID: 56) - İşyeri sorgulanıyor: Nutties Gıda Aş.
+   - HATA: Nutties Gıda Aş. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: beyzade83@hotmail.com (ID: 60) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: beyzade83@hotmail.com (ID: 61) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: bilgekazaz22@gmail.com (ID: 62) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: ertanguness@gmail.com (ID: 67) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: zeynepkoc@duzce.edu.tr (ID: 68) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: ab274556@adalet.gov.tr (ID: 76) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: smmmhknblt@gmail.com (ID: 77) - İşyeri sorgulanıyor: İdeal SU - Bahçe Fabrika
+ - Toplam 16 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: smmmhknblt@gmail.com
+--------------------------------------------------
+İşlenen Kullanıcı: selvi_666@hotmail.com (ID: 78) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: cevdetturansan@duzce.edu.tr (ID: 79) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+Cron Job Tamamlandı: 2025-11-12 19:31:13
+</pre>
+[2025-11-12 21:23:01] [INFO]  - İşyeri sorgulanıyor: DU Hastane İşçiler
+[2025-11-12 21:23:01] [INFO] Kullanıcı Kodu: 32450401908, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: beyzade83@gmail.com
+[2025-11-12 21:23:01] [INFO]  - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+[2025-11-12 21:23:01] [INFO] Kullanıcı Kodu: 31252682942, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: beyzade83@gmail.com
+[2025-11-12 21:23:01] [INFO]  - İşyeri sorgulanıyor: Düzce Üniversitesi Sağlık Uygulama Ve Araştırma Merkezi Döner Sermaye İşletmesi
+[2025-11-12 21:23:01] [INFO] Kullanıcı Kodu: 37258482234, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 212708, 
+                               Kullanıcı Email: ilknurersoy@duzce.edu.tr
+[2025-11-12 21:23:01] [INFO]  - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+[2025-11-12 21:23:01] [INFO] Kullanıcı Kodu: 46942158874, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 123456, 
+                               Kullanıcı Email: mostgrup81@gmail.com
+[2025-11-12 21:23:01] [INFO]  - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+[2025-11-12 21:23:01] [INFO] Kullanıcı Kodu: 46942158874, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 123456, 
+                               Kullanıcı Email: mostgrup81@gmail.com
+[2025-11-12 21:23:01] [INFO]  - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+[2025-11-12 21:23:01] [INFO] Kullanıcı Kodu: 46942158874, 
+                               İşyeri Kodu: 5, 
+                               Şifre: 123456, 
+                               Kullanıcı Email: mostgrup81@gmail.com
+[2025-11-12 21:23:01] [INFO]  - İşyeri sorgulanıyor: Hastane İşçiler
+[2025-11-12 21:23:01] [INFO] Kullanıcı Kodu: 32450401908, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: ozkanyalli@gmail.com
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: Özel Kalem 
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 29590555684, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 16AurX45, 
+                               Kullanıcı Email: betularamak@duzce.edu.tr
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: Güvenlik
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 49615069910, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 7887836, 
+                               Kullanıcı Email: gamzedemir@duzce.edu.tr
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: Teknik Servis
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 49615069910, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 7887834, 
+                               Kullanıcı Email: gamzedemir@duzce.edu.tr
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: Veri Personeli
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 49615069910, 
+                               İşyeri Kodu: 4, 
+                               Şifre: 7887832, 
+                               Kullanıcı Email: gamzedemir@duzce.edu.tr
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: DÜ Hastane işçi 
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 32450401908, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: Zeynepmetin@duzce.edu.tr
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: DÜ Hastane sözleşmeli 
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 31252682942, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: Zeynepmetin@duzce.edu.tr
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: Cedetek
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 12312312312, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 27shw82, 
+                               Kullanıcı Email: emre.ipek643@gmail.com
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: Kukuroğlu Tekstil
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 30406432990, 
+                               İşyeri Kodu: 10000, 
+                               Şifre: 743164, 
+                               Kullanıcı Email: ik@kukuroglu.com
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: Nutties Gıda Aş.
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 54511558352, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 43UiyA04, 
+                               Kullanıcı Email: nusretgure@gngdanismanlik.com
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: DU Hastane İşçiler
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 32450401908, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: beyzade83@hotmail.com
+[2025-11-12 21:23:02] [INFO]  - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+[2025-11-12 21:23:02] [INFO] Kullanıcı Kodu: 31252682942, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: beyzade83@hotmail.com
+[2025-11-12 21:23:03] [INFO]  - İşyeri sorgulanıyor: DU Hastane İşçiler
+[2025-11-12 21:23:03] [INFO] Kullanıcı Kodu: 32450401908, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: beyzade83@hotmail.com
+[2025-11-12 21:23:03] [INFO]  - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+[2025-11-12 21:23:03] [INFO] Kullanıcı Kodu: 31252682942, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: beyzade83@hotmail.com
+[2025-11-12 21:23:03] [INFO]  - İşyeri sorgulanıyor: DU Hastane İşçiler
+[2025-11-12 21:23:03] [INFO] Kullanıcı Kodu: 32450401908, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: bilgekazaz22@gmail.com
+[2025-11-12 21:23:03] [INFO]  - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+[2025-11-12 21:23:03] [INFO] Kullanıcı Kodu: 31252682942, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: bilgekazaz22@gmail.com
+[2025-11-12 21:23:03] [INFO]  - İşyeri sorgulanıyor: DU Hastane İşçiler
+[2025-11-12 21:23:03] [INFO] Kullanıcı Kodu: 32450401908, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: zeynepkoc@duzce.edu.tr
+[2025-11-12 21:23:03] [INFO]  - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+[2025-11-12 21:23:03] [INFO] Kullanıcı Kodu: 31252682942, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: zeynepkoc@duzce.edu.tr
+[2025-11-12 21:23:03] [INFO]  - İşyeri sorgulanıyor: Alperen_Şube
+[2025-11-12 21:23:03] [INFO] Kullanıcı Kodu: 60709238364, 
+                               İşyeri Kodu: 4, 
+                               Şifre: 91NgkT99, 
+                               Kullanıcı Email: smmmhknblt@gmail.com
+[2025-11-12 21:23:03] [INFO]  - İşyeri sorgulanıyor: DU Hastane İşçiler
+[2025-11-12 21:23:03] [INFO] Kullanıcı Kodu: 32450401908, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: selvi_666@hotmail.com
+[2025-11-12 21:23:03] [INFO]  - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+[2025-11-12 21:23:03] [INFO] Kullanıcı Kodu: 31252682942, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: selvi_666@hotmail.com
+[2025-11-12 21:23:04] [INFO]  - İşyeri sorgulanıyor: DU Hastane İşçiler
+[2025-11-12 21:23:04] [INFO] Kullanıcı Kodu: 32450401908, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: cevdetturansan@duzce.edu.tr
+[2025-11-12 21:23:04] [INFO]  - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+[2025-11-12 21:23:04] [INFO] Kullanıcı Kodu: 31252682942, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 87174585, 
+                               Kullanıcı Email: cevdetturansan@duzce.edu.tr
+[2025-11-12 21:23:04] [INFO]  - İşyeri sorgulanıyor: Güvenlik
+[2025-11-12 21:23:04] [INFO] Kullanıcı Kodu: 49615069910, 
+                               İşyeri Kodu: 3, 
+                               Şifre: 7887836, 
+                               Kullanıcı Email: kerimbilici@duzce.edu.tr
+[2025-11-12 21:23:04] [INFO]  - İşyeri sorgulanıyor: Teknik Servis
+[2025-11-12 21:23:04] [INFO] Kullanıcı Kodu: 49615069910, 
+                               İşyeri Kodu: 2, 
+                               Şifre: 7887834, 
+                               Kullanıcı Email: kerimbilici@duzce.edu.tr
+[2025-11-12 21:23:04] [INFO]  - İşyeri sorgulanıyor: Veri Personeli
+[2025-11-12 21:23:04] [INFO] Kullanıcı Kodu: 49615069910, 
+                               İşyeri Kodu: 4, 
+                               Şifre: 7887832, 
+                               Kullanıcı Email: kerimbilici@duzce.edu.tr
+[2025-11-12 21:23:04] [INFO] <pre style='background-color: #1e1e1e; color: #ffffff; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: Consolas, monospace; font-size: 12px; line-height: 1.4;'>Cron Job Başlatıldı (Onaylanacak raporlar bildirimi): 2025-11-12 21:23:01
+27 adet kullanıcı için işlem başlatılıyor...
+--------------------------------------------------
+
+İşlenen Kullanıcı: beyzade83@gmail.com (ID: 1) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: ilknurersoy@duzce.edu.tr (ID: 30) - İşyeri sorgulanıyor: Düzce Üniversitesi Sağlık Uygulama Ve Araştırma Merkezi Döner Sermaye İşletmesi
+   - HATA: Düzce Üniversitesi Sağlık Uygulama Ve Araştırma Merkezi Döner Sermaye İşletmesi işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: jannissoon1@gmail.com (ID: 31) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: mostgrup81@gmail.com (ID: 33) - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+   - HATA: Most grup Yönetim danışmanlığı limited şirketi  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+   - HATA: Most grup Yönetim danışmanlığı limited şirketi  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+   - HATA: Most grup Yönetim danışmanlığı limited şirketi  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: ozkanyalli@gmail.com (ID: 34) - İşyeri sorgulanıyor: Hastane İşçiler
+   - HATA: Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: betularamak@duzce.edu.tr (ID: 37) - İşyeri sorgulanıyor: Özel Kalem 
+   - HATA: Özel Kalem  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: aliakmes@duzce.edu.tr (ID: 38) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: emreakar@duzce.edu.tr (ID: 39) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: mehmetbayirbasi@duzce.edu.tr (ID: 40) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: gamzedemir@duzce.edu.tr (ID: 45) - İşyeri sorgulanıyor: Güvenlik
+   - HATA: Güvenlik işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: Teknik Servis
+   - HATA: Teknik Servis işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: Veri Personeli
+   - HATA: Veri Personeli işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: Zeynepmetin@duzce.edu.tr (ID: 46) - İşyeri sorgulanıyor: DÜ Hastane işçi 
+   - HATA: DÜ Hastane işçi  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DÜ Hastane sözleşmeli 
+   - HATA: DÜ Hastane sözleşmeli  işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: bilgekazaz@gmail.com (ID: 48) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: senol@senoldonder.com.tr (ID: 52) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: emre.ipek643@gmail.com (ID: 53) - İşyeri sorgulanıyor: Cedetek
+   - HATA: Cedetek işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: KullanıcıAdi , KullanıcıKodu , Şifre  tekrar deneyin.
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: bilgekazaz21@gmail.com (ID: 54) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: ik@kukuroglu.com (ID: 55) - İşyeri sorgulanıyor: Kukuroğlu Tekstil
+   - HATA: Kukuroğlu Tekstil işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: KullanıcıAdi , KullanıcıKodu , Şifre  tekrar deneyin.
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: nusretgure@gngdanismanlik.com (ID: 56) - İşyeri sorgulanıyor: Nutties Gıda Aş.
+   - HATA: Nutties Gıda Aş. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: beyzade83@hotmail.com (ID: 60) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: beyzade83@hotmail.com (ID: 61) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: bilgekazaz22@gmail.com (ID: 62) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: ertanguness@gmail.com (ID: 67) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: zeynepkoc@duzce.edu.tr (ID: 68) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: ab274556@adalet.gov.tr (ID: 76) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: smmmhknblt@gmail.com (ID: 77) - İşyeri sorgulanıyor: Alperen_Şube
+   - HATA: Alperen_Şube işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: selvi_666@hotmail.com (ID: 78) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: cevdetturansan@duzce.edu.tr (ID: 79) - İşyeri sorgulanıyor: DU Hastane İşçiler
+   - HATA: DU Hastane İşçiler işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+   - HATA: DU Hastane Sözleşmeli Person. işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: kerimbilici@duzce.edu.tr (ID: 80) - İşyeri sorgulanıyor: Güvenlik
+   - HATA: Güvenlik işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: Teknik Servis
+   - HATA: Teknik Servis işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - İşyeri sorgulanıyor: Veri Personeli
+   - HATA: Veri Personeli işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: BU İŞVEREN İÇİN FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT.YENİSİ VERİLEMEZ!
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+Cron Job Tamamlandı: 2025-11-12 21:23:04
+</pre>

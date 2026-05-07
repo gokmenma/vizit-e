@@ -1,0 +1,122 @@
+[2025-09-10 20:53:30] [INFO] <pre style='background-color: #1e1e1e; color: #ffffff; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: Consolas, monospace; font-size: 12px; line-height: 1.4;'>Cron Job Başlatıldı (Kullanıcı Başına Tek E-posta Modu): 2025-09-10 20:53:20
+21 adet kullanıcı için işlem başlatılıyor...
+--------------------------------------------------
+
+İşlenen Kullanıcı: beyzade83@gmail.com (ID: 1) - İşyeri sorgulanıyor: DU Hastane İşçiler
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+ - Toplam 4 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: beyzade83@gmail.com
+--------------------------------------------------
+İşlenen Kullanıcı: ilknurersoy@duzce.edu.tr (ID: 30) - İşyeri sorgulanıyor: Düzce Üniversitesi Sağlık Uygulama Ve Araştırma Merkezi Döner Sermaye İşletmesi
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: jannissoon1@gmail.com (ID: 31) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: mostgrup81@gmail.com (ID: 33) - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+ - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+ - İşyeri sorgulanıyor: Most grup Yönetim danışmanlığı limited şirketi 
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: ozkanyalli@gmail.com (ID: 34) - İşyeri sorgulanıyor: Hastane İşçiler
+ - Toplam 4 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: ozkanyalli@gmail.com
+--------------------------------------------------
+İşlenen Kullanıcı: betularamak@duzce.edu.tr (ID: 37) - İşyeri sorgulanıyor: Özel Kalem 
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: aliakmes@duzce.edu.tr (ID: 38) - İşyeri sorgulanıyor: Rektörlük İşçiler
+ - İşyeri sorgulanıyor: İŞKUR İşçiler
+ - Toplam 1 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: aliakmes@duzce.edu.tr
+--------------------------------------------------
+İşlenen Kullanıcı: emreakar@duzce.edu.tr (ID: 39) - İşyeri sorgulanıyor: İşçiler
+ - İşyeri sorgulanıyor: işkur işçileri
+   - HATA: işkur işçileri işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: KullanıcıAdi , KullanıcıKodu , Şifre  tekrar deneyin.
+ - Toplam 1 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: emreakar@duzce.edu.tr
+--------------------------------------------------
+İşlenen Kullanıcı: mehmetbayirbasi@duzce.edu.tr (ID: 40) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: gamzedemir@duzce.edu.tr (ID: 45) - İşyeri sorgulanıyor: Güvenlik
+ - İşyeri sorgulanıyor: Teknik Servis
+ - İşyeri sorgulanıyor: Veri Personeli
+ - Toplam 4 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: gamzedemir@duzce.edu.tr
+--------------------------------------------------
+İşlenen Kullanıcı: mehmetaligokmen@duzce.edu.tr (ID: 46) - İşyeri sorgulanıyor: DÜ Hastane işçi 
+ - İşyeri sorgulanıyor: DÜ Hastane sözleşmeli 
+ - Toplam 4 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: mehmetaligokmen@duzce.edu.tr
+--------------------------------------------------
+İşlenen Kullanıcı: bilgekazaz@gmail.com (ID: 48) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: senol@senoldonder.com.tr (ID: 52) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: emre.ipek643@gmail.com (ID: 53) - İşyeri sorgulanıyor: Cedetek
+   - HATA: Cedetek işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: KullanıcıAdi , KullanıcıKodu , Şifre  tekrar deneyin.
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: bilgekazaz21@gmail.com (ID: 54) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: ik@kukuroglu.com (ID: 55) - İşyeri sorgulanıyor: Kukuroğlu Tekstil
+   - HATA: Kukuroğlu Tekstil işyeri için raporlar sorgulanırken hata oluştu: Login başarısız: KullanıcıAdi , KullanıcıKodu , Şifre  tekrar deneyin.
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: nusretgure@gngdanismanlik.com (ID: 56) - İşyeri sorgulanıyor: Nutties Gıda Aş.
+ - Toplam 1 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: nusretgure@gngdanismanlik.com
+--------------------------------------------------
+İşlenen Kullanıcı: selvi_666@hotmail.com (ID: 60) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: beyzade83@hotmail.com (ID: 61) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: bilgekazaz22@gmail.com (ID: 62) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+İşlenen Kullanıcı: ertanguness@gmail.com (ID: 67) - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.
+
+Cron Job Tamamlandı: 2025-09-10 20:53:30
+</pre>
+[2025-09-10 20:55:30] [INFO] <pre style='background-color: #1e1e1e; color: #ffffff; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: Consolas, monospace; font-size: 12px; line-height: 1.4;'>Cron Job Başlatıldı (Kullanıcı Başına Tek E-posta Modu): 2025-09-10 20:55:28
+21 adet kullanıcı için işlem başlatılıyor...
+--------------------------------------------------
+
+İşlenen Kullanıcı: beyzade83@gmail.com (ID: 1) - İşyeri sorgulanıyor: DU Hastane İşçiler
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+ - Toplam 3 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: beyzade83@gmail.com
+--------------------------------------------------
+Cron Job Tamamlandı: 2025-09-10 20:55:30
+</pre>
+[2025-09-10 21:00:57] [INFO] <pre style='background-color: #1e1e1e; color: #ffffff; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: Consolas, monospace; font-size: 12px; line-height: 1.4;'>Cron Job Başlatıldı (Kullanıcı Başına Tek E-posta Modu): 2025-09-10 21:00:56
+21 adet kullanıcı için işlem başlatılıyor...
+--------------------------------------------------
+
+İşlenen Kullanıcı: beyzade83@gmail.com (ID: 1) - İşyeri sorgulanıyor: DU Hastane İşçiler
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+ - Toplam 3 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: beyzade83@gmail.com
+--------------------------------------------------
+Cron Job Tamamlandı: 2025-09-10 21:00:57
+</pre>
+[2025-09-10 21:02:35] [INFO] <pre style='background-color: #1e1e1e; color: #ffffff; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: Consolas, monospace; font-size: 12px; line-height: 1.4;'>Cron Job Başlatıldı (Kullanıcı Başına Tek E-posta Modu): 2025-09-10 21:02:34
+21 adet kullanıcı için işlem başlatılıyor...
+--------------------------------------------------
+
+İşlenen Kullanıcı: beyzade83@gmail.com (ID: 1) - İşyeri sorgulanıyor: DU Hastane İşçiler
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+ - Toplam 3 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: beyzade83@gmail.com
+--------------------------------------------------
+Cron Job Tamamlandı: 2025-09-10 21:02:35
+</pre>
+[2025-09-10 21:03:57] [INFO] <pre style='background-color: #1e1e1e; color: #ffffff; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: Consolas, monospace; font-size: 12px; line-height: 1.4;'>Cron Job Başlatıldı (Kullanıcı Başına Tek E-posta Modu): 2025-09-10 21:03:56
+21 adet kullanıcı için işlem başlatılıyor...
+--------------------------------------------------
+
+İşlenen Kullanıcı: beyzade83@gmail.com (ID: 1) - İşyeri sorgulanıyor: DU Hastane İşçiler
+ - İşyeri sorgulanıyor: DU Hastane Sözleşmeli Person.
+ - Toplam 3 adet rapor bulundu. E-posta oluşturuluyor...
+ - E-posta başarıyla gönderildi: beyzade83@gmail.com
+--------------------------------------------------
+Cron Job Tamamlandı: 2025-09-10 21:03:57
+</pre>

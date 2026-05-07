@@ -1,0 +1,26 @@
+[2025-09-07 16:18:18] [INFO] <pre style='background-color: #1e1e1e; color: #ffffff; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: Consolas, monospace; font-size: 12px; line-height: 1.4;'>Cron Job Başlatıldı (Kullanıcı Başına Tek E-posta Modu): 2025-09-07 16:18:10
+2 adet kullanıcı için işlem başlatılıyor...
+--------------------------------------------------İşlenen Kullanıcı: beyzade83@hotmail.com (ID: 1) - İşyeri sorgulanıyor: DU Hastane S&amp;ouml;zleşmeli Person.
+ - İşyeri sorgulanıyor: İşçiler
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: beyzade83@gmail.com (ID: 53) - İşyeri sorgulanıyor: Alt Kullanıcı Ekleme Dene
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+Cron Job Tamamlandı: 2025-09-07 16:18:18
+</pre>
+
+
+[2025-09-07 16:18:57] [INFO] <pre style='background-color: #1e1e1e; color: #ffffff; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: Consolas, monospace; font-size: 12px; line-height: 1.4;'>Cron Job Başlatıldı (Kullanıcı Başına Tek E-posta Modu): 2025-09-07 16:18:51
+2 adet kullanıcı için işlem başlatılıyor...
+--------------------------------------------------
+
+İşlenen Kullanıcı: beyzade83@hotmail.com (ID: 1) - İşyeri sorgulanıyor: DU Hastane S&amp;ouml;zleşmeli Person.
+ - İşyeri sorgulanıyor: İşçiler
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+İşlenen Kullanıcı: beyzade83@gmail.com (ID: 53) - İşyeri sorgulanıyor: Alt Kullanıcı Ekleme Dene
+ - Bu kullanıcı için e-posta gönderilecek rapor bulunmadı.
+--------------------------------------------------
+Cron Job Tamamlandı: 2025-09-07 16:18:57
+</pre>
