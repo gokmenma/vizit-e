@@ -105,6 +105,9 @@ class SgkViziteService
      */
     private function sendRequest($methodName, $params, $maxRetries = 3)
     {
+        // İstekler arasında çok kısa bir bekleme sunucunun bizi engellemesini önleyebilir
+        usleep(200000); // 0.2 saniye
+
         $paramXml = '';
         foreach ($params as $key => $value) {
             $paramXml .= "<{$key}>" . htmlspecialchars($value, ENT_XML1, 'UTF-8') . "</{$key}>";
@@ -137,7 +140,7 @@ XML;
                 'SOAPAction: ' . $soapAction,
                 'Accept: text/xml, multipart/related, text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2',
                 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Connection: close', // Bazı eski sistemler her istekten sonra bağlantının kapanmasını tercih eder
+                'Connection: close',
                 'Expect:'
             ];
 
@@ -145,13 +148,19 @@ XML;
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             
-            // SGK sunucuları için TLS 1.2 genellikle en stabil olanıdır
+            // Bağlantı yönetimi - Her seferinde taze bağlantı
+            curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
+            curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
+            
+            // Bazı eski sunucular HTTP 1.0 ile daha kararlı çalışır
+            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+
             if (defined('CURL_SSLVERSION_TLSv1_2')) {
                 curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
             }
 
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 90);
             curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
             $responseXml = curl_exec($ch);
@@ -171,7 +180,7 @@ XML;
                 ];
 
                 if (in_array($curlErrno, $retryableErrors) && $attempt < $maxRetries) {
-                    sleep($attempt * 2); // Bekleme süresini biraz artıralım
+                    sleep($attempt * 3); // Bekleme süresini daha da artıralım
                     continue;
                 }
                 throw new Exception("cURL Hatası ({$attempt}. deneme): " . $curlError);
@@ -179,7 +188,7 @@ XML;
 
             if (empty($responseXml) || strpos(trim($responseXml), '<') !== 0) {
                 if ($attempt < $maxRetries) {
-                    sleep($attempt * 2);
+                    sleep($attempt * 3);
                     continue;
                 }
                 throw new Exception("SGK sunucusundan geçerli bir XML cevabı alınamadı. Gelen cevap boş veya geçersiz.");
@@ -500,7 +509,6 @@ XML;
 
         // 'onayliRaporlarDetay' kapısını çalıyoruz (SOAP operasyonunu çağırıyoruz)
         $response = $this->sendRequest('onayliRaporlarDetay', $params);
-        var_dump($response);
         $returnNode = $response->onayliRaporlarDetayReturn;
 
         if (isset($returnNode->sonucKod) && $returnNode->sonucKod == '0') {
