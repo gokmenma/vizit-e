@@ -208,7 +208,11 @@ XML;
                 }
 
                 // Sistem geçici dosyasına (temp file) yazalım ki tüm oturumlar ve istekler bu geçerli seansı paylaşabilsin
-                $cacheFile = __DIR__ . '/../../logs/sgk_tokens/sgk_token_' . md5($currentUserKey) . '.json';
+                $cacheDir = __DIR__ . '/../../logs/sgk_tokens';
+                if (!is_dir($cacheDir)) {
+                    mkdir($cacheDir, 0777, true);
+                }
+                $cacheFile = $cacheDir . '/sgk_token_' . md5($currentUserKey) . '.json';
                 $cacheData = [
                     'wsToken' => $this->wsToken,
                     'tokenExpiresAt' => $this->tokenExpiresAt
