@@ -103,7 +103,7 @@ class SgkViziteService
     /**
      * Tüm SOAP isteklerini yapan merkezi cURL fonksiyonu. (Geliştirilmiş Versiyon)
      */
-    private function sendRequest($methodName, $params)
+    private function sendRequest($methodName, $params, $retryCount = 0)
     {
         $paramXml = '';
         foreach ($params as $key => $value) {
@@ -134,20 +134,37 @@ XML;
             'Content-Length: ' . strlen($xml_request),
             'SOAPAction: ' . $soapAction,
             'Expect:',
-            'Connection: close'
+            'Connection: keep-alive', // Bağlantıyı açık tutmayı deneyelim
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) SGK-Vizite-Client/1.0'
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Yönlendirmeleri takip et
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20); // Bağlantı için 20 saniye
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);        // Toplam işlem için 60 saniye
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1); // HTTP 1.1 zorla
 
         $responseXml = curl_exec($ch);
-
-        if (curl_errno($ch)) {
-            throw new Exception("cURL Hatası: " . curl_error($ch));
-        }
+        $curlError = curl_error($ch);
+        $curlErrno = curl_errno($ch);
         curl_close($ch);
+
+        if ($curlErrno) {
+            // Eğer bağlantı hatasıysa ve retry hakkımız varsa tekrar dene
+            if ($retryCount < 2) {
+                usleep(1000000); // 1 saniye bekle ve tekrar dene
+                return $this->sendRequest($methodName, $params, $retryCount + 1);
+            }
+            throw new Exception("cURL Hatası ({$curlErrno}): " . $curlError);
+        }
+
+        // Cevap boşsa ve retry hakkımız varsa tekrar dene (Bazen sunucu boş dönebiliyor)
+        if (empty($responseXml) && $retryCount < 2) {
+            usleep(1000000);
+            return $this->sendRequest($methodName, $params, $retryCount + 1);
+        }
 
         // Cevap boşsa veya bir HTML hata sayfasıysa
         if (empty($responseXml) || strpos(trim($responseXml), '<') !== 0) {

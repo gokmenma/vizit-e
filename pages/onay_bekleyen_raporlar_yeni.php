@@ -72,7 +72,7 @@ try {
         <div class="card">
             <div class="header row d-flex justify-content-between align-items-center">
                 <div class="col-lg-6">
-                    <h2><strong>Onay Bekleyen Rapor Listesi</strong></h2>
+                    <h2><strong>Onay Bekleyen Rapor Listesi.</strong></h2>
                     <small id="rapor-sayi-bilgisi">
                         <!-- Bu metin JavaScript tarafından dinamik olarak güncellenecek -->
                     </small>
