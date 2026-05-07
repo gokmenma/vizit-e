@@ -52,11 +52,41 @@ class SgkViziteService
         $this->wsSifre              = trim($wsSifre);
 
         $currentUserKey = $this->kullaniciAdi . '|' . $this->isyeriKodu;
+        $loadedFromSession = false;
+
+        // 1. ADIM: PHP Session'dan yüklemeyi dene
         if (php_sapi_name() !== 'cli' && isset($_SESSION['wsToken']) && isset($_SESSION['tokenExpiresAt']) && ($_SESSION['activeUserKey'] ?? '') === $currentUserKey) {
-            $this->wsToken          = $_SESSION['wsToken'];
-            $this->tokenExpiresAt   = $_SESSION['tokenExpiresAt'];
-            $this->activeUserKey    = $currentUserKey;
-        } else {
+            if (time() < $_SESSION['tokenExpiresAt']) {
+                $this->wsToken          = $_SESSION['wsToken'];
+                $this->tokenExpiresAt   = $_SESSION['tokenExpiresAt'];
+                $this->activeUserKey    = $currentUserKey;
+                $loadedFromSession      = true;
+            }
+        }
+
+        // 2. ADIM: Session'da yoksa veya süresi geçmişse, sistem geçici dosyasından (temp file) yüklemeyi dene
+        if (!$loadedFromSession) {
+            $cacheFile = __DIR__ . '/../../logs/sgk_tokens/sgk_token_' . md5($currentUserKey) . '.json';
+            if (file_exists($cacheFile)) {
+                $cacheData = json_decode(file_get_contents($cacheFile), true);
+                if ($cacheData && isset($cacheData['wsToken']) && isset($cacheData['tokenExpiresAt']) && time() < $cacheData['tokenExpiresAt']) {
+                    $this->wsToken          = $cacheData['wsToken'];
+                    $this->tokenExpiresAt   = $cacheData['tokenExpiresAt'];
+                    $this->activeUserKey    = $currentUserKey;
+
+                    // Bulunan geçerli token'ı Session'a geri yazalım ki sonraki adımlarda hızlıca oradan okunsun
+                    if (php_sapi_name() !== 'cli') {
+                        $_SESSION['wsToken'] = $this->wsToken;
+                        $_SESSION['tokenExpiresAt'] = $this->tokenExpiresAt;
+                        $_SESSION['activeUserKey'] = $currentUserKey;
+                    }
+                    $loadedFromSession = true;
+                }
+            }
+        }
+
+        // 3. ADIM: Eğer hiçbir yerden geçerli bir token yüklenemediyse null yap
+        if (!$loadedFromSession) {
             $this->wsToken          = null;
             $this->tokenExpiresAt   = null;
             $this->activeUserKey    = null;
@@ -167,15 +197,23 @@ XML;
             // Gelen cevabın doğru katmanına erişiyoruz: wsLoginReturn
             if (isset($response->wsLoginReturn->sonucKod) && $response->wsLoginReturn->sonucKod == '0') {
                 // Token'ı ve açıklamayı da doğru yoldan alıyoruz
-                $this->wsToken = (string)$response->wsLoginReturn->wsToken;
-                $this->tokenExpiresAt = time() + (29 * 60);
-                $this->activeUserKey = $currentUserKey;
+                 $this->wsToken = (string)$response->wsLoginReturn->wsToken;
+                 $this->tokenExpiresAt = time() + (55 * 60);
+                 $this->activeUserKey = $currentUserKey;
 
                 if (php_sapi_name() !== 'cli') {
                     $_SESSION['wsToken'] = $this->wsToken;
                     $_SESSION['tokenExpiresAt'] = $this->tokenExpiresAt;
                     $_SESSION['activeUserKey'] = $currentUserKey;
                 }
+
+                // Sistem geçici dosyasına (temp file) yazalım ki tüm oturumlar ve istekler bu geçerli seansı paylaşabilsin
+                $cacheFile = __DIR__ . '/../../logs/sgk_tokens/sgk_token_' . md5($currentUserKey) . '.json';
+                $cacheData = [
+                    'wsToken' => $this->wsToken,
+                    'tokenExpiresAt' => $this->tokenExpiresAt
+                ];
+                file_put_contents($cacheFile, json_encode($cacheData));
                 //echo "Token başarıyla alındı: " . $this->wsToken . "\n";
             } else {
                 // Hata mesajını da doğru yoldan alıyoruz
@@ -184,6 +222,29 @@ XML;
                     : 'Bilinmeyen Hata';
 
                 if (mb_strpos($hataMesaji, 'FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT') !== false) {
+                    // CANKURTARAN MODU: Eğer SGK "aktif seans mevcut" diyorsa ve lokalde süresi geçmiş görünüyorsa, 
+                    // sistem geçici dosyasındaki son token'ı canlandırıp tekrar kullanmayı deneyelim.
+                    $cacheFile = __DIR__ . '/../../logs/sgk_tokens/sgk_token_' . md5($currentUserKey) . '.json';
+                    if (file_exists($cacheFile)) {
+                        $cacheData = json_decode(file_get_contents($cacheFile), true);
+                        if ($cacheData && isset($cacheData['wsToken'])) {
+                            $this->wsToken          = $cacheData['wsToken'];
+                            $this->tokenExpiresAt   = time() + (55 * 60); // Seansı 55 dakika daha uzatıyoruz
+                            $this->activeUserKey    = $currentUserKey;
+
+                            if (php_sapi_name() !== 'cli') {
+                                $_SESSION['wsToken'] = $this->wsToken;
+                                $_SESSION['tokenExpiresAt'] = $this->tokenExpiresAt;
+                                $_SESSION['activeUserKey'] = $currentUserKey;
+                            }
+                            
+                            // Temp dosyayı da yeni süreyle güncelleyelim
+                            $cacheData['tokenExpiresAt'] = $this->tokenExpiresAt;
+                            file_put_contents($cacheFile, json_encode($cacheData));
+                            
+                            return $this->wsToken;
+                        }
+                    }
                     $hataMesaji = "Oturum Hatası (SGK): Bu işveren için başka bir IP/cihaz üzerinden alınmış aktif bir seans mevcuttur. \n\nÇözüm: Lütfen 10-15 dakika bekleyerek SGK sunucusundaki eski oturumun otomatik sonlanmasını sağlayın veya internet bağlantınızı kesip tekrar bağlanarak (modem kapat-aç vb.) yeni bir IP almayı deneyin.";
                 }
                 throw new Exception("Login başarısız: " . $hataMesaji);

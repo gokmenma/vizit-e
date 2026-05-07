@@ -142,7 +142,7 @@ try {
                 </style>
 
                 <form method="post">
-                    <div class="responsive">
+                    <div class="responsive d-none d-md-block">
 
 
                         <table class="table table-bordered table-hover">
@@ -225,6 +225,81 @@ try {
                                 <?php endif; ?>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- MOBİL LİSTE GÖRÜNÜMÜ -->
+                    <div class="mobile-rapor-container d-md-none d-block">
+                        <div id="mobile-rapor-yok-mesaji" class="text-center p-4 bg-white rounded shadow-sm text-muted mb-3" style="display: none; border: 1px dashed #dee2e6;">
+                            Onay bekleyen rapor bulunamadı.
+                        </div>
+                        <?php if (!empty($raporlar)): ?>
+                            <?php 
+                            $mi = 0;
+                            foreach ($raporlar as $rapor): 
+                                $mi++;
+                            ?>
+                                <div class="card mobile-rapor-card p-3 mb-3 border-0 shadow-sm" data-rapor='<?php echo htmlspecialchars(json_encode($rapor)); ?>' data-gun-farki="<?php echo $rapor['gun_farki']; ?>" style="border-radius: 12px; background: #fff; border: 1px solid #eaeaea !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">Sıra: <?php echo $mi; ?></span>
+                                        <span class="badge bg-primary text-white rounded-pill px-3 py-1.5" style="font-size: 0.75rem; font-weight: 600;"><?php echo htmlspecialchars($rapor['VAKAADI']); ?></span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <h6 class="font-weight-bold mb-1" style="font-size: 1.1rem; color: #2c3e50; font-weight: 700;"><?php echo htmlspecialchars($rapor['AD'] . ' ' . $rapor['SOYAD']); ?></h6>
+                                        <div class="text-muted small">
+                                            <i class="zmdi zmdi-account"></i> TC Kimlik: <strong><?php echo htmlspecialchars($rapor['TCKIMLIKNO']); ?></strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="row text-center bg-light rounded p-2 mb-3 g-0">
+                                        <div class="col-5">
+                                            <div class="text-muted small" style="font-size: 0.75rem;">Başlangıç</div>
+                                            <div class="font-weight-bold" style="color: #34495e; font-size: 0.9rem;"><?php echo htmlspecialchars($rapor['POLIKLINIKTAR']); ?></div>
+                                        </div>
+                                        <div class="col-2 d-flex align-items-center justify-content-center">
+                                            <i class="zmdi zmdi-arrow-right text-muted" style="font-size: 1.2rem;"></i>
+                                        </div>
+                                        <div class="col-5">
+                                            <div class="text-muted small" style="font-size: 0.75rem;">Bitiş</div>
+                                            <div class="font-weight-bold" style="color: #34495e; font-size: 0.9rem;"><?php echo htmlspecialchars($rapor['ABITTAR']); ?></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-muted small"><i class="zmdi zmdi-calendar-check"></i> Rapor Süresi:</span>
+                                        <span class="badge bg-danger text-white rounded-pill px-2.5 py-1 font-weight-bold" style="font-size: 0.8rem;"><?php echo $rapor['gun_farki']; ?> Gün</span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="text-muted small font-weight-bold mb-1">Nitelik Durumu</label>
+                                        <select class="form-control nitelik-durumu" style="border-radius: 8px; border: 1px solid #ced4da; height: auto; padding: 6px 12px; font-size: 0.9rem;">
+                                            <option value="0">ÇALIŞMAMIŞTIR</option>
+                                            <option value="1">ÇALIŞMIŞTIR</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <?php if ($userRole == "admin"): ?>
+                                            <button type="button" class="btn btn-success w-100 py-2.5 btn-onayla d-flex align-items-center justify-content-center gap-1" style="border-radius: 8px; font-weight: 600; background-color: #2cc711; border-color: #2cc711; font-size: 0.95rem; color: #fff;">
+                                                <i class="zmdi zmdi-check"></i> Onayla
+                                            </button>
+                                            <div class="row g-2 mt-1">
+                                                <div class="col-6">
+                                                    <button type="button" class="btn btn-outline-secondary w-100 py-2 btn-personel-degil d-flex align-items-center justify-content-center gap-1" style="border-radius: 8px; font-size: 0.8rem;">
+                                                        <i class="zmdi zmdi-folder-person"></i> Personelim Değil
+                                                    </button>
+                                                </div>
+                                                <div class="col-6">
+                                                    <button type="button" class="btn btn-outline-warning w-100 py-2 btn-kapat d-flex align-items-center justify-content-center gap-1" data-id="<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>" style="border-radius: 8px; font-size: 0.8rem;">
+                                                        <i class="zmdi zmdi-block"></i> Raporu Kapat
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        <?php endif ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
 
                 </form>

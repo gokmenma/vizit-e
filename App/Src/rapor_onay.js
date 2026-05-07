@@ -2,7 +2,7 @@ let url = "App/Api/APIrapor_onay.php"; // API URL'si
 
 $(document).ready(function () {
   $(document).on("click", ".btn-onayla", function () {
-    let satirElement = $(this).closest("tr"); // Butonun bulunduğu satırı al
+    let satirElement = $(this).closest("tr, .mobile-rapor-card"); // Butonun bulunduğu satırı/kartı al
     let raporData = satirElement.data("rapor"); // Satırdaki rapor verisini al
 
     // Nitelik durumunu seçili değere göre ayarla
@@ -85,7 +85,7 @@ $(document).ready(function () {
 
 //Okundu Olarak işaretler
 $(document).on("click", ".btn-kapat", function () {
-  let satirElement = $(this).closest("tr"); // Butonun bulunduğu satırı al
+  let satirElement = $(this).closest("tr, .mobile-rapor-card"); // Butonun bulunduğu satırı/kartı al
   let raporData = satirElement.data("rapor"); // Satırdaki rapor verisini al
   // API'ye gönderilecek payload
   let payload = {
@@ -139,10 +139,65 @@ $(document).on("click", ".btn-kapat", function () {
 
 });
 
+// Personelim Değil Bildirimi
+$(document).on("click", ".btn-personel-degil", function (e) {
+  e.preventDefault();
+  let satirElement = $(this).closest("tr, .mobile-rapor-card"); // Butonun bulunduğu satırı/kartı al
+  let raporData = satirElement.data("rapor"); // Satırdaki rapor verisini al
+
+  let payload = {
+    MEDULARAPORID: raporData.MEDULARAPORID,
+    TCKIMLIKNO: raporData.TCKIMLIKNO,
+    VAKA: raporData.VAKAADI
+  };
+
+  swal.fire({
+    title: "Emin misiniz?",
+    text: "Bu personelin sizin işyerinizde çalışmadığını bildirmek istediğinize emin misiniz?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Evet, bildir",
+    cancelButtonText: "Hayır, iptal et"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          action: "personelimDegil",
+          ...payload
+        })
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success || data.status === "success") {
+            swal.fire("Başarılı!", data.message || "Personel bildirim işlemi başarılı.", "success");
+            satirElement.remove(); // Başarılı olursa satırı/kartı kaldır
+          } else {
+            swal.fire({
+              icon: "error",
+              title: "Hata",
+              text: data.message || "İşlem başarısız."
+            });
+          }
+        })
+        .catch((error) => {
+          swal.fire({
+            icon: "error",
+            title: "Hata",
+            text: "Bir hata oluştu: " + error.message
+          });
+        });
+    }
+  });
+});
+
 $(document).ready(function () {
   // --- YENİ FİLTRELEME KODU ---
   const $checkbox = $("#kisa-rapor-goster-cb");
-  const $raporSatirlari = $("tbody tr[data-gun-farki]");
+  const $raporSatirlari = $("tbody tr[data-gun-farki], .mobile-rapor-card[data-gun-farki]");
   const $raporSayiBilgisi = $("#rapor-sayi-bilgisi");
   const toplamRaporSayisi = parseInt($("#toplam-rapor-sayisi").val(), 10) || 0;
 
@@ -159,19 +214,23 @@ $(document).ready(function () {
       if (kisaRaporlariGoster || gunFarki >= 3) {
         // Eğer checkbox işaretliyse VEYA rapor 3+ günlükse göster
         $satir.show(); // Satırı görünür yap
-        gosterilenSayisi++;
+        if ($satir.is("tr")) {
+          gosterilenSayisi++;
+        }
       } else {
         // Değilse gizle
         $satir.hide();
       }
-
-      // Eğer gösterilen satır sayısı 0 ise bilgi mesajı göster
-      if (gosterilenSayisi === 0) {
-        $("#rapor-yok-mesaji").show();
-      } else {
-        $("#rapor-yok-mesaji").hide();
-      }
     });
+
+    // Eğer gösterilen satır sayısı 0 ise bilgi mesajı göster
+    if (gosterilenSayisi === 0) {
+      $("#rapor-yok-mesaji").show();
+      $("#mobile-rapor-yok-mesaji").show();
+    } else {
+      $("#rapor-yok-mesaji").hide();
+      $("#mobile-rapor-yok-mesaji").hide();
+    }
 
     // Bilgi metnini güncelle
     if (kisaRaporlariGoster) {

@@ -1,8 +1,9 @@
 let url = "App/Api/APIonayli_raporlar.php";
 
-$(document).on("click", ".onay-iptal", function () {
+$(document).on("click", ".onay-iptal", function (e) {
+  e.preventDefault();
   let MEDULARAPORID = $(this).data("id");
-  let row = $(this).closest("tr");
+  let row = $(this).closest("tr, .mobile-rapor-card");
   var formData = new FormData();
 
   swal
