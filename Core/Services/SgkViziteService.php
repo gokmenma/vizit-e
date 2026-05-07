@@ -121,35 +121,38 @@ class SgkViziteService
 </SOAP-ENV:Envelope>
 XML;
 
-        // SOAPAction başlığı her zaman metot adını içermeli
         $soapAction = "\"{$methodName}\"";
-
         $lastError = '';
-        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
 
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $this->serviceUrl);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_request);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            
+            $headers = [
                 'Content-Type: text/xml; charset=utf-8',
                 'Content-Length: ' . strlen($xml_request),
                 'SOAPAction: ' . $soapAction,
-                'Expect:',
-            ]);
+                'Accept: text/xml, multipart/related, text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2',
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Connection: close', // Bazı eski sistemler her istekten sonra bağlantının kapanmasını tercih eder
+                'Expect:'
+            ];
+
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-            curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+            
+            // SGK sunucuları için TLS 1.2 genellikle en stabil olanıdır
+            if (defined('CURL_SSLVERSION_TLSv1_2')) {
+                curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
+            }
 
-            // Timeout ayarları - bağlantı kopmasını önlemek için
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);  // Bağlantı kurma süresi
-            curl_setopt($ch, CURLOPT_TIMEOUT, 120);         // Toplam istek süresi
-            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-            curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);  // Her seferinde yeni bağlantı
-            curl_setopt($ch, CURLOPT_FORBID_REUSE, true);   // Bağlantıyı yeniden kullanma
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+            curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
             $responseXml = curl_exec($ch);
             $curlErrno = curl_errno($ch);
@@ -158,33 +161,30 @@ XML;
 
             if ($curlErrno) {
                 $lastError = $curlError;
-                // Bağlantı hataları için yeniden dene (timeout, connection reset, abruptly closed vb.)
                 $retryableErrors = [
-                    CURLE_COULDNT_CONNECT,      // 7
-                    CURLE_OPERATION_TIMEDOUT,    // 28
-                    CURLE_GOT_NOTHING,           // 52
-                    CURLE_RECV_ERROR,            // 56
-                    CURLE_SEND_ERROR,            // 55
-                    CURLE_PARTIAL_FILE,          // 18
+                    CURLE_COULDNT_CONNECT,
+                    CURLE_OPERATION_TIMEDOUT,
+                    CURLE_GOT_NOTHING,
+                    CURLE_RECV_ERROR,
+                    CURLE_SEND_ERROR,
+                    CURLE_PARTIAL_FILE,
                 ];
+
                 if (in_array($curlErrno, $retryableErrors) && $attempt < $maxRetries) {
-                    // Yeniden denemeden önce kısa bir bekleme (1s, 2s, 3s)
-                    sleep($attempt);
+                    sleep($attempt * 2); // Bekleme süresini biraz artıralım
                     continue;
                 }
                 throw new Exception("cURL Hatası ({$attempt}. deneme): " . $curlError);
             }
 
-            // Cevap boşsa veya bir HTML hata sayfasıysa
             if (empty($responseXml) || strpos(trim($responseXml), '<') !== 0) {
                 if ($attempt < $maxRetries) {
-                    sleep($attempt);
+                    sleep($attempt * 2);
                     continue;
                 }
-                throw new Exception("SGK sunucusundan geçerli bir XML cevabı alınamadı. Gelen cevap: " . $responseXml);
+                throw new Exception("SGK sunucusundan geçerli bir XML cevabı alınamadı. Gelen cevap boş veya geçersiz.");
             }
 
-            // Başarılı cevap geldi, parse edelim
             $responseXml = preg_replace("/(<\/?)(\\w+):([^>]*>)/", "$1$2$3", $responseXml);
             libxml_use_internal_errors(true);
             $xml = simplexml_load_string($responseXml);
@@ -198,7 +198,6 @@ XML;
             return $responseNode;
         }
 
-        // Buraya ulaşmaması lazım ama güvenlik için
         throw new Exception("SGK sunucusuna {$maxRetries} denemede de bağlanılamadı. Son hata: " . $lastError);
     }
 
