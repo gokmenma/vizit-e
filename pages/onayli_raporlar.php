@@ -87,75 +87,124 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <button type="button" id="export-pdf" class="btn btn-primary waves-effect"><i class="zmdi zmdi-collection-pdf"></i> PDF'e Aktar</button>
                                     </div>
                                 <?php endif; ?>
-                                <table class="table table-bordered table-striped table-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th>Sıra</th>
-                                            <th style="width: 10%;">Tc Kimlik No</th>
-                                            <th style="width: 40%;">Ad Soyad</th>
-                                            <th class="text-center" style="width: 10%;">Vaka</th>
-                                            <th class="text-center" style="width: 10%;">Onay Türü</th>
-                                            <th class="text-center" style="width: 10%;">Poliklinik Tarihi</th>
-                                            <th class="text-center" style="width: 10%;">İşbaşı / Kontrol Tarihi</th>
-                                            <th class="text-center" style="width: 10%;">İşlem</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if (!empty($onayliRaporlar)): ?>
-                                            <?php
-                                            $i = 0; // Sıra numarasını başlatıyoruz
-                                            foreach ($onayliRaporlar as &$rapor):
-                                                $i++;
-
-                                                $onay_turu = $RaporModel->onaylanmaTuru($rapor['MEDULARAPORID'] ?? 0);
-                                                $rapor['ONAYTURU'] = $onay_turu ?? 'Belirtilmemiş';
-
-                                            ?>
-                                                <tr>
-                                                    <td class="text-center"><?php echo $i; ?></td>
-
-                                                    <!-- Bu veri genelde 1 olur -->
-                                                    <td><?php echo htmlspecialchars($rapor['TCKIMLIKNO'] ?? ''); ?></td>
-                                                    <td><?php echo htmlspecialchars(($rapor['AD'] ?? '') . ' ' . ($rapor['SOYAD'] ?? '')); ?>
-                                                    </td>
-                                                    <td class="text-center"><?php echo htmlspecialchars($rapor['VAKAADI'] ?? ''); ?>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <?php echo htmlspecialchars($rapor['ONAYTURU'] ?? ''); ?></td>
-
-                                                    <td class="text-center">
-                                                        <?php echo htmlspecialchars($rapor['POLIKLINIKTAR'] ?? ''); ?></td>
-                                                    <td class="text-center">
-                                                        <?php echo htmlspecialchars($rapor['ISBASKONTTAR'] ?? ''); ?></td>
-                                                    <td class="text-center d-flex">
-
-                                                        <!-- Detay Butonu -->
-                                                        <!-- <a href="onayli-rapor-detay?rapor_id=<?php echo Security::encrypt($rapor['MEDULARAPORID'] ?? ''); ?>"
-                                                            class="btn btn-sm btn-primary btn-round ">Detay</a> -->
-                                                        <!-- Onay İptal Butonu -->
-                                                        <a href="#"
-                                                            data-id=<?php echo Security::encrypt($rapor['MEDULARAPORID'] ?? ''); ?>
-                                                            class="btn btn-sm btn-danger btn-simple btn-round text-nowrap onay-iptal">Onay
-                                                            İptal</a>
-                                                        <!-- Raporu Göster Butonu -->
-                                                        <a href="rapor-onay-goster?id=<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>"
-                                                            target="_blank" class="btn btn-info btn-sm btn-round text-nowrap">Fişi
-                                                            Göster</a>
-                                                    </td>
-
-                                                </tr>
-                                            <?php endforeach; 
-                                            unset($rapor);
-                                            ?>
-                                        <?php else: ?>
+                                <div class="table-responsive d-none d-md-block">
+                                    <table class="table table-bordered table-striped">
+                                        <thead>
                                             <tr>
-                                                <td colspan="8" style="text-align:center;">Belirtilen kriterlere uygun
-                                                    onaylanmış rapor
-                                                    bulunamadı.</td>
+                                                <th>Sıra</th>
+                                                <th style="width: 10%;">Tc Kimlik No</th>
+                                                <th style="width: 40%;">Ad Soyad</th>
+                                                <th class="text-center" style="width: 10%;">Vaka</th>
+                                                <th class="text-center" style="width: 10%;">Onay Türü</th>
+                                                <th class="text-center" style="width: 10%;">Poliklinik Tarihi</th>
+                                                <th class="text-center" style="width: 10%;">İşbaşı / Kontrol Tarihi</th>
+                                                <th class="text-center" style="width: 10%;">İşlem</th>
                                             </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (!empty($onayliRaporlar)): ?>
+                                                <?php
+                                                $i = 0; // Sıra numarasını başlatıyoruz
+                                                foreach ($onayliRaporlar as &$rapor):
+                                                    $i++;
+
+                                                    $onay_turu = $RaporModel->onaylanmaTuru($rapor['MEDULARAPORID'] ?? 0);
+                                                    $rapor['ONAYTURU'] = $onay_turu ?? 'Belirtilmemiş';
+
+                                                ?>
+                                                    <tr>
+                                                        <td class="text-center"><?php echo $i; ?></td>
+
+                                                        <!-- Bu veri genelde 1 olur -->
+                                                        <td><?php echo htmlspecialchars($rapor['TCKIMLIKNO'] ?? ''); ?></td>
+                                                        <td><?php echo htmlspecialchars(($rapor['AD'] ?? '') . ' ' . ($rapor['SOYAD'] ?? '')); ?>
+                                                        </td>
+                                                        <td class="text-center"><?php echo htmlspecialchars($rapor['VAKAADI'] ?? ''); ?>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <?php echo htmlspecialchars($rapor['ONAYTURU'] ?? ''); ?></td>
+
+                                                        <td class="text-center">
+                                                            <?php echo htmlspecialchars($rapor['POLIKLINIKTAR'] ?? ''); ?></td>
+                                                        <td class="text-center">
+                                                            <?php echo htmlspecialchars($rapor['ISBASKONTTAR'] ?? ''); ?></td>
+                                                        <td class="text-center d-flex">
+
+                                                            <!-- Detay Butonu -->
+                                                            <!-- <a href="onayli-rapor-detay?rapor_id=<?php echo Security::encrypt($rapor['MEDULARAPORID'] ?? ''); ?>"
+                                                                class="btn btn-sm btn-primary btn-round ">Detay</a> -->
+                                                            <!-- Onay İptal Butonu -->
+                                                            <a href="#"
+                                                                data-id=<?php echo Security::encrypt($rapor['MEDULARAPORID'] ?? ''); ?>
+                                                                class="btn btn-sm btn-danger btn-simple btn-round text-nowrap onay-iptal">Onay
+                                                                İptal</a>
+                                                            <!-- Raporu Göster Butonu -->
+                                                            <a href="rapor-onay-goster?id=<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>"
+                                                                target="_blank" class="btn btn-info btn-sm btn-round text-nowrap">Fişi
+                                                                Göster</a>
+                                                        </td>
+
+                                                    </tr>
+                                                <?php endforeach; 
+                                                unset($rapor);
+                                                ?>
+                                            <?php else: ?>
+                                                <tr>
+                                                    <td colspan="8" style="text-align:center;">Belirtilen kriterlere uygun
+                                                        onaylanmış rapor
+                                                        bulunamadı.</td>
+                                                </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- MOBİL GÖRÜNÜM (Kart Yapısı) -->
+                                <div class="mobile-rapor-container d-md-none d-block">
+                                    <?php if (empty($onayliRaporlar)): ?>
+                                        <div class="alert alert-info text-center">Kayıtlı onaylı rapor bulunamadı.</div>
+                                    <?php else: ?>
+                                        <?php foreach ($onayliRaporlar as $rapor): ?>
+                                            <div class="mobile-rapor-card mb-3 p-3 shadow-sm border-radius-10 bg-white border">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <h6 class="mb-0 fw-bold text-primary"><?php echo htmlspecialchars(($rapor['AD'] ?? '') . ' ' . ($rapor['SOYAD'] ?? '')); ?></h6>
+                                                    <span class="badge bg-info"><?php echo htmlspecialchars($rapor['VAKAADI'] ?? ''); ?></span>
+                                                </div>
+                                                
+                                                <div class="row mb-2">
+                                                    <div class="col-6">
+                                                        <small class="text-muted d-block">TC Kimlik No</small>
+                                                        <span class="fw-500"><?php echo htmlspecialchars($rapor['TCKIMLIKNO'] ?? ''); ?></span>
+                                                    </div>
+                                                    <div class="col-6 text-end">
+                                                        <small class="text-muted d-block">Onay Türü</small>
+                                                        <span class="badge bg-light text-dark border"><?php echo htmlspecialchars($rapor['ONAYTURU'] ?? ''); ?></span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row mb-3 bg-light p-2 mx-0 rounded">
+                                                    <div class="col-6 border-end">
+                                                        <small class="text-muted d-block text-center">Poliklinik</small>
+                                                        <div class="text-center fw-bold small"><?php echo htmlspecialchars($rapor['POLIKLINIKTAR'] ?? ''); ?></div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="text-muted d-block text-center">İşbaşı/Kontrol</small>
+                                                        <div class="text-center fw-bold small text-success"><?php echo htmlspecialchars($rapor['ISBASKONTTAR'] ?? ''); ?></div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex gap-2">
+                                                    <a href="rapor-onay-goster?id=<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>" target="_blank" class="btn btn-info w-50 py-2 waves-effect">
+                                                        <i class="zmdi zmdi-eye me-1"></i> Fişi Göster
+                                                    </a>
+                                                    <a href="#" data-id="<?php echo Security::encrypt($rapor['MEDULARAPORID'] ?? ''); ?>" class="btn btn-outline-danger w-50 py-2 waves-effect onay-iptal">
+                                                        <i class="zmdi zmdi-close-circle me-1"></i> İptal
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
                             </form>
                         <?php endif; ?>
                     </div>
