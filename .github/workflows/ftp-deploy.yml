@@ -36,6 +36,8 @@ jobs:
             **/database.sql
             **/Database/db.php
             **/admin/**
+            admin
+            admin/**
           log-level: standard
           dry-run: false
           dangerous-clean-slate: false
