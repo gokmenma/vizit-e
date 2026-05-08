@@ -131,7 +131,7 @@ $(document).on("click", ".isyeri-duzenle", function () {
 //İşyerini silme işlemi
 $(document).on("click", ".isyeri-sil", function () {
   var isyeriId = $(this).data("isyeri-id");
-  var satir = $(this).closest("tr");
+  var satir = $(this).closest("tr, .mobile-isyeri-card");
 
   Swal.fire({
     title: "Emin misiniz?",

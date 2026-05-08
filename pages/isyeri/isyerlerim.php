@@ -148,7 +148,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                     <div class="body">
                         <div class="form-container">
 
-                            <div class="table-responsive">
+                            <div class="table-responsive d-none d-md-block">
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
@@ -272,6 +272,71 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                                     </tbody>
                                 </table>
                             </div>
+
+                            <!-- MOBİL GÖRÜNÜM (Kart Yapısı) -->
+                            <div class="mobile-isyeri-container d-md-none d-block">
+                                <?php
+                                if (count($isyerleri) == 0 && $kalan_firma_hakki > 0) {
+                                    echo '<div class="alert alert-info text-center py-4">
+                                            <p class="mb-3">Kayıtlı işyeriniz bulunmamaktadır.</p>
+                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#defaultModal">Yeni Ekle</button>
+                                          </div>';
+                                }
+                                
+                                foreach ($isyerleri as $isyeri) {
+                                    $enc_id = Security::encrypt($isyeri->id);
+                                    $is_selected = ($isyeri->id === $selected_firma_id);
+                                    $sel_btn_class = $is_selected ? 'btn-success disabled' : 'btn-primary';
+                                    $sel_text = $is_selected ? 'Seçili' : 'Seç';
+                                ?>
+                                    <div class="mobile-isyeri-card <?php echo $is_selected ? 'selected' : ''; ?> mb-3 p-3 shadow-sm border-radius-10 bg-white">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h5 class="mb-0 fw-bold text-primary"><?php echo $isyeri->firma_adi; ?></h5>
+                                                <small class="text-muted">Kodu: <?php echo $isyeri->isyeri_kodu; ?></small>
+                                            </div>
+                                            <div>
+                                                <?php if ($isyeri->otomatik_rapor_onay == "1"): ?>
+                                                    <span class="badge bg-success shadow-none">Oto Onay: Açık</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-light text-dark border shadow-none">Oto Onay: Kapalı</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+
+                                        <?php if (!empty($isyeri->otomatik_onay_eposta)): ?>
+                                        <div class="mb-3">
+                                            <small class="text-muted d-block mb-1"><i class="zmdi zmdi-email me-1"></i> Bildirim E-postaları:</small>
+                                            <div class="ps-3 border-start">
+                                                <?php 
+                                                $epostalar = explode(',', $isyeri->otomatik_onay_eposta);
+                                                foreach($epostalar as $mail) echo '<small class="d-block text-dark">' . trim($mail) . '</small>';
+                                                ?>
+                                            </div>
+                                        </div>
+                                        <?php endif; ?>
+
+                                        <div class="d-flex gap-2 mt-3 pt-2 border-top">
+                                            <form action="<?php echo ($firma_hakki > 0) ? 'isyeri-sec' : '#'; ?>" method="POST" class="flex-grow-1">
+                                                <input type="hidden" name="isyeri_id" value="<?php echo $isyeri->id; ?>">
+                                                <input type="hidden" name="previous_page" value="<?php echo $_SERVER['HTTP_REFERER'] ?? ''; ?>">
+                                                <button type="submit" class="btn <?php echo $sel_btn_class; ?> w-100 py-2 waves-effect" <?php if ($firma_hakki == 0) echo 'disabled'; ?>>
+                                                    <i class="zmdi zmdi-check-circle me-1"></i> <?php echo $sel_text; ?>
+                                                </button>
+                                            </form>
+                                            
+                                            <?php if($userRole == "admin"): ?>
+                                                <button type="button" data-id="<?php echo $enc_id; ?>" class="btn btn-outline-primary py-2 px-3 waves-effect isyeri-duzenle" title="Düzenle">
+                                                    <i class="zmdi zmdi-edit"></i>
+                                                </button>
+                                                <button type="button" data-isyeri-id="<?php echo Security::encrypt($isyeri->id); ?>" class="btn btn-outline-danger py-2 px-3 isyeri-sil" title="Sil">
+                                                    <i class="zmdi zmdi-delete"></i>
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -281,6 +346,24 @@ $hataMesaji = $_SESSION['hata'] ?? '';
 <style>
     textarea.form-control {
         text-align: left;
+    }
+    .mobile-isyeri-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .mobile-isyeri-card.selected {
+        border-left: 4px solid #28a745;
+        background-color: #f8fff9 !important;
+    }
+    .mobile-isyeri-card .btn {
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    .mobile-isyeri-card .badge {
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 6px;
     }
 </style>
 
