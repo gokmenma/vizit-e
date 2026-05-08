@@ -238,7 +238,7 @@ try {
                             foreach ($raporlar as $rapor): 
                                 $mi++;
                             ?>
-                                <div class="card mobile-rapor-card p-3 mb-3 border-0 shadow-sm" data-rapor='<?php echo htmlspecialchars(json_encode($rapor)); ?>' data-gun-farki="<?php echo $rapor['gun_farki']; ?>" style="border-radius: 12px; background: #fff; border: 1px solid #eaeaea !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;">
+                                <div class="card mobile-rapor-card p-3 mb-4 border-0 shadow-sm" data-rapor='<?php echo htmlspecialchars(json_encode($rapor)); ?>' data-gun-farki="<?php echo $rapor['gun_farki']; ?>" style="border-radius: 12px; background: #fff; border: 1px solid #eaeaea !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">Sıra: <?php echo $mi; ?></span>
                                         <span class="badge bg-primary text-white rounded-pill px-3 py-1.5" style="font-size: 0.75rem; font-weight: 600;"><?php echo htmlspecialchars($rapor['VAKAADI']); ?></span>
@@ -290,7 +290,7 @@ try {
                                                     </button>
                                                 </div>
                                                 <div class="col-6">
-                                                    <button type="button" class="btn btn-outline-warning w-100 py-2 btn-kapat d-flex align-items-center justify-content-center gap-1" data-id="<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>" style="border-radius: 8px; font-size: 0.8rem;">
+                                                    <button type="button" class="btn btn-warning w-100 py-2 btn-kapat d-flex align-items-center justify-content-center gap-1 text-white" data-id="<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>" style="border-radius: 8px; font-size: 0.8rem;">
                                                         <i class="zmdi zmdi-block"></i> Raporu Kapat
                                                     </button>
                                                 </div>

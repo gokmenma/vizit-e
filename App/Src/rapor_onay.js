@@ -98,7 +98,8 @@ $(document).on("click", ".btn-kapat", function () {
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: "Evet, işaretle",
-    cancelButtonText: "Hayır, iptal et"
+    cancelButtonText: "Hayır, iptal et",
+    reverseButtons: true
 
   }).then((result) => {
     if (result.isConfirmed) {
