@@ -1,2 +1,6 @@
 .env
 vendor/
+.vscode/
+.agent/
+/scratch/
+/node_modules/

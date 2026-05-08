@@ -30,6 +30,8 @@ jobs:
             **/.gitkeep
             **/.agent/**
             **/.vscode/**
+            .vscode
+            .agent
             **/README.md
             **/database.sql
             **/Database/db.php
