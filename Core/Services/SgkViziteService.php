@@ -417,6 +417,10 @@ XML;
                         'ARSIV' => (string)$rapor->ARSIV, // <-- BU SATIRIN OLDUĞUNDAN EMİN OLUN
                         'SIGORTALIADSOYAD' => (string)$rapor->AD . ' ' . (string)$rapor->SOYAD,
                         'RAPORDURUMU' => (string)$rapor->RAPORDURUMU,
+                        'RAPORDURUMADI' => (string)$rapor->RAPORDURUMADI,
+                        'ONAYLI' => (string)$rapor->ONAYLI,
+                        'ONAYDURUMU' => (string)$rapor->ONAYDURUMU,
+                        'ONAY_TARIHI' => (string)$rapor->ONAY_TARIHI,
                         'EKRANTARIHI' => (string)$rapor->EKRANTARIHI,
                         'TESISKODU' => (string)$rapor->TESISKODU,
                         'BRANSKODU' => (string)$rapor->BRANSKODU,
