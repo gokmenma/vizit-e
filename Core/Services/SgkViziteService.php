@@ -52,44 +52,21 @@ class SgkViziteService
         $this->wsSifre              = trim($wsSifre);
 
         $currentUserKey = $this->kullaniciAdi . '|' . $this->isyeriKodu;
-        $loadedFromSession = false;
+        $cacheFile = __DIR__ . '/../../cache/sgk_token_' . md5($currentUserKey) . '.json';
+        
+        $this->wsToken          = null;
+        $this->tokenExpiresAt   = null;
+        $this->activeUserKey    = null;
 
-        // 1. ADIM: PHP Session'dan yüklemeyi dene
-        if (php_sapi_name() !== 'cli' && isset($_SESSION['wsToken']) && isset($_SESSION['tokenExpiresAt']) && ($_SESSION['activeUserKey'] ?? '') === $currentUserKey) {
-            if (time() < $_SESSION['tokenExpiresAt']) {
-                $this->wsToken          = $_SESSION['wsToken'];
-                $this->tokenExpiresAt   = $_SESSION['tokenExpiresAt'];
-                $this->activeUserKey    = $currentUserKey;
-                $loadedFromSession      = true;
-            }
-        }
-
-        // 2. ADIM: Session'da yoksa veya süresi geçmişse, sistem geçici dosyasından (temp file) yüklemeyi dene
-        if (!$loadedFromSession) {
-            $cacheFile = __DIR__ . '/../../logs/sgk_tokens/sgk_token_' . md5($currentUserKey) . '.json';
-            if (file_exists($cacheFile)) {
-                $cacheData = json_decode(file_get_contents($cacheFile), true);
-                if ($cacheData && isset($cacheData['wsToken']) && isset($cacheData['tokenExpiresAt']) && time() < $cacheData['tokenExpiresAt']) {
+        if (file_exists($cacheFile)) {
+            $cacheData = json_decode(file_get_contents($cacheFile), true);
+            if ($cacheData && isset($cacheData['wsToken']) && isset($cacheData['tokenExpiresAt'])) {
+                if (time() < $cacheData['tokenExpiresAt']) {
                     $this->wsToken          = $cacheData['wsToken'];
                     $this->tokenExpiresAt   = $cacheData['tokenExpiresAt'];
                     $this->activeUserKey    = $currentUserKey;
-
-                    // Bulunan geçerli token'ı Session'a geri yazalım ki sonraki adımlarda hızlıca oradan okunsun
-                    if (php_sapi_name() !== 'cli') {
-                        $_SESSION['wsToken'] = $this->wsToken;
-                        $_SESSION['tokenExpiresAt'] = $this->tokenExpiresAt;
-                        $_SESSION['activeUserKey'] = $currentUserKey;
-                    }
-                    $loadedFromSession = true;
                 }
             }
-        }
-
-        // 3. ADIM: Eğer hiçbir yerden geçerli bir token yüklenemediyse null yap
-        if (!$loadedFromSession) {
-            $this->wsToken          = null;
-            $this->tokenExpiresAt   = null;
-            $this->activeUserKey    = null;
         }
 
 
@@ -101,13 +78,10 @@ class SgkViziteService
     }
 
     /**
-     * Tüm SOAP isteklerini yapan merkezi cURL fonksiyonu. (Geliştirilmiş Versiyon - Retry Destekli)
+     * Tüm SOAP isteklerini yapan merkezi cURL fonksiyonu. (Geliştirilmiş Versiyon)
      */
-    private function sendRequest($methodName, $params, $maxRetries = 3)
+    private function sendRequest($methodName, $params)
     {
-        // İstekler arasında çok kısa bir bekleme sunucunun bizi engellemesini önleyebilir
-        usleep(200000); // 0.2 saniye
-
         $paramXml = '';
         foreach ($params as $key => $value) {
             $paramXml .= "<{$key}>" . htmlspecialchars($value, ENT_XML1, 'UTF-8') . "</{$key}>";
@@ -124,90 +98,51 @@ class SgkViziteService
 </SOAP-ENV:Envelope>
 XML;
 
+        // SOAPAction başlığı her zaman metot adını içermeli
         $soapAction = "\"{$methodName}\"";
-        $lastError = '';
 
-        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $this->serviceUrl);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_request);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            
-            $headers = [
-                'Content-Type: text/xml; charset=utf-8',
-                'Content-Length: ' . strlen($xml_request),
-                'SOAPAction: ' . $soapAction,
-                'Accept: text/xml, multipart/related, text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2',
-                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Connection: close',
-                'Expect:'
-            ];
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->serviceUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_request);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: text/xml; charset=utf-8',
+            'Content-Length: ' . strlen($xml_request),
+            'SOAPAction: ' . $soapAction,
+            'Expect:',
+            'Connection: close'
+        ]);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Yönlendirmeleri takip et
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-            
-            // Bağlantı yönetimi - Her seferinde taze bağlantı
-            curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
-            curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
-            
-            // Bazı eski sunucular HTTP 1.0 ile daha kararlı çalışır
-            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+        $responseXml = curl_exec($ch);
 
-            if (defined('CURL_SSLVERSION_TLSv1_2')) {
-                curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-            }
+        if (curl_errno($ch)) {
+            throw new Exception("cURL Hatası: " . curl_error($ch));
+        }
+        curl_close($ch);
 
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 90);
-            curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-
-            $responseXml = curl_exec($ch);
-            $curlErrno = curl_errno($ch);
-            $curlError = curl_error($ch);
-            curl_close($ch);
-
-            if ($curlErrno) {
-                $lastError = $curlError;
-                $retryableErrors = [
-                    CURLE_COULDNT_CONNECT,
-                    CURLE_OPERATION_TIMEDOUT,
-                    CURLE_GOT_NOTHING,
-                    CURLE_RECV_ERROR,
-                    CURLE_SEND_ERROR,
-                    CURLE_PARTIAL_FILE,
-                ];
-
-                if (in_array($curlErrno, $retryableErrors) && $attempt < $maxRetries) {
-                    sleep($attempt * 3); // Bekleme süresini daha da artıralım
-                    continue;
-                }
-                throw new Exception("cURL Hatası ({$attempt}. deneme): " . $curlError);
-            }
-
-            if (empty($responseXml) || strpos(trim($responseXml), '<') !== 0) {
-                if ($attempt < $maxRetries) {
-                    sleep($attempt * 3);
-                    continue;
-                }
-                throw new Exception("SGK sunucusundan geçerli bir XML cevabı alınamadı. Gelen cevap boş veya geçersiz.");
-            }
-
-            $responseXml = preg_replace("/(<\/?)(\\w+):([^>]*>)/", "$1$2$3", $responseXml);
-            libxml_use_internal_errors(true);
-            $xml = simplexml_load_string($responseXml);
-
-            if ($xml === false) {
-                throw new Exception("Sunucudan gelen XML parse edilemedi.");
-            }
-
-            $body = $xml->xpath('//soapenvBody')[0];
-            $responseNode = $body->children()->children();
-            return $responseNode;
+        // Cevap boşsa veya bir HTML hata sayfasıysa
+        if (empty($responseXml) || strpos(trim($responseXml), '<') !== 0) {
+            throw new Exception("SGK sunucusundan geçerli bir XML cevabı alınamadı. Gelen cevap: " . $responseXml);
         }
 
-        throw new Exception("SGK sunucusuna {$maxRetries} denemede de bağlanılamadı. Son hata: " . $lastError);
+        // Gelen XML'i parse edip obje haline getirelim (Daha sağlam bir yöntemle)
+        $responseXml = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $responseXml);
+        libxml_use_internal_errors(true); // XML hatalarını yakalamak için
+        $xml = simplexml_load_string($responseXml);
+
+        if ($xml === false) {
+            throw new Exception("Sunucudan gelen XML parse edilemedi.");
+        }
+
+        $body = $xml->xpath('//soapenvBody')[0];
+        $responseNode = $body->children()->children(); // wsLoginReturn, raporAramaTarihileReturn vb.
+        return $responseNode;
     }
 
     private function getValidToken()
@@ -239,26 +174,18 @@ XML;
             // Gelen cevabın doğru katmanına erişiyoruz: wsLoginReturn
             if (isset($response->wsLoginReturn->sonucKod) && $response->wsLoginReturn->sonucKod == '0') {
                 // Token'ı ve açıklamayı da doğru yoldan alıyoruz
-                 $this->wsToken = (string)$response->wsLoginReturn->wsToken;
-                 $this->tokenExpiresAt = time() + (55 * 60);
-                 $this->activeUserKey = $currentUserKey;
+                $this->wsToken = (string)$response->wsLoginReturn->wsToken;
+                $this->tokenExpiresAt = time() + (29 * 60);
+                $this->activeUserKey = $currentUserKey;
 
-                if (php_sapi_name() !== 'cli') {
-                    $_SESSION['wsToken'] = $this->wsToken;
-                    $_SESSION['tokenExpiresAt'] = $this->tokenExpiresAt;
-                    $_SESSION['activeUserKey'] = $currentUserKey;
-                }
-
-                // Sistem geçici dosyasına (temp file) yazalım ki tüm oturumlar ve istekler bu geçerli seansı paylaşabilsin
-                $cacheDir = __DIR__ . '/../../logs/sgk_tokens';
-                if (!is_dir($cacheDir)) {
-                    mkdir($cacheDir, 0777, true);
-                }
-                $cacheFile = $cacheDir . '/sgk_token_' . md5($currentUserKey) . '.json';
+                $cacheFile = __DIR__ . '/../../cache/sgk_token_' . md5($currentUserKey) . '.json';
                 $cacheData = [
                     'wsToken' => $this->wsToken,
                     'tokenExpiresAt' => $this->tokenExpiresAt
                 ];
+                if (!is_dir(dirname($cacheFile))) {
+                    mkdir(dirname($cacheFile), 0777, true);
+                }
                 file_put_contents($cacheFile, json_encode($cacheData));
                 //echo "Token başarıyla alındı: " . $this->wsToken . "\n";
             } else {
@@ -268,89 +195,13 @@ XML;
                     : 'Bilinmeyen Hata';
 
                 if (mb_strpos($hataMesaji, 'FARKLI IP DEN ALINMIŞ GEÇERLİ GUID MEVCUT') !== false) {
-                    // CANKURTARAN MODU: SGK "başka IP'den aktif seans var" diyor.
-                    // Cache'deki token farklı IP'ye ait olabilir, o yüzden önce cache'i temizle.
-                    $cacheFile = __DIR__ . '/../../logs/sgk_tokens/sgk_token_' . md5($currentUserKey) . '.json';
-                    if (file_exists($cacheFile)) {
-                        @unlink($cacheFile);
-                    }
-
-                    // 15 saniye bekleyip yeniden login dene - SGK oturumu düşmüş olabilir
-                    sleep(15);
-
-                    try {
-                        $retryResponse = $this->sendRequest('wsLogin', $params);
-                        if (isset($retryResponse->wsLoginReturn->sonucKod) && $retryResponse->wsLoginReturn->sonucKod == '0') {
-                            $this->wsToken = (string)$retryResponse->wsLoginReturn->wsToken;
-                            $this->tokenExpiresAt = time() + (55 * 60);
-                            $this->activeUserKey = $currentUserKey;
-
-                            if (php_sapi_name() !== 'cli') {
-                                $_SESSION['wsToken'] = $this->wsToken;
-                                $_SESSION['tokenExpiresAt'] = $this->tokenExpiresAt;
-                                $_SESSION['activeUserKey'] = $currentUserKey;
-                            }
-
-                            $cacheDir = __DIR__ . '/../../logs/sgk_tokens';
-                            if (!is_dir($cacheDir)) { mkdir($cacheDir, 0777, true); }
-                            file_put_contents($cacheDir . '/sgk_token_' . md5($currentUserKey) . '.json', json_encode([
-                                'wsToken' => $this->wsToken,
-                                'tokenExpiresAt' => $this->tokenExpiresAt
-                            ]));
-
-                            return $this->wsToken;
-                        }
-                    } catch (Exception $e) {
-                        // Yeniden deneme de başarısız oldu, aşağıda kullanıcıya mesaj verilecek
-                    }
-
-                    $hataMesaji = "Oturum Hatası (SGK): Bu işveren için başka bir IP/cihaz üzerinden alınmış aktif bir seans mevcuttur. \n\nÇözüm: Lütfen 10-15 dakika bekleyerek SGK sunucusundaki eski oturumun otomatik sonlanmasını sağlayın.";
+                    $hataMesaji = "Oturum Hatası (SGK): Bu işveren için başka bir IP/cihaz üzerinden alınmış aktif bir seans mevcuttur. \n\nÇözüm: Lütfen 10-15 dakika bekleyerek SGK sunucusundaki eski oturumun otomatik sonlanmasını sağlayın veya internet bağlantınızı kesip tekrar bağlanarak (modem kapat-aç vb.) yeni bir IP almayı deneyin.";
                 }
                 throw new Exception("Login başarısız: " . $hataMesaji);
             }
             // =============================================================
         }
         return $this->wsToken;
-    }
-
-    /**
-     * Token'ı zorla geçersiz kılar. Bir sonraki getValidToken() çağrısında yeni token alınır.
-     */
-    private function invalidateToken()
-    {
-        $this->wsToken = null;
-        $this->tokenExpiresAt = 0;
-
-        // Session'daki token bilgilerini de temizle
-        if (php_sapi_name() !== 'cli') {
-            unset($_SESSION['wsToken'], $_SESSION['tokenExpiresAt'], $_SESSION['activeUserKey']);
-        }
-
-        // Cache dosyasını da sil
-        $currentUserKey = $this->kullaniciAdi . '|' . $this->isyeriKodu;
-        $cacheFile = __DIR__ . '/../../logs/sgk_tokens/sgk_token_' . md5($currentUserKey) . '.json';
-        if (file_exists($cacheFile)) {
-            @unlink($cacheFile);
-        }
-    }
-
-    /**
-     * SGK'dan gelen "Token hatalı" hatasını kontrol eder.
-     */
-    private function isTokenError(string $message): bool
-    {
-        $tokenErrors = [
-            'Token hatalı',
-            'Token süresi dolmuştur',
-            'Tekrar token alınız',
-            'token alınız',
-        ];
-        foreach ($tokenErrors as $err) {
-            if (mb_stripos($message, $err) !== false) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -390,7 +241,7 @@ XML;
      * @return array Her zaman onaylanmış raporların bulunduğu saf bir PHP dizisi döndürür.
      * @throws Exception
      */
-    public function onayliRaporlariGetir(DateTime $tarih1, DateTime $tarih2, $retried = false)
+    public function onayliRaporlariGetir(DateTime $tarih1, DateTime $tarih2)
     {
         $params = [
             'kullaniciAdi' => $this->kullaniciAdi,
@@ -459,11 +310,6 @@ XML;
             $hataMesaji = isset($returnNode->sonucAciklama)
                 ? (string)$returnNode->sonucAciklama
                 : 'Bilinmeyen bir hata oluştu.';
-            // Token hatası ise: token'ı sıfırla ve bir kez daha dene
-            if (!$retried && $this->isTokenError($hataMesaji)) {
-                $this->invalidateToken();
-                return $this->onayliRaporlariGetir($tarih1, $tarih2, true);
-            }
             throw new Exception("Onaylı raporlar getirilemedi: " . $hataMesaji);
         }
 
@@ -509,6 +355,7 @@ XML;
 
         // 'onayliRaporlarDetay' kapısını çalıyoruz (SOAP operasyonunu çağırıyoruz)
         $response = $this->sendRequest('onayliRaporlarDetay', $params);
+        var_dump($response);
         $returnNode = $response->onayliRaporlarDetayReturn;
 
         if (isset($returnNode->sonucKod) && $returnNode->sonucKod == '0') {
@@ -532,7 +379,7 @@ XML;
      * @return array Her zaman raporların bulunduğu bir dizi döndürür.
      * @throws Exception
      */
-    public function raporlariGetir(DateTime $tarih, $arsiv = true, $retried = false)
+    public function raporlariGetir(DateTime $tarih, $arsiv = true)
 
     {
         $params = [
@@ -583,11 +430,6 @@ XML;
             // Rapor bulunamadı.
         } else {
             $hataMesaji = isset($returnNode->sonucAciklama) ? (string)$returnNode->sonucAciklama : 'Bilinmeyen Hata';
-            // Token hatası ise: token'ı sıfırla ve bir kez daha dene
-            if (!$retried && $this->isTokenError($hataMesaji)) {
-                $this->invalidateToken();
-                return $this->raporlariGetir($tarih, $arsiv, true);
-            }
             throw new Exception("Raporlar getirilemedi: " . $hataMesaji);
         }
 
@@ -605,7 +447,7 @@ XML;
      * @return SimpleXMLElement|array|null Raporları içeren nesne/dizi veya kayıt yoksa null.
      * @throws Exception
      */
-    public function raporAramaTarihleGetir(DateTime $tarih, $retried = false)
+    public function raporAramaTarihleGetir(DateTime $tarih)
     {
         $params = [
             'kullaniciAdi' => $this->kullaniciAdi,
@@ -634,11 +476,6 @@ XML;
             $hataMesaji = isset($returnNode->sonucAciklama)
                 ? (string)$returnNode->sonucAciklama
                 : 'Bilinmeyen bir hata oluştu.';
-            // Token hatası ise: token'ı sıfırla ve bir kez daha dene
-            if (!$retried && $this->isTokenError($hataMesaji)) {
-                $this->invalidateToken();
-                return $this->raporAramaTarihleGetir($tarih, true);
-            }
             throw new Exception("Raporlar getirilemedi: " . $hataMesaji);
         }
     }

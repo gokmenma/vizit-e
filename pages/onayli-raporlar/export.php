@@ -29,41 +29,24 @@ if ($format === 'excel') {
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setTitle('Onaylı Raporlar');
 
-    // Başlık satırı 1: Firma Adı & Rapor Türü
-    $sheet->mergeCells('A1:F1');
-    $sheet->setCellValue('A1', mb_strtoupper($_SESSION['firma_adi'] ?? 'FİRMA', 'UTF-8') . ' - ONAYLANMIŞ RAPOR LİSTESİ');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+    // Başlık satırını yaz
+    $sheet->setCellValue('A1', 'TC Kimlik No');
+    $sheet->setCellValue('B1', 'Ad Soyad');
+    $sheet->setCellValue('C1', 'Vaka');
+    $sheet->setCellValue('D1', 'Onay Türü');
+    $sheet->setCellValue('E1', 'Poliklinik Tarihi');
+    $sheet->setCellValue('F1', 'İşbaşı / Kontrol Tarihi');
 
-    // Başlık satırı 2: Filtrelenmiş Tarihler
-    $t1 = !empty($_POST['tarih1']) ? date('d.m.Y', strtotime($_POST['tarih1'])) : '';
-    $t2 = !empty($_POST['tarih2']) ? date('d.m.Y', strtotime($_POST['tarih2'])) : '';
-    $tarihAraligiText = ($t1 && $t2) ? "Sorgulanan Tarih Aralığı: {$t1} - {$t2}" : "Tüm Onaylanmış Raporlar";
+    // Başlıkları kalın yap
+    $sheet->getStyle('A1:F1')->getFont()->setBold(true);
 
-    $sheet->mergeCells('A2:F2');
-    $sheet->setCellValue('A2', $tarihAraligiText);
-    $sheet->getStyle('A2')->getFont()->setItalic(true)->setSize(11);
-    $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-    // Tablo Başlıkları (Satır 4)
-    $sheet->setCellValue('A4', 'TC Kimlik No');
-    $sheet->setCellValue('B4', 'Ad Soyad');
-    $sheet->setCellValue('C4', 'Vaka');
-    $sheet->setCellValue('D4', 'Onay Türü');
-    $sheet->setCellValue('E4', 'Poliklinik Tarihi');
-    $sheet->setCellValue('F4', 'İşbaşı / Kontrol Tarihi');
-
-    // Başlıkları kalın ve arka planlı yap
-    $sheet->getStyle('A4:F4')->getFont()->setBold(true);
-    $sheet->getStyle('A4:F4')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('EAEAEA');
-
-    // Veri satırlarını yaz (Satır 5'ten başlayarak)
-    $satir = 5;
+    // Veri satırlarını yaz
+    $satir = 2;
     foreach ($raporlar as $rapor) {
         $adSoyad = (isset($rapor['AD']) || isset($rapor['SOYAD'])) 
             ? trim(($rapor['AD'] ?? '') . ' ' . ($rapor['SOYAD'] ?? '')) 
             : trim($rapor['SIGORTALIADSOYAD'] ?? '');
-        $sheet->setCellValueExplicit('A' . $satir, $rapor['TCKIMLIKNO'] ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+        $sheet->setCellValue('A' . $satir, $rapor['TCKIMLIKNO'] ?? '');
         $sheet->setCellValue('B' . $satir, $adSoyad);
         $sheet->setCellValue('C' . $satir, $rapor['VAKAADI'] ?? '');
         $sheet->setCellValue('D' . $satir, $rapor['ONAYTURU'] ?? 'Belirtilmemiş');

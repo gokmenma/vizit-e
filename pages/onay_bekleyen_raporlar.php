@@ -94,7 +94,7 @@ try {
         <div class="card">
             <div class="header row d-flex justify-content-between align-items-center">
                 <div class="col-lg-9">
-                    <h2><strong>Onay Bekleyen Rapor Listesi buraya neden gelmiyor</strong></h2>
+                    <h2><strong>Onay Bekleyen Rapor Listesi</strong></h2>
                     <small id="rapor-sayi-bilgisi">
                         <!-- ID'yi buraya ekliyoruz -->
                         <?php echo htmlspecialchars((new DateTime($tarih))->format('d.m.Y')); ?> tarihine kadar SGK'dan
