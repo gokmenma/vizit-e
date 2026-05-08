@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="login-hero">
                     <img src="/assets/images/logo.svg" alt="Vizit-e" class="login-hero__logo">
                 </div>
-                <h3 class="center-title">Vizit-E'ye Hoşgeldiniz</h3>
+                <h3 class="center-title">Vizit-E'ye Hoşgeldiniz test</h3>
                 <p class="center-subtitle">Devam etmek için hesabınıza giriş yapın</p>
                 <?php if (!empty($error_message)) { echo '<div class="alert alert-danger login-alert">' . htmlspecialchars($error_message) . '</div>'; } ?>
                 <div class="login-card">
