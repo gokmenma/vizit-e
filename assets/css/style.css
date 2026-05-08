@@ -391,7 +391,7 @@ body {
   }
 
   .card{
-    margin-bottom: 0 !important;
+    margin-bottom: 10px !important;
   }
   .sgk-card .nav-link:last-child{
     margin-bottom: 30px !important;
