@@ -66,9 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </small>
                             <?php endif; ?>
                         </div>
-                        <div class="col-lg-2">
+                        <div class="col-lg-2 text-md-end text-center mt-2 mt-md-0">
                             <a href="onayli-rapor-ara"
-                                class="btn btn-raised btn-primary btn-round waves-effect float-right"><i
+                                class="btn btn-raised btn-primary btn-round waves-effect w-100 w-md-auto"><i
                                     class="zmdi zmdi-arrow-back"></i> Geri Dön</a>
                         </div>
 
@@ -82,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php else: ?>
                             <form method="post">
                                 <?php if (!empty($onayliRaporlar)): ?>
-                                    <div class="export-buttons float-right mb-3">
-                                        <button type="button" id="export-excel" class="btn btn-primary btn-simple waves-effect"><i class="zmdi zmdi-file-text"></i> Excel'e Aktar</button>
-                                        <button type="button" id="export-pdf" class="btn btn-primary waves-effect"><i class="zmdi zmdi-collection-pdf"></i> PDF'e Aktar</button>
+                                    <div class="export-buttons d-flex justify-content-md-end justify-content-center gap-2 mb-4 mt-2">
+                                        <button type="button" id="export-excel" class="btn btn-primary btn-simple waves-effect m-0"><i class="zmdi zmdi-file-text"></i> Excel'e Aktar</button>
+                                        <button type="button" id="export-pdf" class="btn btn-primary waves-effect m-0"><i class="zmdi zmdi-collection-pdf"></i> PDF'e Aktar</button>
                                     </div>
                                 <?php endif; ?>
                                 <div class="table-responsive d-none d-md-block">
