@@ -137,78 +137,173 @@ try {
             </div>
             <div class="body">
                 <style>
-                    /* Mobile Responsive Styles for Search and Export Section */
-                    @media (max-width: 767px) {
-                        .search-form-responsive {
-                            width: 100% !important;
+                    /* Premium Filter Card Styling */
+                    .filter-card {
+                        background: #fdfdfd;
+                        border: 1px solid #eaeaea;
+                        border-radius: 16px;
+                        padding: 20px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+                        margin-bottom: 25px;
+                    }
+                    .search-form-layout {
+                        margin-bottom: 0;
+                    }
+                    .date-input-wrapper {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+                    }
+                    .date-label-style {
+                        font-weight: 700;
+                        color: #34495e;
+                        font-size: 0.9rem;
+                        margin-bottom: 0;
+                    }
+                    .input-with-button {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        width: 100%;
+                    }
+                    .custom-date-input {
+                        height: 46px !important;
+                        border-radius: 10px !important;
+                        border: 1px solid #ced4da !important;
+                        padding: 10px 16px !important;
+                        font-size: 0.95rem !important;
+                        background-color: #fff !important;
+                        box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important;
+                        transition: border-color 0.2s, box-shadow 0.2s !important;
+                        width: 200px;
+                    }
+                    .custom-date-input:focus {
+                        border-color: #007bff !important;
+                        box-shadow: 0 0 0 3px rgba(0,123,255,0.15) !important;
+                    }
+                    .custom-search-btn {
+                        height: 46px !important;
+                        width: 46px !important;
+                        border-radius: 10px !important;
+                        padding: 0 !important;
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        margin: 0 !important;
+                        background-color: #2c3e50 !important;
+                        border-color: #2c3e50 !important;
+                        box-shadow: 0 3px 12px rgba(44,62,80,0.15) !important;
+                        transition: all 0.2s !important;
+                    }
+                    .custom-search-btn:hover {
+                        background-color: #1a252f !important;
+                        border-color: #1a252f !important;
+                        transform: translateY(-1px) !important;
+                        box-shadow: 0 5px 15px rgba(44,62,80,0.25) !important;
+                    }
+                    .export-buttons-layout {
+                        display: inline-flex;
+                        gap: 12px;
+                    }
+                    .custom-export-btn {
+                        height: 46px !important;
+                        border-radius: 10px !important;
+                        padding: 0 20px !important;
+                        font-weight: 600 !important;
+                        font-size: 0.9rem !important;
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        gap: 8px !important;
+                        margin: 0 !important;
+                        transition: all 0.2s !important;
+                    }
+                    .custom-export-btn#export-excel {
+                        color: #2e7d32 !important;
+                        border: 1px solid #2e7d32 !important;
+                        background: transparent !important;
+                    }
+                    .custom-export-btn#export-excel:hover {
+                        background-color: #e8f5e9 !important;
+                        transform: translateY(-1px) !important;
+                    }
+                    .custom-export-btn#export-pdf {
+                        background-color: #c62828 !important;
+                        border-color: #c62828 !important;
+                        color: #fff !important;
+                        box-shadow: 0 3px 12px rgba(198,40,40,0.15) !important;
+                    }
+                    .custom-export-btn#export-pdf:hover {
+                        background-color: #b71c1c !important;
+                        transform: translateY(-1px) !important;
+                        box-shadow: 0 5px 15px rgba(198,40,40,0.25) !important;
+                    }
+
+                    /* Mobile Responsive Adjustments */
+                    @media (max-width: 991px) {
+                        .filter-card {
+                            padding: 16px;
+                        }
+                        .input-with-button {
                             display: flex !important;
                             flex-direction: row !important;
                             align-items: center !important;
-                            justify-content: space-between !important;
-                            gap: 10px !important;
-                            margin-bottom: 10px !important;
+                            gap: 10px;
                         }
-                        .date-input-group {
+                        .custom-date-input {
                             flex: 1 !important;
-                            display: flex !important;
-                            align-items: center !important;
                             width: auto !important;
                         }
-                        .date-label {
-                            font-size: 0.9rem !important;
-                            margin-right: 8px !important;
+                        .custom-search-btn {
+                            width: 46px !important;
+                            height: 46px !important;
                         }
-                        .date-input-field {
+                        .export-buttons-layout {
+                            display: flex;
+                            width: 100%;
+                            gap: 10px;
+                            margin-top: 15px;
+                        }
+                        .custom-export-btn {
                             flex: 1 !important;
-                            width: 100% !important;
-                            min-width: 120px !important;
-                            padding: 6px 10px !important;
-                            height: 38px !important;
-                            font-size: 0.9rem !important;
-                        }
-                        .search-btn-responsive {
-                            padding: 8px 15px !important;
+                            height: 42px !important;
                             font-size: 0.85rem !important;
-                            height: 38px !important;
-                            display: flex !important;
-                            align-items: center !important;
-                            justify-content: center !important;
-                            margin: 0 !important;
-                        }
-                        .export-buttons-responsive {
-                            width: 100% !important;
-                            display: flex !important;
-                            justify-content: space-between !important;
-                            gap: 10px !important;
-                        }
-                        .export-buttons-responsive button {
-                            flex: 1 !important;
-                            margin: 0 !important;
-                            padding: 8px !important;
-                            font-size: 0.85rem !important;
-                            text-align: center !important;
                         }
                     }
                 </style>
 
                 <!-- Tarih Seçimi, Arama ve Dışa Aktarma Elemanları -->
-                <div class="d-flex justify-content-between align-items-center flex-wrap mb-4" style="gap: 15px;">
-                    <!-- Sol Taraf: Arama Formu -->
-                    <form action="onay-bekleyen-raporlar" method="POST" class="d-flex align-items-center flex-wrap mb-0 search-form-responsive" style="gap: 15px;">
-                        <div class="form-group mb-0 d-flex align-items-center date-input-group">
-                            <b class="date-label" style="margin-right: 10px; white-space: nowrap; color: #2c3e50;">Rapor Tarihi:</b>
-                            <input type="date" id="rapor_tarihi" name="rapor_tarihi" value="<?php echo htmlspecialchars($tarih); ?>" class="form-control mb-0 date-input-field" style="width: 170px; display: inline-block;">
+                <div class="filter-card">
+                    <div class="row align-items-center">
+                        <!-- Sol Taraf: Arama Formu -->
+                        <div class="col-lg-8 col-md-12">
+                            <form action="onay-bekleyen-raporlar" method="POST" class="search-form-layout">
+                                <div class="date-input-wrapper">
+                                    <label for="rapor_tarihi" class="date-label-style">Rapor Tarihi</label>
+                                    <div class="input-with-button">
+                                        <input type="date" id="rapor_tarihi" name="rapor_tarihi" value="<?php echo htmlspecialchars($tarih); ?>" class="form-control custom-date-input">
+                                        <button type="submit" name="rapor_ara_buton" class="btn btn-primary btn-round waves-effect custom-search-btn">
+                                            <i class="zmdi zmdi-search" style="font-size: 1.2rem;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
-                        <button type="submit" name="rapor_ara_buton" class="btn btn-primary btn-round waves-effect mb-0 search-btn-responsive" style="padding: 8px 20px;"><i class="zmdi zmdi-search"></i> Rapor Ara</button>
-                    </form>
 
-                    <!-- Sağ Taraf: Excel / PDF Butonları (Tablo verisi varsa gösterilir) -->
-                    <?php if (!empty($raporlar)): ?>
-                        <div class="export-buttons d-flex mb-0 export-buttons-responsive" style="gap: 10px;">
-                            <button type="button" id="export-excel" class="btn btn-primary btn-simple waves-effect mb-0">Excel'e Aktar</button>
-                            <button type="button" id="export-pdf" class="btn btn-primary waves-effect mb-0">PDF'e Aktar</button>
-                        </div>
-                    <?php endif; ?>
+                        <!-- Sağ Taraf: Excel / PDF Butonları (Tablo verisi varsa gösterilir) -->
+                        <?php if (!empty($raporlar)): ?>
+                            <div class="col-lg-4 col-md-12 text-lg-right text-center mt-3 mt-lg-0">
+                                <div class="export-buttons-layout">
+                                    <button type="button" id="export-excel" class="btn btn-outline-primary btn-round waves-effect custom-export-btn">
+                                        <i class="zmdi zmdi-file-text"></i> Excel'e Aktar
+                                    </button>
+                                    <button type="button" id="export-pdf" class="btn btn-danger btn-round waves-effect custom-export-btn">
+                                        <i class="zmdi zmdi-file"></i> PDF'e Aktar
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <?php if ($hataMesaji): ?>
