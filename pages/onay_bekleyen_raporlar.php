@@ -210,15 +210,28 @@ try {
                                             </td>
 
                                             <td class="text-center d-flex justify-content-center align-items-center gap-1">
+                                                <?php 
+                                                $is_future = false;
+                                                try {
+                                                    $raporBitis = new DateTime($rapor['ABITTAR']);
+                                                    $raporBitis->setTime(0, 0, 0);
+                                                    $bugun = new DateTime();
+                                                    $bugun->setTime(0, 0, 0);
+                                                    if ($raporBitis > $bugun) {
+                                                        $is_future = true;
+                                                    }
+                                                } catch (Exception $e) {}
+                                                $disabled_attr = $is_future ? 'disabled title="Rapor süresi henüz dolmadı"' : '';
+                                                ?>
                                                 <?php if ($userRole == "admin"): ?>
-                                                    <button type="button" class="btn btn-info btn-sm btn-onayla">
+                                                    <button type="button" class="btn btn-info btn-sm btn-onayla" <?php echo $disabled_attr; ?>>
                                                     <!-- İkon Ekle     -->
                                                      <i class="zmdi zmdi-check zmdi-hc-fw"></i>
                                                     Onayla</button>
                                                     <button class="btn btn-secondary btn-sm btn-personel-degil">
                                                     <i class="zmdi zmdi-folder-person zmdi-hc-fw"></i>    
                                                     Personelim Değil</button>
-                                                    <button type="button" class="btn btn-warning btn-sm btn-kapat" data-id="<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>">
+                                                    <button type="button" class="btn btn-warning btn-sm btn-kapat" <?php echo $disabled_attr; ?> data-id="<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>">
                                                     <!-- İkon Ekle     -->
                                                      <i class="zmdi zmdi-block zmdi-hc-fw"></i>
                                                     Raporu Kapat</button>
@@ -250,10 +263,26 @@ try {
                             $mi = 0;
                             foreach ($raporlar as $rapor): 
                                 $mi++;
+                                $is_future = false;
+                                try {
+                                    $raporBitis = new DateTime($rapor['ABITTAR']);
+                                    $raporBitis->setTime(0, 0, 0);
+                                    $bugun = new DateTime();
+                                    $bugun->setTime(0, 0, 0);
+                                    if ($raporBitis > $bugun) {
+                                        $is_future = true;
+                                    }
+                                } catch (Exception $e) {}
+                                $disabled_attr = $is_future ? 'disabled title="Rapor süresi henüz dolmadı"' : '';
                             ?>
                                 <div class="card mobile-rapor-card p-3 mb-4 border-0 shadow-sm" data-rapor='<?php echo htmlspecialchars(json_encode($rapor)); ?>' data-gun-farki="<?php echo $rapor['gun_farki']; ?>" style="border-radius: 12px; background: #fff; border: 1px solid #eaeaea !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">Sıra: <?php echo $mi; ?></span>
+                                        <div class="d-flex gap-1 align-items-center">
+                                            <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">Sıra: <?php echo $mi; ?></span>
+                                            <?php if ($is_future): ?>
+                                                <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill" style="font-size: 0.65rem;"><i class="zmdi zmdi-time"></i> Beklemede</span>
+                                            <?php endif; ?>
+                                        </div>
                                         <span class="badge bg-primary text-white rounded-pill px-3 py-1.5" style="font-size: 0.75rem; font-weight: 600;"><?php echo htmlspecialchars($rapor['VAKAADI']); ?></span>
                                     </div>
                                     
@@ -293,7 +322,7 @@ try {
 
                                     <div class="d-grid gap-2">
                                         <?php if ($userRole == "admin"): ?>
-                                            <button type="button" class="btn btn-success w-100 py-2.5 btn-onayla d-flex align-items-center justify-content-center gap-1" style="border-radius: 8px; font-weight: 600; background-color: #2cc711; border-color: #2cc711; font-size: 0.95rem; color: #fff;">
+                                            <button type="button" class="btn btn-success w-100 py-2.5 btn-onayla d-flex align-items-center justify-content-center gap-1" <?php echo $disabled_attr; ?> style="border-radius: 8px; font-weight: 600; background-color: <?php echo $is_future ? '#6c757d' : '#2cc711'; ?>; border-color: <?php echo $is_future ? '#6c757d' : '#2cc711'; ?>; font-size: 0.95rem; color: #fff;">
                                                 <i class="zmdi zmdi-check"></i> Onayla
                                             </button>
                                             <div class="row g-2 mt-1">
@@ -303,7 +332,7 @@ try {
                                                     </button>
                                                 </div>
                                                 <div class="col-6">
-                                                    <button type="button" class="btn btn-warning w-100 py-2 btn-kapat d-flex align-items-center justify-content-center gap-1 text-white" data-id="<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>" style="border-radius: 8px; font-size: 0.8rem;">
+                                                    <button type="button" class="btn btn-warning w-100 py-2 btn-kapat d-flex align-items-center justify-content-center gap-1 text-white" <?php echo $disabled_attr; ?> data-id="<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>" style="border-radius: 8px; font-size: 0.8rem; <?php if($is_future) echo 'background-color: #ffc107; opacity: 0.65;'; ?>">
                                                         <i class="zmdi zmdi-block"></i> Raporu Kapat
                                                     </button>
                                                 </div>
