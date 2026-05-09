@@ -136,17 +136,24 @@ try {
                 </div>
             </div>
             <div class="body">
-                <!-- Tarih Seçimi ve Arama Butonu -->
-                <div class="row align-items-center mb-4">
-                    <div class="col-md-12">
-                        <form action="onay-bekleyen-raporlar" method="POST" class="d-flex align-items-center flex-wrap" style="gap: 15px;">
-                            <div class="form-group mb-0 d-flex align-items-center">
-                                <b style="margin-right: 10px; white-space: nowrap; color: #2c3e50;">Rapor Tarihi:</b>
-                                <input type="date" id="rapor_tarihi" name="rapor_tarihi" value="<?php echo htmlspecialchars($tarih); ?>" class="form-control mb-0" style="width: 170px; display: inline-block;">
-                            </div>
-                            <button type="submit" name="rapor_ara_buton" class="btn btn-primary btn-round waves-effect mb-0" style="padding: 8px 20px;"><i class="zmdi zmdi-search"></i> Rapor Ara</button>
-                        </form>
-                    </div>
+                <!-- Tarih Seçimi, Arama ve Dışa Aktarma Elemanları -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap mb-4" style="gap: 15px;">
+                    <!-- Sol Taraf: Arama Formu -->
+                    <form action="onay-bekleyen-raporlar" method="POST" class="d-flex align-items-center flex-wrap mb-0" style="gap: 15px;">
+                        <div class="form-group mb-0 d-flex align-items-center">
+                            <b style="margin-right: 10px; white-space: nowrap; color: #2c3e50;">Rapor Tarihi:</b>
+                            <input type="date" id="rapor_tarihi" name="rapor_tarihi" value="<?php echo htmlspecialchars($tarih); ?>" class="form-control mb-0" style="width: 170px; display: inline-block;">
+                        </div>
+                        <button type="submit" name="rapor_ara_buton" class="btn btn-primary btn-round waves-effect mb-0" style="padding: 8px 20px;"><i class="zmdi zmdi-search"></i> Rapor Ara</button>
+                    </form>
+
+                    <!-- Sağ Taraf: Excel / PDF Butonları (Tablo verisi varsa gösterilir) -->
+                    <?php if (!empty($raporlar)): ?>
+                        <div class="export-buttons d-flex mb-0" style="gap: 10px;">
+                            <button type="button" id="export-excel" class="btn btn-primary btn-simple waves-effect mb-0">Excel'e Aktar</button>
+                            <button type="button" id="export-pdf" class="btn btn-primary waves-effect mb-0">PDF'e Aktar</button>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <?php if ($hataMesaji): ?>
@@ -184,12 +191,6 @@ try {
 
 
                                 <?php if (!empty($raporlar)): ?>
-                              
-                             <div class="export-buttons float-right mb-3">
-                                 <button type="button" id="export-excel" class="btn btn-primary btn-simple waves-effect">Excel'e
-                                     Aktar</button>
-                                 <button type="button" id="export-pdf" class="btn btn-primary waves-effect">PDF'e Aktar</button>
-                             </div>
                                 <?php
 
                                     $i = 0; // Sıra numarası için sayaç
