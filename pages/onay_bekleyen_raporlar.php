@@ -136,20 +136,75 @@ try {
                 </div>
             </div>
             <div class="body">
+                <style>
+                    /* Mobile Responsive Styles for Search and Export Section */
+                    @media (max-width: 767px) {
+                        .search-form-responsive {
+                            width: 100% !important;
+                            display: flex !important;
+                            flex-direction: row !important;
+                            align-items: center !important;
+                            justify-content: space-between !important;
+                            gap: 10px !important;
+                            margin-bottom: 10px !important;
+                        }
+                        .date-input-group {
+                            flex: 1 !important;
+                            display: flex !important;
+                            align-items: center !important;
+                            width: auto !important;
+                        }
+                        .date-label {
+                            font-size: 0.9rem !important;
+                            margin-right: 8px !important;
+                        }
+                        .date-input-field {
+                            flex: 1 !important;
+                            width: 100% !important;
+                            min-width: 120px !important;
+                            padding: 6px 10px !important;
+                            height: 38px !important;
+                            font-size: 0.9rem !important;
+                        }
+                        .search-btn-responsive {
+                            padding: 8px 15px !important;
+                            font-size: 0.85rem !important;
+                            height: 38px !important;
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                            margin: 0 !important;
+                        }
+                        .export-buttons-responsive {
+                            width: 100% !important;
+                            display: flex !important;
+                            justify-content: space-between !important;
+                            gap: 10px !important;
+                        }
+                        .export-buttons-responsive button {
+                            flex: 1 !important;
+                            margin: 0 !important;
+                            padding: 8px !important;
+                            font-size: 0.85rem !important;
+                            text-align: center !important;
+                        }
+                    }
+                </style>
+
                 <!-- Tarih Seçimi, Arama ve Dışa Aktarma Elemanları -->
                 <div class="d-flex justify-content-between align-items-center flex-wrap mb-4" style="gap: 15px;">
                     <!-- Sol Taraf: Arama Formu -->
-                    <form action="onay-bekleyen-raporlar" method="POST" class="d-flex align-items-center flex-wrap mb-0" style="gap: 15px;">
-                        <div class="form-group mb-0 d-flex align-items-center">
-                            <b style="margin-right: 10px; white-space: nowrap; color: #2c3e50;">Rapor Tarihi:</b>
-                            <input type="date" id="rapor_tarihi" name="rapor_tarihi" value="<?php echo htmlspecialchars($tarih); ?>" class="form-control mb-0" style="width: 170px; display: inline-block;">
+                    <form action="onay-bekleyen-raporlar" method="POST" class="d-flex align-items-center flex-wrap mb-0 search-form-responsive" style="gap: 15px;">
+                        <div class="form-group mb-0 d-flex align-items-center date-input-group">
+                            <b class="date-label" style="margin-right: 10px; white-space: nowrap; color: #2c3e50;">Rapor Tarihi:</b>
+                            <input type="date" id="rapor_tarihi" name="rapor_tarihi" value="<?php echo htmlspecialchars($tarih); ?>" class="form-control mb-0 date-input-field" style="width: 170px; display: inline-block;">
                         </div>
-                        <button type="submit" name="rapor_ara_buton" class="btn btn-primary btn-round waves-effect mb-0" style="padding: 8px 20px;"><i class="zmdi zmdi-search"></i> Rapor Ara</button>
+                        <button type="submit" name="rapor_ara_buton" class="btn btn-primary btn-round waves-effect mb-0 search-btn-responsive" style="padding: 8px 20px;"><i class="zmdi zmdi-search"></i> Rapor Ara</button>
                     </form>
 
                     <!-- Sağ Taraf: Excel / PDF Butonları (Tablo verisi varsa gösterilir) -->
                     <?php if (!empty($raporlar)): ?>
-                        <div class="export-buttons d-flex mb-0" style="gap: 10px;">
+                        <div class="export-buttons d-flex mb-0 export-buttons-responsive" style="gap: 10px;">
                             <button type="button" id="export-excel" class="btn btn-primary btn-simple waves-effect mb-0">Excel'e Aktar</button>
                             <button type="button" id="export-pdf" class="btn btn-primary waves-effect mb-0">PDF'e Aktar</button>
                         </div>
