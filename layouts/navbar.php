@@ -104,7 +104,7 @@ $activeMenu = getActiveMenu($currentPage, $menuItems);
 
 
                                 <ul class="sub-menu">
-                                    <li><a href="tarihe-gore-rapor-ara">Tarihe göre Rapor Ara</a></li>
+                                    <li><a href="onay-bekleyen-raporlar">Tarihe göre Rapor Ara</a></li>
                                     <li><a href="onayli-rapor-ara">Onaylı Rapor Ara</a></li>
                                     <li><a href="mahsuplastirilacak-raporlar">Mahsuplaşma İşlemleri</a></li>
 

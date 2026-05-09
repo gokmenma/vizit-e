@@ -21,7 +21,7 @@ $uzunSureliRaporlar = []; // 3 günden uzun raporları tutmak için
 try {
     $sgkClient = new SgkViziteService();
     $raporModel = new RaporModel();
-    $tarih = $_POST["rapor_tarihi"];
+    $tarih = !empty($_POST["rapor_tarihi"]) ? $_POST["rapor_tarihi"] : date('Y-m-d');
 
     // 1. SGK'dan tüm onay bekleyen raporları çek
     // $tumRaporlar = $sgkClient->raporlariGetir(new DateTime('tomorrow'));
@@ -120,11 +120,6 @@ try {
                 </div>
 
                 <div class="col-lg-3 d-flex justify-content-end text-nowrap">
-
-                    <a href="tarihe-gore-rapor-ara"
-                        class="btn btn-raised btn-primary btn-round waves-effect float-right"><i
-                            class="zmdi zmdi-arrow-back"></i> Geri Dön</a>
-
                     <a href="onayli-rapor-ara"
                         class="btn btn-raised btn-primary btn-simple btn-round waves-effect float-right ms-2"><i
                             class="zmdi zmdi-check"></i> Onaylı Raporlar</a>
@@ -141,6 +136,18 @@ try {
                 </div>
             </div>
             <div class="body">
+                <!-- Tarih Seçimi ve Arama Butonu -->
+                <div class="row align-items-center mb-4">
+                    <div class="col-md-12">
+                        <form action="onay-bekleyen-raporlar" method="POST" class="d-flex align-items-center flex-wrap" style="gap: 15px;">
+                            <div class="form-group mb-0 d-flex align-items-center">
+                                <b style="margin-right: 10px; white-space: nowrap; color: #2c3e50;">Rapor Tarihi:</b>
+                                <input type="date" id="rapor_tarihi" name="rapor_tarihi" value="<?php echo htmlspecialchars($tarih); ?>" class="form-control mb-0" style="width: 170px; display: inline-block;">
+                            </div>
+                            <button type="submit" name="rapor_ara_buton" class="btn btn-primary btn-round waves-effect mb-0" style="padding: 8px 20px;"><i class="zmdi zmdi-search"></i> Rapor Ara</button>
+                        </form>
+                    </div>
+                </div>
 
                 <?php if ($hataMesaji): ?>
                     <div class="message-box error-box"><?php echo htmlspecialchars($hataMesaji); ?></div>

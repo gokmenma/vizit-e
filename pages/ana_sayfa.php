@@ -35,7 +35,7 @@
                 'button_text' => 'Görüntüle',
                 'button_class' => 'btn-warning',
                 'border_class' => 'border-warning',
-                'link' => 'tarihe-gore-rapor-ara'
+                'link' => 'onay-bekleyen-raporlar'
             ],
             [
                 'title' => 'Onaylanmış Raporlar',
