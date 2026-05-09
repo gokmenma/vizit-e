@@ -278,12 +278,10 @@ try {
                                 <div class="card mobile-rapor-card p-3 mb-4 border-0 shadow-sm <?php echo $is_future ? 'opacity-75' : ''; ?>" data-rapor='<?php echo htmlspecialchars(json_encode($rapor)); ?>' data-gun-farki="<?php echo $rapor['gun_farki']; ?>" style="border-radius: 12px; background: #fff; border: 1px solid <?php echo $is_future ? '#ffeeba' : '#eaeaea'; ?> !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;">
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between align-items-start">
-                                            <h6 class="font-weight-bold mb-1" style="font-size: 1.1rem; color: #2c3e50; font-weight: 700;"><?php echo htmlspecialchars($rapor['AD'] . ' ' . $rapor['SOYAD']); ?></h6>
+                                            <h6 class="font-weight-bold mb-0" style="font-size: 1.1rem; color: #2c3e50; font-weight: 700;"><?php echo htmlspecialchars($rapor['AD'] . ' ' . $rapor['SOYAD']); ?></h6>
                                             <span class="badge bg-primary text-white rounded-pill px-2.5 py-1" style="font-size: 0.7rem; font-weight: 600;"><?php echo htmlspecialchars($rapor['VAKAADI']); ?></span>
                                         </div>
-                                        <div class="text-muted small">
-                                            <i class="zmdi zmdi-account"></i> TC Kimlik: <strong><?php echo htmlspecialchars($rapor['TCKIMLIKNO']); ?></strong>
-                                        </div>
+                                        <span class="text-muted" style="font-size: 0.8rem;">TC: <?php echo htmlspecialchars($rapor['TCKIMLIKNO']); ?></span>
                                     </div>
 
                                     <div class="row text-center bg-light rounded p-2 mb-3 g-0">
@@ -296,13 +294,11 @@ try {
                                         </div>
                                         <div class="col-5">
                                             <div class="text-muted small" style="font-size: 0.75rem;">Bitiş</div>
-                                            <div class="font-weight-bold" style="color: #34495e; font-size: 0.9rem;"><?php echo htmlspecialchars($rapor['ABITTAR']); ?></div>
+                                            <div class="d-flex align-items-center justify-content-center gap-1">
+                                                <div class="font-weight-bold" style="color: #34495e; font-size: 0.9rem;"><?php echo htmlspecialchars($rapor['ABITTAR']); ?></div>
+                                                <span class="badge bg-danger text-white rounded-pill" style="font-size: 0.65rem; padding: 2px 5px;"><?php echo $rapor['gun_farki']; ?> G</span>
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="text-muted small"><i class="zmdi zmdi-calendar-check"></i> Rapor Süresi:</span>
-                                        <span class="badge bg-danger text-white rounded-pill px-2.5 py-1 font-weight-bold" style="font-size: 0.8rem;"><?php echo $rapor['gun_farki']; ?> Gün</span>
                                     </div>
 
                                     <div class="mb-3">
