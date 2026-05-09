@@ -275,19 +275,12 @@ try {
                                 } catch (Exception $e) {}
                                 $disabled_attr = $is_future ? 'disabled title="Rapor süresi henüz dolmadı"' : '';
                             ?>
-                                <div class="card mobile-rapor-card p-3 mb-4 border-0 shadow-sm" data-rapor='<?php echo htmlspecialchars(json_encode($rapor)); ?>' data-gun-farki="<?php echo $rapor['gun_farki']; ?>" style="border-radius: 12px; background: #fff; border: 1px solid #eaeaea !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div class="d-flex gap-1 align-items-center">
-                                            <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">Sıra: <?php echo $mi; ?></span>
-                                            <?php if ($is_future): ?>
-                                                <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill" style="font-size: 0.65rem;"><i class="zmdi zmdi-time"></i> Beklemede</span>
-                                            <?php endif; ?>
-                                        </div>
-                                        <span class="badge bg-primary text-white rounded-pill px-3 py-1.5" style="font-size: 0.75rem; font-weight: 600;"><?php echo htmlspecialchars($rapor['VAKAADI']); ?></span>
-                                    </div>
-                                    
+                                <div class="card mobile-rapor-card p-3 mb-4 border-0 shadow-sm <?php echo $is_future ? 'opacity-75' : ''; ?>" data-rapor='<?php echo htmlspecialchars(json_encode($rapor)); ?>' data-gun-farki="<?php echo $rapor['gun_farki']; ?>" style="border-radius: 12px; background: #fff; border: 1px solid <?php echo $is_future ? '#ffeeba' : '#eaeaea'; ?> !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;">
                                     <div class="mb-3">
-                                        <h6 class="font-weight-bold mb-1" style="font-size: 1.1rem; color: #2c3e50; font-weight: 700;"><?php echo htmlspecialchars($rapor['AD'] . ' ' . $rapor['SOYAD']); ?></h6>
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <h6 class="font-weight-bold mb-1" style="font-size: 1.1rem; color: #2c3e50; font-weight: 700;"><?php echo htmlspecialchars($rapor['AD'] . ' ' . $rapor['SOYAD']); ?></h6>
+                                            <span class="badge bg-primary text-white rounded-pill px-2.5 py-1" style="font-size: 0.7rem; font-weight: 600;"><?php echo htmlspecialchars($rapor['VAKAADI']); ?></span>
+                                        </div>
                                         <div class="text-muted small">
                                             <i class="zmdi zmdi-account"></i> TC Kimlik: <strong><?php echo htmlspecialchars($rapor['TCKIMLIKNO']); ?></strong>
                                         </div>
