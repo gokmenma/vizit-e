@@ -142,29 +142,19 @@ try {
                         background: #fdfdfd;
                         border: 1px solid #eaeaea;
                         border-radius: 16px;
-                        padding: 20px;
+                        padding: 15px 20px;
                         box-shadow: 0 4px 20px rgba(0,0,0,0.02);
                         margin-bottom: 25px;
                     }
                     .search-form-layout {
                         margin-bottom: 0;
                     }
-                    .date-input-wrapper {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 6px;
-                    }
                     .date-label-style {
                         font-weight: 700;
                         color: #34495e;
-                        font-size: 0.9rem;
+                        font-size: 0.95rem;
+                        margin-right: 15px;
                         margin-bottom: 0;
-                    }
-                    .input-with-button {
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                        width: 100%;
                     }
                     .custom-date-input {
                         height: 46px !important;
@@ -200,10 +190,6 @@ try {
                         border-color: #1a252f !important;
                         transform: translateY(-1px) !important;
                         box-shadow: 0 5px 15px rgba(44,62,80,0.25) !important;
-                    }
-                    .export-buttons-layout {
-                        display: inline-flex;
-                        gap: 12px;
                     }
                     .custom-export-btn {
                         height: 46px !important;
@@ -243,12 +229,26 @@ try {
                     @media (max-width: 991px) {
                         .filter-card {
                             padding: 16px;
+                            flex-direction: column !important;
+                            align-items: stretch !important;
+                            gap: 15px !important;
+                        }
+                        .search-form-layout {
+                            flex-direction: column !important;
+                            align-items: stretch !important;
+                            width: 100% !important;
+                            gap: 10px !important;
+                        }
+                        .date-label-style {
+                            margin-bottom: 0 !important;
+                            margin-right: 0 !important;
                         }
                         .input-with-button {
                             display: flex !important;
                             flex-direction: row !important;
                             align-items: center !important;
                             gap: 10px;
+                            width: 100% !important;
                         }
                         .custom-date-input {
                             flex: 1 !important;
@@ -262,7 +262,6 @@ try {
                             display: flex;
                             width: 100%;
                             gap: 10px;
-                            margin-top: 15px;
                         }
                         .custom-export-btn {
                             flex: 1 !important;
@@ -273,37 +272,29 @@ try {
                 </style>
 
                 <!-- Tarih Seçimi, Arama ve Dışa Aktarma Elemanları -->
-                <div class="filter-card">
-                    <div class="row align-items-center">
-                        <!-- Sol Taraf: Arama Formu -->
-                        <div class="col-lg-8 col-md-12">
-                            <form action="onay-bekleyen-raporlar" method="POST" class="search-form-layout">
-                                <div class="date-input-wrapper">
-                                    <label for="rapor_tarihi" class="date-label-style">Rapor Tarihi</label>
-                                    <div class="input-with-button">
-                                        <input type="date" id="rapor_tarihi" name="rapor_tarihi" value="<?php echo htmlspecialchars($tarih); ?>" class="form-control custom-date-input">
-                                        <button type="submit" name="rapor_ara_buton" class="btn btn-primary btn-round waves-effect custom-search-btn">
-                                            <i class="zmdi zmdi-search" style="font-size: 1.2rem;"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+                <div class="filter-card d-flex align-items-center justify-content-between flex-wrap">
+                    <!-- Sol Taraf: Arama Formu -->
+                    <form action="onay-bekleyen-raporlar" method="POST" class="search-form-layout d-flex align-items-center flex-wrap" style="gap: 15px;">
+                        <label for="rapor_tarihi" class="date-label-style">Rapor Tarihi</label>
+                        <div class="input-with-button d-flex align-items-center" style="gap: 10px;">
+                            <input type="date" id="rapor_tarihi" name="rapor_tarihi" value="<?php echo htmlspecialchars($tarih); ?>" class="form-control custom-date-input">
+                            <button type="submit" name="rapor_ara_buton" class="btn btn-primary btn-round waves-effect custom-search-btn">
+                                <i class="zmdi zmdi-search" style="font-size: 1.2rem;"></i>
+                            </button>
                         </div>
+                    </form>
 
-                        <!-- Sağ Taraf: Excel / PDF Butonları (Tablo verisi varsa gösterilir) -->
-                        <?php if (!empty($raporlar)): ?>
-                            <div class="col-lg-4 col-md-12 text-lg-right text-center mt-3 mt-lg-0">
-                                <div class="export-buttons-layout">
-                                    <button type="button" id="export-excel" class="btn btn-outline-primary btn-round waves-effect custom-export-btn">
-                                        <i class="zmdi zmdi-file-text"></i> Excel'e Aktar
-                                    </button>
-                                    <button type="button" id="export-pdf" class="btn btn-danger btn-round waves-effect custom-export-btn">
-                                        <i class="zmdi zmdi-file"></i> PDF'e Aktar
-                                    </button>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+                    <!-- Sağ Taraf: Excel / PDF Butonları (Tablo verisi varsa gösterilir) -->
+                    <?php if (!empty($raporlar)): ?>
+                        <div class="export-buttons-layout d-flex align-items-center" style="gap: 12px;">
+                            <button type="button" id="export-excel" class="btn btn-outline-primary btn-round waves-effect custom-export-btn">
+                                <i class="zmdi zmdi-file-text"></i> Excel'e Aktar
+                            </button>
+                            <button type="button" id="export-pdf" class="btn btn-danger btn-round waves-effect custom-export-btn">
+                                <i class="zmdi zmdi-file"></i> PDF'e Aktar
+                            </button>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <?php if ($hataMesaji): ?>
