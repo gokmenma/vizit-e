@@ -111,22 +111,24 @@ XML;
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: text/xml; charset=utf-8',
             'Content-Length: ' . $xml_len,
-            'SOAPAction: ' . $soapAction,
+            'SOAPAction: ""',
             'Expect:',
+            'Connection: close'
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 150);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) SGK-Vizite-Client/1.1');
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) SGK-Vizite-Client/1.2');
         curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
         curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
-        curl_setopt($ch, CURLOPT_ENCODING, ''); // Gzip/Deflate desteği ekle
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($ch, CURLOPT_ENCODING, ''); 
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); // KRİTİK: HTTP 1.0 Zorlaması
+        curl_setopt($ch, CURLOPT_BUFFERSIZE, 64000); // Daha büyük tampon bellek
 
         $responseXml = curl_exec($ch);
 
