@@ -106,9 +106,11 @@ XML;
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_request);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $xml_len = mb_strlen($xml_request, '8bit');
+
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: text/xml; charset=utf-8',
-            'Content-Length: ' . strlen($xml_request),
+            'Content-Length: ' . $xml_len,
             'SOAPAction: ' . $soapAction,
             'Expect:',
         ]);
@@ -117,17 +119,22 @@ XML;
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) SGK-Vizite-Client/1.0');
+        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) SGK-Vizite-Client/1.1');
         curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
         curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
+        curl_setopt($ch, CURLOPT_ENCODING, ''); // Gzip/Deflate desteği ekle
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
         $responseXml = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            throw new Exception("cURL Hatası: " . curl_error($ch));
+            $errNo = curl_errno($ch);
+            $errMsg = curl_error($ch);
+            curl_close($ch);
+            throw new Exception("cURL Hatası ({$errNo}): {$errMsg} (Method: {$methodName})");
         }
         curl_close($ch);
 
