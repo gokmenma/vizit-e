@@ -78,7 +78,10 @@ class SgkViziteService
     }
 
     /**
-     * Tüm SOAP isteklerini yapan merkezi cURL fonksiyonu. (Geliştirilmiş Versiyon)
+     * Tüm SOAP isteklerini yapan merkezi fonksiyon.
+     * file_get_contents + stream_context kullanır.
+     * SGK sunucusu büyük cevaplarda bağlantıyı protokole uygun kapatmadığı için
+     * cURL hata 56 verir. file_get_contents buna tolerans gösterir.
      */
     private function sendRequest($methodName, $params)
     {
@@ -98,47 +101,31 @@ class SgkViziteService
 </SOAP-ENV:Envelope>
 XML;
 
-        // SOAPAction başlığı her zaman metot adını içermeli
-        $soapAction = "\"{$methodName}\"";
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->serviceUrl);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_request);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $xml_len = mb_strlen($xml_request, '8bit');
-
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: text/xml; charset=utf-8',
-            'Content-Length: ' . $xml_len,
-            'SOAPAction: ""',
-            'Expect:',
-            'Connection: close'
+        $streamContext = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: text/xml; charset=utf-8\r\n" .
+                            "SOAPAction: \"\"\r\n" .
+                            "Connection: close\r\n",
+                'content' => $xml_request,
+                'timeout' => 180,
+                'ignore_errors' => true,
+            ],
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true,
+                'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
+            ]
         ]);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 150);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) SGK-Vizite-Client/1.2');
-        curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-        curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
-        curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
-        curl_setopt($ch, CURLOPT_ENCODING, ''); 
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); // KRİTİK: HTTP 1.0 Zorlaması
-        curl_setopt($ch, CURLOPT_BUFFERSIZE, 64000); // Daha büyük tampon bellek
 
-        $responseXml = curl_exec($ch);
+        $responseXml = @file_get_contents($this->serviceUrl, false, $streamContext);
 
-        if (curl_errno($ch)) {
-            $errNo = curl_errno($ch);
-            $errMsg = curl_error($ch);
-            curl_close($ch);
-            throw new Exception("cURL Hatası ({$errNo}): {$errMsg} (Method: {$methodName})");
+        if ($responseXml === false) {
+            $lastErr = error_get_last();
+            $errMsg = $lastErr['message'] ?? 'Bilinmeyen bağlantı hatası';
+            throw new Exception("Bağlantı Hatası: {$errMsg} (Method: {$methodName})");
         }
-        curl_close($ch);
 
         // Cevap boşsa veya bir HTML hata sayfasıysa
         if (empty($responseXml) || strpos(trim($responseXml), '<') !== 0) {
@@ -146,7 +133,7 @@ XML;
         }
 
         // Gelen XML'i parse edip obje haline getirelim (Daha sağlam bir yöntemle)
-        $responseXml = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $responseXml);
+        $responseXml = preg_replace("/(\<\/?)(\w+)\:([^\>]*\>)/", "$1$2$3", $responseXml);
         libxml_use_internal_errors(true); // XML hatalarını yakalamak için
         $xml = simplexml_load_string($responseXml);
 
