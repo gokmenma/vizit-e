@@ -405,8 +405,9 @@ $userModel = new \Models\UserModel();
         App.DataTable.search('campaign-search', '.campaign-row', '.campaign-title');
     }
 
-    let selectedUsers = new Map();
-    let currentTargetMode = 'filter';
+    var selectedUsers = window.selectedUsers || new Map();
+    window.selectedUsers = selectedUsers;
+    var currentTargetMode = 'filter';
 
     function openAddModal() {
         document.getElementById('add-campaign-form').reset();
