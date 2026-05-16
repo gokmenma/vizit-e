@@ -13,7 +13,7 @@ $userModel = new \Models\UserModel();
             <h1 style="font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;">Kampanya Yönetimi</h1>
             <p style="color: var(--muted-foreground); font-size: 0.875rem; margin-top: 0.25rem;">Kullanıcılara yönelik e-posta kampanyaları oluşturun ve yönetin.</p>
         </div>
-        <button class="btn btn-primary" onclick="openAddModal()">
+        <button class="btn btn-primary" onclick="window.CampaignApp.openAddModal()">
             <i data-lucide="plus" style="width: 16px;"></i> Yeni Kampanya Oluştur
         </button>
     </div>
@@ -28,7 +28,7 @@ $userModel = new \Models\UserModel();
             <div class="dt-actions">
                 <div class="dt-search-wrapper">
                     <i data-lucide="search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 16px; color: #71717a; z-index: 10;"></i>
-                    <input type="text" id="campaign-search" class="dt-search-input" placeholder="Kampanya ara..." onkeyup="searchTable()">
+                    <input type="text" id="campaign-search" class="dt-search-input" placeholder="Kampanya ara..." onkeyup="window.CampaignApp.searchTable()">
                 </div>
             </div>
         </div>
@@ -108,23 +108,23 @@ $userModel = new \Models\UserModel();
                         <td style="color: var(--muted-foreground); font-size: 0.8125rem;"><?php echo date('d.m.Y H:i', strtotime($camp->created_at)); ?></td>
                         <td style="text-align: right;">
                             <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
-                                <button class="btn btn-ghost btn-sm" title="Gönderim Logları" onclick="viewLogs(<?php echo $camp->id; ?>, '<?php echo htmlspecialchars($camp->title); ?>')">
+                                <button class="btn btn-ghost btn-sm" title="Gönderim Logları" onclick="window.CampaignApp.viewLogs(<?php echo $camp->id; ?>, '<?php echo htmlspecialchars($camp->title); ?>')">
                                     <i data-lucide="history" style="width: 14px;"></i>
                                 </button>
                                 <?php if ($camp->status === 'completed'): ?>
-                                <button class="btn btn-ghost btn-sm" title="Yeniden Gönder (Aynı Hedef)" style="color: #6366f1;" onclick="confirmResend(<?php echo $camp->id; ?>)">
+                                <button class="btn btn-ghost btn-sm" title="Yeniden Gönder (Aynı Hedef)" style="color: #6366f1;" onclick="window.CampaignApp.confirmResend(<?php echo $camp->id; ?>)">
                                     <i data-lucide="rotate-ccw" style="width: 14px;"></i>
                                 </button>
                                 <?php endif; ?>
-                                <button class="btn btn-ghost btn-sm" title="Düzenle" onclick="editCampaign(<?php echo $camp->id; ?>)">
+                                <button class="btn btn-ghost btn-sm" title="Düzenle" onclick="window.CampaignApp.editCampaign(<?php echo $camp->id; ?>)">
                                     <i data-lucide="edit-3" style="width: 14px;"></i>
                                 </button>
                                 <?php if ($camp->status === 'draft' || $camp->status === 'failed'): ?>
-                                <button class="btn btn-ghost btn-sm" title="Gönderimi Başlat" style="color: #16a34a;" onclick="confirmSend(<?php echo $camp->id; ?>)">
+                                <button class="btn btn-ghost btn-sm" title="Gönderimi Başlat" style="color: #16a34a;" onclick="window.CampaignApp.confirmSend(<?php echo $camp->id; ?>)">
                                     <i data-lucide="send" style="width: 14px;"></i>
                                 </button>
                                 <?php endif; ?>
-                                <button class="btn btn-ghost btn-sm" title="Sil" style="color: #ef4444;" onclick="confirmDelete(<?php echo $camp->id; ?>)">
+                                <button class="btn btn-ghost btn-sm" title="Sil" style="color: #ef4444;" onclick="window.CampaignApp.confirmDelete(<?php echo $camp->id; ?>)">
                                     <i data-lucide="trash-2" style="width: 14px;"></i>
                                 </button>
                             </div>
@@ -149,7 +149,7 @@ $userModel = new \Models\UserModel();
             </h2>
             <button onclick="document.getElementById('add-campaign-modal').close()" class="modal-close-btn"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
-        <form id="add-campaign-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitAddCampaign(this);">
+        <form id="add-campaign-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); window.CampaignApp.submitAddCampaign(this);">
             <input type="hidden" name="id" id="campaign-id" value="">
             <div class="form-group">
                 <label class="form-label">Kampanya Başlığı (E-posta Konusu)</label>
@@ -157,9 +157,9 @@ $userModel = new \Models\UserModel();
             </div>
             
             <div class="dt-tabs" style="margin-bottom: 0.5rem; background: var(--muted); padding: 0.25rem; border-radius: 8px; align-self: flex-start;">
-                <button type="button" class="dt-tab active" id="tab-filter" onclick="switchTargetMode('filter')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Filtreleme Kullan</button>
-                <button type="button" class="dt-tab" id="tab-users" onclick="switchTargetMode('users')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Kullanıcı Seç</button>
-                <button type="button" class="dt-tab" id="tab-manual" onclick="switchTargetMode('manual')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Manuel Giriş</button>
+                <button type="button" class="dt-tab active" id="tab-filter" onclick="window.CampaignApp.switchTargetMode('filter')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Filtreleme Kullan</button>
+                <button type="button" class="dt-tab" id="tab-users" onclick="window.CampaignApp.switchTargetMode('users')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Kullanıcı Seç</button>
+                <button type="button" class="dt-tab" id="tab-manual" onclick="window.CampaignApp.switchTargetMode('manual')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Manuel Giriş</button>
             </div>
 
             <div id="target-mode-filter" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -218,7 +218,7 @@ $userModel = new \Models\UserModel();
                                     $allUsers = $userModel->AktifKullanicilarAltKullanici();
                                     foreach($allUsers as $u): 
                                 ?>
-                                <div class="select-option" data-value="<?php echo $u->id; ?>" data-name="<?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?>" onclick="addUserToSelection(this)">
+                                <div class="select-option" data-value="<?php echo $u->id; ?>" data-name="<?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?>" onclick="window.CampaignApp.addUserToSelection(this)">
                                     <div style="display: flex; flex-direction: column;">
                                         <span style="font-weight: 500;"><?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?></span>
                                         <span style="font-size: 0.7rem; color: #71717a;"><?php echo $u->email; ?></span>
@@ -246,7 +246,7 @@ $userModel = new \Models\UserModel();
             <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                     <label class="form-label" style="margin: 0;">E-posta İçeriği</label>
-                    <button type="button" class="btn btn-ghost btn-sm" onclick="previewEmail()" style="height: 28px; padding: 0 0.5rem; font-size: 0.75rem;">
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.CampaignApp.previewEmail()" style="height: 28px; padding: 0 0.5rem; font-size: 0.75rem;">
                         <i data-lucide="eye" style="width: 14px;"></i> Önizleme
                     </button>
                 </div>
@@ -320,402 +320,311 @@ $userModel = new \Models\UserModel();
 
 <style>
     /* Standard Modal UI */
-    .modal-dialog { 
-        padding: 0; 
-        border: none; 
-        border-radius: 12px; 
-        box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); 
-        overflow: hidden; 
-        background: var(--card);
-    }
-    .modal-header { 
-        padding: 1.5rem; 
-        border-bottom: 1px solid var(--border); 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        background: var(--card); 
-    }
+    .modal-dialog { padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); overflow: hidden; background: var(--card); }
+    .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card); }
     .modal-close-btn { background: none; border: none; cursor: pointer; color: #71717a; display: flex; align-items: center; }
-    .modal-body-scrollable { 
-        max-height: 600px; 
-        overflow-y: auto; 
-        overflow-x: hidden;
-        border-bottom-left-radius: 12px; 
-        border-bottom-right-radius: 12px; 
-    }
-
+    .modal-body-scrollable { max-height: 600px; overflow-y: auto; overflow-x: hidden; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
     .dt-tab { border: none; background: transparent; cursor: pointer; color: var(--muted-foreground); transition: all 0.2s; }
     .dt-tab.active { background: var(--card) !important; color: var(--foreground) !important; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); }
-    
-    .user-tag { 
-        display: inline-flex; 
-        align-items: center; 
-        gap: 0.25rem; 
-        padding: 0.25rem 0.6rem; 
-        background: var(--primary); 
-        color: var(--primary-foreground); 
-        border-radius: 4px; 
-        font-size: 0.75rem; 
-        font-weight: 500;
-        transition: all 0.2s;
-    }
+    .user-tag { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.6rem; background: var(--primary); color: var(--primary-foreground); border-radius: 4px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s; }
     .user-tag button { background: none; border: none; cursor: pointer; padding: 0; color: inherit; opacity: 0.7; display: flex; align-items: center; }
     .user-tag button:hover { opacity: 1; }
-    
     #user-options-list .select-option.hidden { display: none !important; }
-
     .modal-body-scrollable table { width: 100% !important; table-layout: fixed; }
-    .modal-body-scrollable td, .modal-body-scrollable th { 
-        overflow: hidden; 
-        text-overflow: ellipsis; 
-        white-space: nowrap; 
-    }
+    .modal-body-scrollable td, .modal-body-scrollable th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
 
 <script>
-    function initSummernote() {
-        if (typeof $ === 'undefined' || !$.fn.summernote) {
-            setTimeout(initSummernote, 100);
-            return;
-        }
-        $('#campaign-content').summernote({
-            placeholder: 'E-posta içeriğini buraya yazın...',
-            tabsize: 2,
-            height: 300,
-            toolbar: [
-                ['style', ['style']],
-                ['font', ['bold', 'underline', 'clear']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['table', ['table']],
-                ['insert', ['link', 'picture', 'video']],
-                ['view', ['fullscreen', 'codeview', 'help']]
-            ]
-        });
-    }
+(function() {
+    // SPA Scope Isolation
+    const selectedUsers = new Map();
+    let currentTargetMode = 'filter';
 
-    initSummernote();
-
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-
-    function searchTable() {
-        App.DataTable.search('campaign-search', '.campaign-row', '.campaign-title');
-    }
-
-    var selectedUsers = window.selectedUsers || new Map();
-    window.selectedUsers = selectedUsers;
-    var currentTargetMode = 'filter';
-
-    function openAddModal() {
-        document.getElementById('add-campaign-form').reset();
-        document.getElementById('campaign-id').value = '';
-        $('#campaign-content').summernote('code', '');
-        document.getElementById('modal-title').innerHTML = '<i data-lucide="megaphone" style="width: 20px;"></i> Yeni Kampanya Oluştur';
-        selectedUsers.clear();
-        renderUserTags();
-        switchTargetMode('filter');
-        document.getElementById('add-campaign-modal').showModal();
-        if (window.lucide) lucide.createIcons();
-    }
-
-    function switchTargetMode(mode) {
-        currentTargetMode = mode;
-        document.getElementById('tab-filter').classList.toggle('active', mode === 'filter');
-        document.getElementById('tab-users').classList.toggle('active', mode === 'users');
-        document.getElementById('tab-manual').classList.toggle('active', mode === 'manual');
-        
-        document.getElementById('target-mode-filter').style.display = (mode === 'filter' ? 'grid' : 'none');
-        document.getElementById('target-mode-users').style.display = (mode === 'users' ? 'block' : 'none');
-        document.getElementById('target-mode-manual').style.display = (mode === 'manual' ? 'block' : 'none');
-
-        if (mode === 'users' && !App.initializedCustomSelects_Users) {
-            App.initCustomSelects(document.getElementById('target-mode-users'));
-            App.initializedCustomSelects_Users = true;
-        }
-    }
-
-    function addUserToSelection(option) {
-        const id = option.dataset.value;
-        const name = option.dataset.name;
-        if (selectedUsers.has(id)) return;
-        selectedUsers.set(id, name);
-        option.classList.add('hidden');
-        renderUserTags();
-    }
-
-    function removeUserFromSelection(id) {
-        selectedUsers.delete(id.toString());
-        const option = document.querySelector(`#user-options-list .select-option[data-value="${id}"]`);
-        if (option) option.classList.remove('hidden');
-        renderUserTags();
-    }
-
-    function renderUserTags() {
-        const container = document.getElementById('selected-users-tags');
-        const inputsContainer = document.getElementById('user-ids-inputs');
-        container.innerHTML = '';
-        inputsContainer.innerHTML = '';
-        
-        selectedUsers.forEach((name, id) => {
-            const tag = document.createElement('div');
-            tag.className = 'user-tag';
-            tag.innerHTML = `<span>${name}</span><button type="button" onclick="removeUserFromSelection(${id})"><i data-lucide="x" style="width:12px;"></i></button>`;
-            container.appendChild(tag);
-            
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'criteria[user_ids][]';
-            input.value = id;
-            inputsContainer.appendChild(input);
-        });
-        
-        if (window.lucide) lucide.createIcons();
-    }
-
-    async function editCampaign(id) {
-        try {
-            const response = await fetch(`kampanya-detay?id=${id}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    const CampaignApp = {
+        initSummernote: function() {
+            if (typeof $ === 'undefined' || !$.fn.summernote) {
+                setTimeout(this.initSummernote.bind(this), 100);
+                return;
+            }
+            $('#campaign-content').summernote({
+                placeholder: 'E-posta içeriğini buraya yazın...',
+                tabsize: 2,
+                height: 300,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ]
             });
-            const result = await response.json();
+        },
+
+        searchTable: function() {
+            App.DataTable.search('campaign-search', '.campaign-row', '.campaign-title');
+        },
+
+        openAddModal: function() {
+            document.getElementById('add-campaign-form').reset();
+            document.getElementById('campaign-id').value = '';
+            $('#campaign-content').summernote('code', '');
+            document.getElementById('modal-title').innerHTML = '<i data-lucide="megaphone" style="width: 20px;"></i> Yeni Kampanya Oluştur';
+            selectedUsers.clear();
+            this.renderUserTags();
+            this.switchTargetMode('filter');
+            document.getElementById('add-campaign-modal').showModal();
+            if (window.lucide) lucide.createIcons();
+        },
+
+        switchTargetMode: function(mode) {
+            currentTargetMode = mode;
+            document.getElementById('tab-filter').classList.toggle('active', mode === 'filter');
+            document.getElementById('tab-users').classList.toggle('active', mode === 'users');
+            document.getElementById('tab-manual').classList.toggle('active', mode === 'manual');
             
-            if (result.status === 'success') {
-                const data = result.data;
-                document.getElementById('campaign-id').value = data.id;
-                document.getElementById('campaign-title').value = data.title;
-                $('#campaign-content').summernote('code', data.content);
-                document.getElementById('modal-title').innerHTML = '<i data-lucide="edit-3" style="width: 20px;"></i> Kampanyayı Düzenle';
+            document.getElementById('target-mode-filter').style.display = (mode === 'filter' ? 'grid' : 'none');
+            document.getElementById('target-mode-users').style.display = (mode === 'users' ? 'block' : 'none');
+            document.getElementById('target-mode-manual').style.display = (mode === 'manual' ? 'block' : 'none');
+
+            if (mode === 'users' && !App.initializedCustomSelects_Users) {
+                App.initCustomSelects(document.getElementById('target-mode-users'));
+                App.initializedCustomSelects_Users = true;
+            }
+        },
+
+        addUserToSelection: function(option) {
+            const id = option.dataset.value;
+            const name = option.dataset.name;
+            if (selectedUsers.has(id)) return;
+            selectedUsers.set(id, name);
+            option.classList.add('hidden');
+            this.renderUserTags();
+        },
+
+        removeUserFromSelection: function(id) {
+            selectedUsers.delete(id.toString());
+            const option = document.querySelector(`#user-options-list .select-option[data-value="${id}"]`);
+            if (option) option.classList.remove('hidden');
+            this.renderUserTags();
+        },
+
+        renderUserTags: function() {
+            const container = document.getElementById('selected-users-tags');
+            const inputsContainer = document.getElementById('user-ids-inputs');
+            container.innerHTML = '';
+            inputsContainer.innerHTML = '';
+            
+            selectedUsers.forEach((name, id) => {
+                const tag = document.createElement('div');
+                tag.className = 'user-tag';
+                tag.innerHTML = `<span>${name}</span><button type="button" onclick="window.CampaignApp.removeUserFromSelection(${id})"><i data-lucide="x" style="width:12px;"></i></button>`;
+                container.appendChild(tag);
                 
-                selectedUsers.clear();
-                document.querySelectorAll('#user-options-list .select-option').forEach(opt => opt.classList.remove('hidden'));
-
-                if (data.criteria.user_ids) {
-                    switchTargetMode('users');
-                    if (data.selected_users_data) {
-                        data.selected_users_data.forEach(u => {
-                            selectedUsers.set(u.id.toString(), u.name);
-                            const opt = document.querySelector(`#user-options-list .select-option[data-value="${u.id}"]`);
-                            if (opt) opt.classList.add('hidden');
-                        });
-                    }
-                    renderUserTags();
-                } else if (data.criteria.manual_emails) {
-                    switchTargetMode('manual');
-                    document.getElementById('manual-emails').value = data.criteria.manual_emails;
-                } else {
-                    switchTargetMode('filter');
-                    updateSelect('criteria-status-select', data.criteria.status || '');
-                    updateSelect('criteria-paket-select', data.criteria.paket_id || '');
-                }
-                
-                document.getElementById('add-campaign-modal').showModal();
-                if (window.lucide) lucide.createIcons();
-            } else {
-                App.toast('error', 'Hata', result.message);
-            }
-        } catch (e) {
-            App.toast('error', 'Hata', 'Kampanya detayları yüklenemedi.');
-        }
-    }
-
-    function updateSelect(id, value) {
-        const select = document.getElementById(id);
-        const input = select.querySelector('input[type="hidden"]');
-        const label = select.querySelector('.select-label');
-        const options = select.querySelectorAll('.select-option');
-        
-        input.value = value;
-        options.forEach(opt => {
-            if (opt.dataset.value == value) {
-                label.textContent = opt.textContent;
-                opt.classList.add('selected');
-            } else {
-                opt.classList.remove('selected');
-            }
-        });
-    }
-
-    async function viewLogs(id, title) {
-        document.getElementById('log-campaign-title').textContent = title;
-        const tbody = document.getElementById('logs-tbody');
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Yükleniyor...</td></tr>';
-        document.getElementById('view-logs-modal').showModal();
-
-        try {
-            const response = await fetch(`kampanya-logs?id=${id}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'criteria[user_ids][]';
+                input.value = id;
+                inputsContainer.appendChild(input);
             });
-            const result = await response.json();
             
-            if (result.status === 'success') {
-                tbody.innerHTML = '';
-                if (result.logs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">Henüz gönderim kaydı yok.</td></tr>';
-                    return;
-                }
-                result.logs.forEach(log => {
-                    const row = document.createElement('tr');
-                    const statusClass = log.status === 'sent' ? 'badge-success' : (log.status === 'failed' ? 'badge-destructive' : 'badge-secondary');
-                    const name = (log.name == '0' || !log.name || log.name == 'Dış Alıcı') ? log.email.split('@')[0] : log.name;
-                    row.innerHTML = `
-                        <td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6;">${name}</td>
-                        <td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6;">${log.email}</td>
-                        <td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6;"><span class="badge ${statusClass}">${log.status}</span></td>
-                        <td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; font-size: 0.8rem;">${log.sent_at || '-'}</td>
-                        <td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; font-size: 0.75rem; color:#ef4444;">${log.error_message || '-'}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            }
-        } catch (e) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444;">Hata oluştu.</td></tr>';
-        }
-    }
+            if (window.lucide) lucide.createIcons();
+        },
 
-    function previewEmail() {
-        const content = $('#campaign-content').summernote('code');
-        const previewContent = content.replace(/{adi_soyadi}/g, '<strong>[Örnek Kullanıcı]</strong>');
-        document.getElementById('preview-content-frame').innerHTML = previewContent;
-        document.getElementById('preview-modal').showModal();
-    }
-
-    function showConfirm(title, description, onConfirm) {
-        document.getElementById('alert-title').textContent = title;
-        document.getElementById('alert-description').textContent = description;
-        const confirmBtn = document.getElementById('alert-confirm-btn');
-        const newConfirmBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-        newConfirmBtn.onclick = () => {
-            document.getElementById('alert-dialog').close();
-            onConfirm();
-        };
-        document.getElementById('alert-dialog').showModal();
-    }
-
-    async function submitAddCampaign(form) {
-        const submitBtn = document.getElementById('save-btn');
-        const originalText = submitBtn.innerHTML;
-        
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<div class="spinner"></div> Kaydediliyor...';
-
-        try {
-            const formData = new FormData(form);
-            formData.set('content', $('#campaign-content').summernote('code'));
-
-            if (currentTargetMode === 'filter') {
-                formData.delete('criteria[user_ids][]');
-                formData.delete('criteria[manual_emails]');
-            } else if (currentTargetMode === 'users') {
-                formData.delete('criteria[status]');
-                formData.delete('criteria[paket_id]');
-                formData.delete('criteria[manual_emails]');
-            } else {
-                formData.delete('criteria[status]');
-                formData.delete('criteria[paket_id]');
-                formData.delete('criteria[user_ids][]');
-            }
-
-            const response = await fetch('kampanya-kaydet', {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                body: formData
-            });
-
-            const resultStr = await response.text();
-            let result;
+        editCampaign: async function(id) {
             try {
-                const jsonMatch = resultStr.match(/{.*}/s);
-                result = JSON.parse(jsonMatch ? jsonMatch[0] : resultStr);
-            } catch(e) { throw new Error("Sunucu yanıtı anlaşılamadı."); }
+                const response = await fetch(`kampanya-detay?id=${id}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const data = result.data;
+                    document.getElementById('campaign-id').value = data.id;
+                    document.getElementById('campaign-title').value = data.title;
+                    $('#campaign-content').summernote('code', data.content);
+                    document.getElementById('modal-title').innerHTML = '<i data-lucide="edit-3" style="width: 20px;"></i> Kampanyayı Düzenle';
+                    
+                    selectedUsers.clear();
+                    document.querySelectorAll('#user-options-list .select-option').forEach(opt => opt.classList.remove('hidden'));
 
-            if (result.status === 'success') {
-                App.toast('success', 'Başarılı', result.message);
-                document.getElementById('add-campaign-modal').close();
-                setTimeout(() => App.refreshContent(), 500);
-            } else {
-                App.toast('error', 'Hata', result.message);
-            }
-        } catch (error) {
-            App.toast('error', 'Hata', error.message || 'Bir hata oluştu.');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        }
-    }
+                    if (data.criteria.user_ids) {
+                        this.switchTargetMode('users');
+                        if (data.selected_users_data) {
+                            data.selected_users_data.forEach(u => {
+                                selectedUsers.set(u.id.toString(), u.name);
+                                const opt = document.querySelector(`#user-options-list .select-option[data-value="${u.id}"]`);
+                                if (opt) opt.classList.add('hidden');
+                            });
+                        }
+                        this.renderUserTags();
+                    } else if (data.criteria.manual_emails) {
+                        this.switchTargetMode('manual');
+                        document.getElementById('manual-emails').value = data.criteria.manual_emails;
+                    } else {
+                        this.switchTargetMode('filter');
+                        this.updateSelect('criteria-status-select', data.criteria.status || '');
+                        this.updateSelect('criteria-paket-select', data.criteria.paket_id || '');
+                    }
+                    
+                    document.getElementById('add-campaign-modal').showModal();
+                    if (window.lucide) lucide.createIcons();
+                } else {
+                    App.toast('error', 'Hata', result.message);
+                }
+            } catch (e) { App.toast('error', 'Hata', 'Kampanya detayları yüklenemedi.'); }
+        },
 
-    function confirmResend(id) {
-        showConfirm(
-            'Yeniden Gönderilsin mi?', 
-            'Aynı hedef kitleye gönderim süreci tekrar başlatılacaktır. Eski loglar korunur.',
-            async () => {
+        updateSelect: function(id, value) {
+            const select = document.getElementById(id);
+            const input = select.querySelector('input[type="hidden"]');
+            const label = select.querySelector('.select-label');
+            const options = select.querySelectorAll('.select-option');
+            input.value = value;
+            options.forEach(opt => {
+                if (opt.dataset.value == value) {
+                    label.textContent = opt.textContent;
+                    opt.classList.add('selected');
+                } else { opt.classList.remove('selected'); }
+            });
+        },
+
+        viewLogs: async function(id, title) {
+            document.getElementById('log-campaign-title').textContent = title;
+            const tbody = document.getElementById('logs-tbody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Yükleniyor...</td></tr>';
+            document.getElementById('view-logs-modal').showModal();
+            try {
+                const response = await fetch(`kampanya-logs?id=${id}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    tbody.innerHTML = '';
+                    if (result.logs.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">Henüz gönderim kaydı yok.</td></tr>';
+                        return;
+                    }
+                    result.logs.forEach(log => {
+                        const row = document.createElement('tr');
+                        const statusClass = log.status === 'sent' ? 'badge-success' : (log.status === 'failed' ? 'badge-destructive' : 'badge-secondary');
+                        const name = (log.name == '0' || !log.name || log.name == 'Dış Alıcı') ? log.email.split('@')[0] : log.name;
+                        row.innerHTML = `<td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6;">${name}</td><td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6;">${log.email}</td><td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6;"><span class="badge ${statusClass}">${log.status}</span></td><td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; font-size: 0.8rem;">${log.sent_at || '-'}</td><td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; font-size: 0.75rem; color:#ef4444;">${log.error_message || '-'}</td>`;
+                        tbody.appendChild(row);
+                    });
+                }
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444;">Hata oluştu.</td></tr>'; }
+        },
+
+        previewEmail: function() {
+            const content = $('#campaign-content').summernote('code');
+            const previewContent = content.replace(/{adi_soyadi}/g, '<strong>[Örnek Kullanıcı]</strong>');
+            document.getElementById('preview-content-frame').innerHTML = previewContent;
+            document.getElementById('preview-modal').showModal();
+        },
+
+        showConfirm: function(title, description, onConfirm) {
+            document.getElementById('alert-title').textContent = title;
+            document.getElementById('alert-description').textContent = description;
+            const confirmBtn = document.getElementById('alert-confirm-btn');
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            newConfirmBtn.onclick = () => {
+                document.getElementById('alert-dialog').close();
+                onConfirm();
+            };
+            document.getElementById('alert-dialog').showModal();
+        },
+
+        submitAddCampaign: async function(form) {
+            const submitBtn = document.getElementById('save-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="spinner"></div> Kaydediliyor...';
+            try {
+                const formData = new FormData(form);
+                formData.set('content', $('#campaign-content').summernote('code'));
+                if (currentTargetMode === 'filter') {
+                    formData.delete('criteria[user_ids][]');
+                    formData.delete('criteria[manual_emails]');
+                } else if (currentTargetMode === 'users') {
+                    formData.delete('criteria[status]');
+                    formData.delete('criteria[paket_id]');
+                    formData.delete('criteria[manual_emails]');
+                } else {
+                    formData.delete('criteria[status]');
+                    formData.delete('criteria[paket_id]');
+                    formData.delete('criteria[user_ids][]');
+                }
+                const response = await fetch('kampanya-kaydet', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: formData });
+                const resultStr = await response.text();
+                let result;
+                try {
+                    const jsonMatch = resultStr.match(/{.*}/s);
+                    result = JSON.parse(jsonMatch ? jsonMatch[0] : resultStr);
+                } catch(e) { throw new Error("Sunucu yanıtı anlaşılamadı."); }
+                if (result.status === 'success') {
+                    App.toast('success', 'Başarılı', result.message);
+                    document.getElementById('add-campaign-modal').close();
+                    setTimeout(() => App.refreshContent(), 500);
+                } else { App.toast('error', 'Hata', result.message); }
+            } catch (error) { App.toast('error', 'Hata', error.message || 'Bir hata oluştu.'); }
+            finally { submitBtn.disabled = false; submitBtn.innerHTML = originalText; }
+        },
+
+        confirmResend: function(id) {
+            this.showConfirm('Yeniden Gönderilsin mi?', 'Aynı hedef kitleye gönderim süreci tekrar başlatılacaktır.', async () => {
                 App.toast('info', 'Bilgi', 'Gönderim hazırlanıyor...');
                 try {
                     const formData = new FormData();
                     formData.append('id', id);
-                    const response = await fetch('kampanya-kaydet', {
-                        method: 'POST',
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                        body: formData
-                    });
+                    const response = await fetch('kampanya-kaydet', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: formData });
                     const result = await response.json();
-                    if (result.status === 'success') startSending(id, true);
+                    if (result.status === 'success') this.startSending(id);
                 } catch (e) { App.toast('error', 'Hata', 'İşlem başarısız.'); }
-            }
-        );
-    }
-
-    function confirmSend(id) {
-        showConfirm(
-            'Gönderimi Başlat?', 
-            'Kampanya e-postaları belirlenen alıcılara gönderilmeye başlanacaktır.',
-            () => startSending(id)
-        );
-    }
-
-    async function startSending(id, isSkipConfirm = false) {
-        App.toast('info', 'Bilgi', 'Gönderim başlatılıyor, lütfen bekleyin...');
-        try {
-            const formData = new FormData();
-            formData.append('id', id);
-            const response = await fetch('kampanya-gonder', {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                body: formData
             });
-            const result = await response.json();
-            if (result.status === 'success') {
-                App.toast('success', 'Başarılı', result.message);
-                App.refreshContent();
-            } else { App.toast('error', 'Hata', result.message); }
-        } catch (error) { App.toast('error', 'Hata', 'Bir hata oluştu.'); }
-    }
+        },
 
-    function confirmDelete(id) {
-        showConfirm(
-            'Silmek istediğinize emin misiniz?', 
-            'Bu kampanya ve tüm gönderim kayıtları kalıcı olarak silinecektir.',
-            () => deleteCampaign(id)
-        );
-    }
+        confirmSend: function(id) {
+            this.showConfirm('Gönderimi Başlat?', 'Kampanya e-postaları belirlenen alıcılara gönderilmeye başlanacaktır.', () => this.startSending(id));
+        },
 
-    async function deleteCampaign(id) {
-        try {
-            const formData = new FormData();
-            formData.append('id', id);
-            const response = await fetch('kampanya-sil', {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                body: formData
-            });
-            const result = await response.json();
-            if (result.status === 'success') {
-                App.toast('success', 'Başarılı', result.message);
-                App.refreshContent();
-            } else { App.toast('error', 'Hata', result.message); }
-        } catch (error) { App.toast('error', 'Hata', 'Bir hata oluştu.'); }
-    }
+        startSending: async function(id) {
+            App.toast('info', 'Bilgi', 'Gönderim başlatılıyor, lütfen bekleyin...');
+            try {
+                const formData = new FormData();
+                formData.append('id', id);
+                const response = await fetch('kampanya-gonder', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: formData });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    App.toast('success', 'Başarılı', result.message);
+                    App.refreshContent();
+                } else { App.toast('error', 'Hata', result.message); }
+            } catch (error) { App.toast('error', 'Hata', 'Bir hata oluştu.'); }
+        },
+
+        confirmDelete: function(id) {
+            this.showConfirm('Silmek istediğinize emin misiniz?', 'Bu kampanya kalıcı olarak silinecektir.', () => this.deleteCampaign(id));
+        },
+
+        deleteCampaign: async function(id) {
+            try {
+                const formData = new FormData();
+                formData.append('id', id);
+                const response = await fetch('kampanya-sil', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: formData });
+                const result = await response.json();
+                if (result.status === 'success') { App.toast('success', 'Başarılı', result.message); App.refreshContent(); }
+                else { App.toast('error', 'Hata', result.message); }
+            } catch (error) { App.toast('error', 'Hata', 'Bir hata oluştu.'); }
+        }
+    };
+
+    // Global Expose
+    window.CampaignApp = CampaignApp;
+    
+    // Initial calls
+    CampaignApp.initSummernote();
+    if (window.lucide) lucide.createIcons();
+})();
 </script>

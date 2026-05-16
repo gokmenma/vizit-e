@@ -1792,3 +1792,9 @@
 21:52:11 - admin.vizite.com - /kampanyalar
 21:52:21 - admin.vizite.com - /kampanya-kaydet
 21:52:34 - admin.vizite.com - /kampanya-logs?id=2
+22:02:02 - admin.vizite.com - /kampanyalar
+22:02:11 - admin.vizite.com - /kampanyalar
+22:02:12 - admin.vizite.com - /favicon.ico
+22:02:19 - admin.vizite.com - /kampanyalar
+22:02:22 - admin.vizite.com - /kampanya-logs?id=2
+22:02:26 - admin.vizite.com - /kampanya-kaydet
