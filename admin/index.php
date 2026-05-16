@@ -99,6 +99,9 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     </script>
 </head>
 <body class="theme-light">
+    <!-- Toaster Container for Basecoat (Moved to top for better accessibility by scripts) -->
+    <div id="toaster" class="toaster" data-align="end" popover="manual"></div>
+
     <aside class="sidebar" data-side="left" aria-hidden="false">
         <nav aria-label="Sidebar navigation">
             <header class="sidebar-header">
@@ -262,7 +265,5 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
         // Initial icon render
         lucide.createIcons();
     </script>
-    <!-- Toaster Container for Basecoat -->
-    <div id="toaster" class="toaster" data-align="end" popover="manual"></div>
 </body>
 </html>

@@ -1798,3 +1798,17 @@
 22:02:19 - admin.vizite.com - /kampanyalar
 22:02:22 - admin.vizite.com - /kampanya-logs?id=2
 22:02:26 - admin.vizite.com - /kampanya-kaydet
+22:03:10 - admin.vizite.com - /dashboard
+22:03:12 - admin.vizite.com - /kullanicilar
+22:03:14 - admin.vizite.com - /alt-kullanicilar
+22:03:15 - admin.vizite.com - /dashboard
+22:03:16 - admin.vizite.com - /kullanicilar
+22:03:18 - admin.vizite.com - /alt-kullanicilar
+22:03:20 - admin.vizite.com - /paketler
+22:08:16 - admin.vizite.com - /dashboard
+22:08:17 - admin.vizite.com - /kampanyalar
+22:08:19 - admin.vizite.com - /kampanya-detay?id=2
+22:08:36 - admin.vizite.com - /kampanya-kaydet
+22:08:37 - admin.vizite.com - /kampanyalar
+22:08:44 - admin.vizite.com - /kampanya-gonder
+22:08:45 - admin.vizite.com - /kampanyalar

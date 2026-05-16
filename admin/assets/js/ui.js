@@ -14,11 +14,6 @@ App.toast = (type, title, message) => {
         cancel: { label: 'Kapat' }
     };
 
-    const toaster = document.getElementById('toaster');
-    if (toaster && toaster.showPopover) {
-        try { toaster.showPopover(); } catch (e) {}
-    }
-
     document.dispatchEvent(new CustomEvent('basecoat:toast', {
         detail: { config }
     }));
