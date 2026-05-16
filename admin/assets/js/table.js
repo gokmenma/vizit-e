@@ -530,7 +530,7 @@ App.TableFilter = {
 App.TablePagination = {
     settings: {}, // tableId -> { currentPage, pageSize, totalRows, totalPages }
 
-    init: (tableId, pageSize = 10) => {
+    init: (tableId, pageSize = null) => {
         const table = document.getElementById(tableId);
         if (!table) return;
 
@@ -538,19 +538,24 @@ App.TablePagination = {
         if (!container) return;
 
         // Ensure we don't double-init if called from a child event
-        if (App.TablePagination.settings[tableId]) {
-            pageSize = App.TablePagination.settings[tableId].pageSize;
+        const currentSettings = App.TablePagination.settings[tableId];
+        let finalPageSize = 10;
+        
+        if (pageSize !== null && pageSize !== undefined) {
+            finalPageSize = parseInt(pageSize);
+        } else if (currentSettings) {
+            finalPageSize = currentSettings.pageSize;
         }
-
+        
         const visibleRows = Array.from(table.querySelectorAll('tbody tr')).filter(row => {
             return row.getAttribute('data-filtered-out') !== 'true';
         });
         
         App.TablePagination.settings[tableId] = {
             currentPage: 1,
-            pageSize: parseInt(pageSize),
+            pageSize: finalPageSize,
             totalRows: visibleRows.length,
-            totalPages: Math.ceil(visibleRows.length / parseInt(pageSize))
+            totalPages: Math.ceil(visibleRows.length / finalPageSize)
         };
 
         App.TablePagination.render(tableId);

@@ -149,30 +149,30 @@ $stats = $userModel->getAdminDashboardStats();
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div style="width: 28px; height: 28px; border-radius: 50%; background: #f4f4f5; color: #71717a; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; border: 1px solid #e4e4e7;">
+                                        <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--muted); color: var(--muted-foreground); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; border: 1px solid var(--border);">
                                             <?php echo strtoupper($initials); ?>
                                         </div>
                                         <div style="display: flex; flex-direction: column;">
-                                            <span style="font-weight: 600; color: #18181b; font-size: 0.8125rem;">
+                                            <span style="font-weight: 600; color: var(--foreground); font-size: 0.8125rem;">
                                                 <?php echo $user->adi_soyadi ?: $user->kullanici_adi; ?>
                                             </span>
-                                            <span style="font-size: 0.7rem; color: #71717a;"><?php echo $user->email; ?></span>
+                                            <span style="font-size: 0.7rem; color: var(--muted-foreground);"><?php echo $user->email; ?></span>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge badge-outline" style="font-size: 0.7rem; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">
+                                    <span class="badge badge-outline" style="font-size: 0.7rem;">
                                         <?php echo $user->paket_adi ?: 'Paketsiz'; ?>
                                     </span>
                                 </td>
-                                <td style="color: #71717a; font-size: 0.75rem;">
+                                <td style="color: var(--muted-foreground); font-size: 0.75rem;">
                                     <?php echo date('d.m.Y', strtotime($user->kayit_tarihi)); ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
                             <?php if (empty($stats['recent_users'])): ?>
                             <tr>
-                                <td colspan="3" style="text-align: center; padding: 2rem; color: #71717a;">
+                                <td colspan="3" style="text-align: center; padding: 2rem; color: var(--muted-foreground);">
                                     Henüz kayıtlı kullanıcı bulunmuyor.
                                 </td>
                             </tr>
@@ -222,7 +222,7 @@ $stats = $userModel->getAdminDashboardStats();
                                         <span style="font-weight: 600; color: #18181b; font-size: 0.8125rem;">
                                             <?php echo $activity->message; ?>
                                         </span>
-                                        <span style="font-size: 0.7rem; color: #71717a;">
+                                        <span style="font-size: 0.7rem; color: var(--muted-foreground);">
                                             <i data-lucide="user" style="width: 10px; display: inline-block; vertical-align: middle;"></i>
                                             <?php echo $activity->adi_soyadi ?: $activity->kullanici_adi ?: 'Sistem'; ?>
                                         </span>
@@ -233,7 +233,7 @@ $stats = $userModel->getAdminDashboardStats();
                                         <?php echo str_replace('-', ' ', $activity->channel); ?>
                                     </span>
                                 </td>
-                                <td style="color: #71717a; font-size: 0.75rem;">
+                                <td style="color: var(--muted-foreground); font-size: 0.75rem;">
                                     <?php 
                                         $diff = time() - strtotime($activity->created_at);
                                         if ($diff < 60) echo 'Şimdi';
@@ -246,7 +246,7 @@ $stats = $userModel->getAdminDashboardStats();
                             <?php endforeach; ?>
                             <?php if (empty($stats['recent_activities'])): ?>
                             <tr>
-                                <td colspan="3" style="text-align: center; padding: 2rem; color: #71717a;">
+                                <td colspan="3" style="text-align: center; padding: 2rem; color: var(--muted-foreground);">
                                     Henüz aktivite bulunmuyor.
                                 </td>
                             </tr>

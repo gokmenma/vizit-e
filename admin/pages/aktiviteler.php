@@ -9,23 +9,51 @@ if ($_SESSION['user_role'] !== 'superadmin') {
 
 $userModel = new \Models\UserModel();
 $activities = $userModel->getRecentActivities(100); // Son 100 aktiviteyi getir
+
+$counts = [
+    'ALL' => count($activities),
+    'SUCCESS' => 0,
+    'WARNING' => 0,
+    'ERROR' => 0
+];
+
+foreach ($activities as $a) {
+    if (isset($counts[$a->level])) $counts[$a->level]++;
+}
 ?>
 
-<div class="animate-in">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+<div class="animate-in" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-shrink: 0;">
         <div>
             <h1 style="font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;">Sistem Aktiviteleri</h1>
-            <p style="color: hsl(var(--muted-foreground)); font-size: 0.875rem; margin-top: 0.25rem;">Tüm kritik sistem işlemleri ve günlükleri.</p>
+            <p style="color: var(--muted-foreground); font-size: 0.875rem; margin-top: 0.25rem;">Tüm kritik sistem işlemleri ve günlükleri.</p>
         </div>
     </div>
 
-    <div class="card">
-        <div class="table-container">
-            <table class="data-table">
+    <div class="card dt-container" style="padding: 0; overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <!-- Data Table Header -->
+        <div class="dt-header">
+            <div class="dt-tabs">
+                <button class="dt-tab active" onclick="filterByLevel('ALL', this)">Hepsi <span class="dt-tab-count"><?php echo $counts['ALL']; ?></span></button>
+                <button class="dt-tab" onclick="filterByLevel('SUCCESS', this)">Başarılı <span class="dt-tab-count"><?php echo $counts['SUCCESS']; ?></span></button>
+                <button class="dt-tab" onclick="filterByLevel('WARNING', this)">Uyarı <span class="dt-tab-count"><?php echo $counts['WARNING']; ?></span></button>
+                <button class="dt-tab" onclick="filterByLevel('ERROR', this)">Hata <span class="dt-tab-count"><?php echo $counts['ERROR']; ?></span></button>
+            </div>
+
+            <div class="dt-actions">
+                <div class="dt-search-wrapper">
+                    <i data-lucide="search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 16px; color: var(--muted-foreground); z-index: 10;"></i>
+                    <input type="text" id="activity-search" class="dt-search-input" placeholder="Aktivite ara..." onkeyup="searchActivities()">
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container" style="flex: 1; min-height: 0;">
+            <table class="data-table" id="activities-table">
                 <thead>
                     <tr>
-                        <th>Tarih</th>
-                        <th>Kullanıcı</th>
+                        <th class="sortable" onclick="sortActivities(0)">Tarih <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortActivities(1)">Kullanıcı <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
                         <th>İşlem</th>
                         <th>Kanal</th>
                         <th>Seviye</th>
@@ -40,22 +68,22 @@ $activities = $userModel->getRecentActivities(100); // Son 100 aktiviteyi getir
                         if ($activity->level === 'WARNING') $levelBadge = 'badge-warning';
                         if ($activity->level === 'ERROR') $levelBadge = 'badge-danger';
                     ?>
-                    <tr>
-                        <td style="white-space: nowrap; font-size: 0.8125rem; color: #71717a;">
+                    <tr class="activity-row" data-level="<?php echo $activity->level; ?>">
+                        <td style="white-space: nowrap; font-size: 0.8125rem; color: var(--muted-foreground);">
                             <?php echo date('d.m.Y H:i:s', strtotime($activity->created_at)); ?>
                         </td>
-                        <td>
+                        <td class="activity-user">
                             <div style="display: flex; flex-direction: column;">
-                                <span style="font-weight: 600; color: #18181b; font-size: 0.8125rem;">
+                                <span style="font-weight: 600; color: var(--foreground); font-size: 0.8125rem;">
                                     <?php echo $activity->adi_soyadi ?: ($activity->kullanici_adi ?: 'Sistem'); ?>
                                 </span>
-                                <span style="font-size: 0.7rem; color: #71717a;">ID: <?php echo $activity->user_id ?: '-'; ?></span>
+                                <span style="font-size: 0.7rem; color: var(--muted-foreground);">ID: <?php echo $activity->user_id ?: '-'; ?></span>
                             </div>
                         </td>
-                        <td>
-                            <span style="font-size: 0.875rem; color: #18181b;"><?php echo $activity->message; ?></span>
+                        <td class="activity-message">
+                            <span style="font-size: 0.875rem; color: var(--foreground);"><?php echo $activity->message; ?></span>
                             <?php if ($activity->context): ?>
-                                <div style="font-size: 0.7rem; color: #71717a; margin-top: 0.25rem; font-family: monospace; background: #f4f4f5; padding: 0.25rem; border-radius: 4px;">
+                                <div style="font-size: 0.7rem; color: var(--muted-foreground); margin-top: 0.25rem; font-family: monospace; background: var(--muted); padding: 0.25rem; border-radius: 4px;">
                                     <?php echo htmlspecialchars($activity->context); ?>
                                 </div>
                             <?php endif; ?>
@@ -78,8 +106,8 @@ $activities = $userModel->getRecentActivities(100); // Son 100 aktiviteyi getir
                                 <?php echo $activity->level; ?>
                             </span>
                         </td>
-                        <td style="font-size: 0.75rem; color: #71717a;"><?php echo $activity->ip_address; ?></td>
-                        <td style="font-size: 0.75rem; color: #71717a;" title="<?php echo htmlspecialchars($activity->browser); ?>">
+                        <td style="font-size: 0.75rem; color: var(--muted-foreground);"><?php echo $activity->ip_address; ?></td>
+                        <td style="font-size: 0.75rem; color: var(--muted-foreground);" title="<?php echo htmlspecialchars($activity->browser); ?>">
                             <?php 
                                 $ua = $activity->browser;
                                 if (strpos($ua, 'Chrome') !== false) echo 'Chrome';
@@ -93,7 +121,7 @@ $activities = $userModel->getRecentActivities(100); // Son 100 aktiviteyi getir
                     <?php endforeach; ?>
                     <?php if (empty($activities)): ?>
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 4rem; color: #71717a;">
+                        <td colspan="7" style="text-align: center; padding: 4rem; color: var(--muted-foreground);">
                             <i data-lucide="info" style="width: 32px; height: 32px; margin-bottom: 1rem; opacity: 0.5;"></i>
                             <p>Henüz sistem aktivitesi kaydedilmemiş.</p>
                         </td>
@@ -102,6 +130,12 @@ $activities = $userModel->getRecentActivities(100); // Son 100 aktiviteyi getir
                 </tbody>
             </table>
         </div>
+
+        <!-- Data Table Footer -->
+        <div class="dt-footer">
+            <div class="dt-info">Yükleniyor...</div>
+            <div class="dt-pagination-actions"></div>
+        </div>
     </div>
 </div>
 
@@ -109,4 +143,42 @@ $activities = $userModel->getRecentActivities(100); // Son 100 aktiviteyi getir
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
+
+    function searchActivities() {
+        App.DataTable.search('activity-search', '.activity-row', '.activity-user', '.activity-message');
+    }
+
+    function sortActivities(n) {
+        App.DataTable.sort('activities-table', n);
+    }
+
+    function filterByLevel(level, btn) {
+        // Tab buttons update
+        if (btn) {
+            btn.parentElement.querySelectorAll('.dt-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        const rows = document.querySelectorAll('.activity-row');
+        rows.forEach(row => {
+            if (level === 'ALL' || row.dataset.level === level) {
+                row.style.display = '';
+                row.classList.remove('dt-filtered');
+            } else {
+                row.style.display = 'none';
+                row.classList.add('dt-filtered');
+            }
+        });
+        
+        // Refresh pagination if active
+        if (window.TablePagination && window.TablePagination['activities-table']) {
+            window.TablePagination['activities-table'].currentPage = 1;
+            App.DataTable.initPagination('activities-table');
+        }
+    }
+
+    // Initialize Pagination
+    setTimeout(() => {
+        App.DataTable.initPagination('activities-table');
+    }, 100);
 </script>

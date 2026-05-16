@@ -75,9 +75,9 @@ App.loadPage = async (rawRoute, pushState = true) => {
         if (breadcrumb) {
             const formattedRoute = route.split('/').pop().split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
             breadcrumb.innerHTML = `
-                <a href="dashboard" style="font-size: 0.875rem; color: #71717a;">Ana Sayfa</a>
-                <span style="font-size: 0.875rem; color: #d4d4d8;">/</span>
-                <span style="font-size: 0.875rem; font-weight: 500; color: #18181b;">${formattedRoute}</span>
+                <a href="dashboard" class="breadcrumb-item">Ana Sayfa</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-active">${formattedRoute}</span>
             `;
         }
         
@@ -204,4 +204,31 @@ document.addEventListener('DOMContentLoaded', () => {
             userDropdown.open = false;
         }
     });
+
+    // Theme Toggle Logic
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        const sunIcon = themeToggle.querySelector('.sun-icon');
+        const moonIcon = themeToggle.querySelector('.moon-icon');
+        
+        const updateIcons = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+        };
+
+        // Initial icon sync
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateIcons();
+        });
+    }
 });

@@ -36,12 +36,12 @@ foreach ($kullanicilar as $user) {
             <h1 style="font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;">Satın Almalar & Abonelikler</h1>
             <p style="color: #71717a; font-size: 0.875rem; margin-top: 0.25rem;">Tüm abonelik işlemlerini ve satın alma geçmişini buradan takip edebilirsiniz.</p>
         </div>
-        <button class="btn" style="background: #18181b; color: white;" onclick="document.getElementById('add-purchase-modal').showModal()">
+        <button class="btn btn-primary" onclick="document.getElementById('add-purchase-modal').showModal()">
             <i data-lucide="shopping-bag" style="width: 16px;"></i> Yeni İşlem Ekle
         </button>
     </div>
 
-    <div class="card dt-container" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid #e4e4e7; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05); flex: 1; display: flex; flex-direction: column;">
+    <div class="card dt-container" style="padding: 0; overflow: hidden; flex: 1; display: flex; flex-direction: column;">
         <div class="dt-header">
             <div style="font-weight: 600;">İşlem Listesi</div>
             <div class="dt-actions">
@@ -54,7 +54,7 @@ foreach ($kullanicilar as $user) {
         
         <div class="table-container" style="flex: 1; min-height: 0;">
             <table class="data-table" id="purchases-table" style="min-width: 900px;">
-                <thead style="background: #fafafa; border-bottom: 1px solid #e4e4e7;">
+                <thead>
                     <tr>
                         <th class="sortable" style="width: 80px;">ID</th>
                         <th class="sortable" style="width: 250px;">Kullanıcı</th>
@@ -68,10 +68,10 @@ foreach ($kullanicilar as $user) {
                 <tbody>
                     <?php foreach ($abonelikler as $row): ?>
                     <tr class="purchase-row">
-                        <td style="color: #71717a; font-family: monospace; font-size: 0.75rem;">#<?php echo $row->id; ?></td>
+                        <td style="color: var(--muted-foreground); font-family: monospace; font-size: 0.75rem;">#<?php echo $row->id; ?></td>
                         <td class="user-cell">
                             <div style="display: flex; flex-direction: column;">
-                                <span style="font-weight: 600; color: #18181b; cursor: pointer;" 
+                                <span style="font-weight: 600; color: var(--foreground); cursor: pointer;" 
                                       onclick="openEditSubscriberModal(this)"
                                       data-id="<?php echo \App\Helper\Security::encrypt($row->kullanici_id); ?>"
                                       data-purchase-id="<?php echo \App\Helper\Security::encrypt($row->id); ?>"
@@ -84,21 +84,21 @@ foreach ($kullanicilar as $user) {
                                       data-end-date="<?php echo $row->bitis_tarihi; ?>">
                                     <?php echo !empty($row->ad_soyad) ? $row->ad_soyad : $row->kullanici_adi; ?>
                                 </span>
-                                <span style="font-size: 0.75rem; color: #71717a;">@<?php echo $row->kullanici_adi; ?></span>
+                                <span style="font-size: 0.75rem; color: var(--muted-foreground);">@<?php echo $row->kullanici_adi; ?></span>
                             </div>
                         </td>
                         <td class="package-cell">
-                            <span class="badge badge-secondary" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-weight: 600;">
+                            <span class="badge badge-secondary" style="font-weight: 600;">
                                 <?php echo $row->paket_adi; ?>
                             </span>
                         </td>
                         <td style="font-size: 0.8125rem; color: #3f3f46;">
                             <div style="display: flex; flex-direction: column;">
                                 <span><?php echo date('d.m.Y', strtotime($row->baslangic_tarihi)); ?></span>
-                                <span style="font-size: 0.75rem; color: #a1a1aa;"><?php echo date('d.m.Y', strtotime($row->bitis_tarihi)); ?></span>
+                                <span style="font-size: 0.75rem; color: var(--muted-foreground);"><?php echo date('d.m.Y', strtotime($row->bitis_tarihi)); ?></span>
                             </div>
                         </td>
-                        <td style="font-weight: 700; color: #18181b;">₺<?php echo number_format($row->fiyat ?? 0, 0); ?></td>
+                        <td style="font-weight: 700; color: var(--foreground);">₺<?php echo number_format($row->fiyat ?? 0, 0); ?></td>
                         <td>
                             <?php if ($row->durum == 'aktif'): ?>
                                 <span class="badge badge-success" style="background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; display: inline-flex; align-items: center; gap: 0.375rem;">
@@ -139,7 +139,7 @@ foreach ($kullanicilar as $user) {
             <div>Toplam <b><?php echo count($abonelikler); ?></b> işlem kayıtlı.</div>
             <div class="dt-pagination">
                 <button class="dt-page-btn" disabled><i data-lucide="chevron-left" style="width: 14px;"></i></button>
-                <button class="dt-page-btn active" style="background: #18181b; color: white; border-color: #18181b;">1</button>
+                <button class="dt-page-btn active">1</button>
                 <button class="dt-page-btn"><i data-lucide="chevron-right" style="width: 14px;"></i></button>
             </div>
         </div>
@@ -147,7 +147,7 @@ foreach ($kullanicilar as $user) {
 
     <!-- Modals -->
     <dialog id="add-purchase-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                 <i data-lucide="shopping-cart" style="width: 18px;"></i> Yeni İşlem Ekle
             </h2>
@@ -223,13 +223,13 @@ foreach ($kullanicilar as $user) {
             </div>
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button type="button" class="btn btn-outline" style="flex: 1;" onclick="this.closest('dialog').close()">Vazgeç</button>
-                <button type="submit" class="btn" style="flex: 1; background: #18181b; color: white;">İşlemi Kaydet</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">İşlemi Kaydet</button>
             </div>
         </form>
     </dialog>
 
     <dialog id="edit-subscriber-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                 <i data-lucide="shopping-cart" style="width: 18px;"></i> İşlem Düzenle
             </h2>
@@ -294,7 +294,7 @@ foreach ($kullanicilar as $user) {
 
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button type="button" class="btn btn-outline" style="flex: 1;" onclick="this.closest('dialog').close()">Vazgeç</button>
-                <button type="submit" class="btn" style="flex: 1; background: #18181b; color: white;">Güncelle</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Güncelle</button>
             </div>
         </form>
     </dialog>
@@ -307,7 +307,7 @@ foreach ($kullanicilar as $user) {
             <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">Kaydı Sil?</h2>
             <p style="color: #71717a; font-size: 0.875rem;">Bu satın alma kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
         </div>
-        <div style="padding: 1rem 1.5rem; background: #fafafa; border-top: 1px solid #e4e4e7; display: flex; gap: 0.75rem; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+        <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
             <button type="button" class="btn btn-outline" style="flex: 1;" onclick="this.closest('dialog').close()">Vazgeç</button>
             <button type="button" id="confirm-delete-btn" class="btn" style="flex: 1; background: #ef4444; color: white;">Evet, Sil</button>
         </div>

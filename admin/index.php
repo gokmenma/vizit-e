@@ -76,6 +76,18 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        // Theme initialization to prevent flash
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
 </head>
 <body class="theme-light">
     <aside class="sidebar" data-side="left" aria-hidden="false">
@@ -188,21 +200,25 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     </aside>
 
     <main class="app-main">
-        <header class="app-topbar" style="background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem;">
+        <header class="app-topbar">
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <button type="button" class="topbar-btn" onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: #71717a;">
+                <button type="button" class="topbar-btn" onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))">
                     <i data-lucide="menu"></i>
                 </button>
-                <div id="breadcrumb" class="breadcrumb" style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="font-size: 0.875rem; color: #71717a;">SGK Vizite</span>
-                    <span style="font-size: 0.875rem; color: #d4d4d8;">/</span>
-                    <span style="font-size: 0.875rem; font-weight: 500; color: #18181b;"><?php echo ucfirst($currentRoute); ?></span>
+                <div id="breadcrumb" class="breadcrumb">
+                    <span class="breadcrumb-item">SGK Vizite</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-active"><?php echo ucfirst($currentRoute); ?></span>
                 </div>
             </div>
 
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <button style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #71717a;"><i data-lucide="search" style="width: 18px;"></i></button>
-                <button style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #71717a;"><i data-lucide="bell" style="width: 18px;"></i></button>
+                <button id="theme-toggle" class="topbar-btn" title="Tema Değiştir">
+                    <i data-lucide="sun" class="sun-icon" style="width: 18px;"></i>
+                    <i data-lucide="moon" class="moon-icon" style="width: 18px; display: none;"></i>
+                </button>
+                <button class="topbar-btn"><i data-lucide="search" style="width: 18px;"></i></button>
+                <button class="topbar-btn"><i data-lucide="bell" style="width: 18px;"></i></button>
             </div>
         </header>
 

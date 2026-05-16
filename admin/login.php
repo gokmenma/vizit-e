@@ -68,6 +68,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <script>
+        // Theme initialization to prevent flash
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+
     <style>
         :root {
             --background: 0 0% 98%;
@@ -224,6 +236,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .footer-links a:hover {
             text-decoration: underline;
+        }
+
+        /* Dark Mode Overrides */
+        .dark body {
+            background-color: #09090b;
+        }
+
+        .dark .logo-text {
+            color: #f4f4f5;
+        }
+
+        .dark .login-card {
+            background: #18181b;
+            border-color: #27272a;
+        }
+
+        .dark .card-header h2,
+        .dark .form-group label {
+            color: #f4f4f5;
+        }
+
+        .dark .form-group input {
+            background: #09090b;
+            border-color: #27272a;
+            color: #f4f4f5;
+        }
+
+        .dark .form-group input:focus {
+            border-color: #f4f4f5;
+        }
+
+        .dark .btn-login {
+            background: #f4f4f5;
+            color: #18181b;
+        }
+
+        .dark .footer-links {
+            color: #a1a1aa;
+        }
+
+        .dark .footer-links a {
+            color: #f4f4f5;
+        }
+
+        .dark .error-banner {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
         }
     </style>
 </head>

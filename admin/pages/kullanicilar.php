@@ -10,14 +10,14 @@ $paketler = $paketModel->all();
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
         <div>
             <h1 style="font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;">Kullanıcılar</h1>
-            <p style="color: #71717a; font-size: 0.875rem; margin-top: 0.25rem;">Sisteme kayıtlı ana kullanıcılar ve firma yöneticileri.</p>
+            <p style="color: var(--muted-foreground); font-size: 0.875rem; margin-top: 0.25rem;">Sisteme kayıtlı ana kullanıcılar ve firma yöneticileri.</p>
         </div>
-        <button class="btn" style="background: #18181b; color: white;" onclick="document.getElementById('add-subscriber-modal').showModal()">
+        <button class="btn btn-primary" onclick="document.getElementById('add-subscriber-modal').showModal()">
             <i data-lucide="user-plus" style="width: 16px;"></i> Yeni Kullanıcı Ekle
         </button>
     </div>
 
-    <div class="card dt-container" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid #e4e4e7; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);">
+    <div class="card dt-container" style="padding: 0; overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0;">
         <!-- Data Table Header -->
         <div class="dt-header">
             <div class="dt-tabs">
@@ -41,9 +41,9 @@ $paketler = $paketModel->all();
         </div>
 
         <!-- Table Body -->
-        <div class="table-container">
+        <div class="table-container" style="flex: 1; min-height: 0;">
             <table class="data-table" id="subscribers-table">
-                <thead style="background: #fafafa; border-bottom: 1px solid #e4e4e7;">
+                <thead>
                     <tr>
                         <th class="sortable" onclick="sortTable(0)" style="width: 80px;">ID <i data-lucide="chevron-down" class="sort-icon" style="width: 12px;"></i></th>
                         <th class="sortable" onclick="sortTable(1)">Kullanıcı / Firma <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
@@ -71,14 +71,14 @@ $paketler = $paketModel->all();
                         }
                     ?>
                     <tr class="subscriber-row" data-id="<?php echo $user->id; ?>" data-status="active">
-                        <td style="color: #71717a; font-family: monospace; font-size: 0.75rem;">#<?php echo $user->id; ?></td>
+                        <td style="color: var(--muted-foreground); font-family: monospace; font-size: 0.75rem;">#<?php echo $user->id; ?></td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #f4f4f5; color: #71717a; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; border: 1px solid #e4e4e7;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--muted); color: var(--muted-foreground); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--border);">
                                     <?php echo strtoupper($initials); ?>
                                 </div>
                                 <div style="display: flex; flex-direction: column;">
-                                    <span class="subscriber-name" style="font-weight: 600; color: #18181b; cursor: pointer;" 
+                                    <span class="subscriber-name" style="font-weight: 600; color: var(--foreground); cursor: pointer;" 
                                           onclick="openEditModal(this)"
                                           data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
                                           data-name="<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>"
@@ -89,14 +89,14 @@ $paketler = $paketModel->all();
                                           data-yetkiler="<?php echo htmlspecialchars($user->yetkiler ?? ''); ?>">
                                         <?php echo $user->adi_soyadi  ?: $user->kullanici_adi; ?>
                                     </span>
-                                    <span style="font-size: 0.75rem; color: #71717a;">@<?php echo $user->kullanici_adi; ?></span>
+                                    <span style="font-size: 0.75rem; color: var(--muted-foreground);">@<?php echo $user->kullanici_adi; ?></span>
                                 </div>
                             </div>
                         </td>
                         <td class="subscriber-email-cell">
                             <div style="display: flex; flex-direction: column;">
                                 <span style="font-size: 0.875rem; font-weight: 600; color: #2563eb;"><?php echo $user->paket_adi ?? 'Paketsiz'; ?></span>
-                                <span style="font-size: 0.75rem; color: #71717a;"><?php echo $user->email; ?></span>
+                                <span style="font-size: 0.75rem; color: var(--muted-foreground);"><?php echo $user->email; ?></span>
                             </div>
                         </td>
                         <td>
@@ -110,7 +110,7 @@ $paketler = $paketModel->all();
                                     $yetkiler = (isset($user->yetkiler) && $user->yetkiler) ? explode(',', $user->yetkiler) : [];
                                     foreach ($yetkiler as $yetki) {
                                         $label = ($yetki == 'rapor_onay') ? 'Rapor Onay' : (($yetki == 'manuel_bildirim') ? 'Manuel Bildirim' : $yetki);
-                                        echo '<span class="badge" style="background: #f4f4f5; color: #18181b; font-size: 0.7rem; border: 1px solid #e4e4e7;">' . $label . '</span>';
+                                        echo '<span class="badge" style="background: var(--muted); color: var(--foreground); font-size: 0.7rem; border: 1px solid var(--border);">' . $label . '</span>';
                                     }
                                     if (empty($yetkiler)) echo '<span style="color: #a1a1aa; font-size: 0.75rem;">-</span>';
                                 ?>
@@ -118,12 +118,12 @@ $paketler = $paketModel->all();
                         </td>
                         <td style="text-align: center;">
                             <?php $encryptedId = \App\Helper\Security::encrypt($user->id); ?>
-                            <a href="alt-kullanicilar?user=<?php echo $encryptedId; ?>" class="btn btn-ghost btn-sm nav-link" data-route="alt-kullanicilar?user=<?php echo $encryptedId; ?>" style="gap: 0.375rem; color: #18181b; font-weight: 600;">
+                            <a href="alt-kullanicilar?user=<?php echo $encryptedId; ?>" class="btn btn-ghost btn-sm nav-link" data-route="alt-kullanicilar?user=<?php echo $encryptedId; ?>" style="gap: 0.375rem; color: var(--foreground); font-weight: 600;">
                                 <i data-lucide="users" style="width: 16px;"></i>
                                 <?php echo $user->alt_kullanici_sayisi; ?>
                             </a>
                         </td>
-                        <td style="color: #71717a; font-size: 0.8125rem;"><?php echo date('d.m.Y', strtotime($user->kayit_tarihi)); ?></td>
+                        <td style="color: var(--muted-foreground); font-size: 0.8125rem;"><?php echo date('d.m.Y', strtotime($user->kayit_tarihi)); ?></td>
                         <td>
                             <span class="badge badge-success" style="display: inline-flex; align-items: center; gap: 0.375rem; background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7;">
                                 <span style="width: 6px; height: 6px; border-radius: 50%; background: #22c55e;"></span>
@@ -167,9 +167,9 @@ $paketler = $paketModel->all();
     
     <!-- Modals -->
     <dialog id="add-subscriber-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="user-plus" style="width: 20px; color: #18181b;"></i> Yeni Kullanıcı Ekle
+                <i data-lucide="user-plus" style="width: 20px; color: var(--foreground);"></i> Yeni Kullanıcı Ekle
             </h2>
             <button onclick="document.getElementById('add-subscriber-modal').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
@@ -259,15 +259,15 @@ $paketler = $paketModel->all();
             </div>
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('add-subscriber-modal').close()">Vazgeç</button>
-                <button type="submit" class="btn" style="flex: 1; background: #18181b; color: white;">Kullanıcı Oluştur</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Kullanıcı Oluştur</button>
             </div>
         </form>
     </dialog>
 
     <dialog id="edit-subscriber-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="edit-3" style="width: 20px; color: #18181b;"></i> Kullanıcı Düzenle
+                <i data-lucide="edit-3" style="width: 20px; color: var(--foreground);"></i> Kullanıcı Düzenle
             </h2>
             <button onclick="document.getElementById('edit-subscriber-modal').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
@@ -358,7 +358,7 @@ $paketler = $paketModel->all();
             </div>
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('edit-subscriber-modal').close()">Vazgeç</button>
-                <button type="submit" class="btn" style="flex: 1; background: #18181b; color: white;">Güncelle</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Güncelle</button>
             </div>
         </form>
     </dialog>
@@ -367,10 +367,10 @@ $paketler = $paketModel->all();
     <dialog id="alert-dialog" class="card" style="width: 400px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
         <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
             <header>
-                <h2 id="alert-dialog-title" style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: #ef4444;">
+                <h2 id="alert-dialog-title" style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--destructive);">
                     <i data-lucide="alert-triangle" style="width: 20px;"></i> Emin misiniz?
                 </h2>
-                <p id="alert-dialog-description" style="font-size: 0.875rem; color: #71717a; line-height: 1.5;">
+                <p id="alert-dialog-description" style="font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.5;">
                     <b id="delete-user-name"></b> isimli kullanıcıyı silmek istediğinize emin misiniz? <br><br>
                     Bu işlem geri alınamaz. Bu kullanıcı ile birlikte tüm <b>alt kullanıcılar</b> ve <b>işyerleri</b> de kalıcı olarak silinecektir.
                 </p>
@@ -378,7 +378,7 @@ $paketler = $paketModel->all();
 
             <footer style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('alert-dialog').close()">Vazgeç</button>
-                <button class="btn" id="confirm-delete-btn" style="flex: 1; background: #ef4444; color: white; border-color: #ef4444; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <button class="btn btn-destructive" id="confirm-delete-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                     Silmeyi Onayla
                 </button>
             </footer>

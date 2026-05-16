@@ -13,42 +13,42 @@ $paketler = $paketModel->all();
             <h1 style="font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;">Paket Tanımları</h1>
             <p style="color: #71717a; font-size: 0.875rem; margin-top: 0.25rem;">Abonelik paketlerini oluşturun ve özelliklerini belirleyin.</p>
         </div>
-        <button id="add-btn" class="btn" style="background: #18181b; color: white;" onclick="document.getElementById('add-package-modal').showModal()">
+        <button id="add-btn" class="btn btn-primary" onclick="document.getElementById('add-package-modal').showModal()">
             <i data-lucide="plus" style="width: 16px;"></i> Yeni Paket Oluştur
         </button>
     </div>
 
     <div class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
         <?php foreach ($paketler as $paket): ?>
-        <div class="card" style="display: flex; flex-direction: column; position: relative; overflow: hidden; padding: 1.5rem; border: 1px solid #e4e4e7; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: #18181b;"></div>
+        <div class="card" style="display: flex; flex-direction: column; position: relative; overflow: hidden; padding: 1.5rem;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--primary);"></div>
             
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                 <div>
-                    <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem;"><?php echo $paket->ad; ?></h3>
-                    <p style="font-size: 0.875rem; color: #71717a;"><?php echo $paket->aciklama ?? 'Tüm temel özellikler dahil.'; ?></p>
+                    <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--foreground);"><?php echo $paket->ad; ?></h3>
+                    <p style="font-size: 0.875rem; color: var(--muted-foreground);"><?php echo $paket->aciklama ?? 'Tüm temel özellikler dahil.'; ?></p>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 1.5rem; font-weight: 800; color: #18181b;">₺<?php echo number_format($paket->fiyat, 0); ?></div>
-                    <div style="font-size: 0.75rem; color: #71717a;"><?php echo $paket->sure ?? 1; ?> Ay</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--foreground);">₺<?php echo number_format($paket->fiyat, 0); ?></div>
+                    <div style="font-size: 0.75rem; color: var(--muted-foreground);"><?php echo $paket->sure ?? 1; ?> Ay</div>
                 </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; padding: 1rem; background: #f9fafb; border-radius: 8px; border: 1px solid #f1f1f4;">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; padding: 1rem; background: var(--muted); border-radius: 8px; border: 1px solid var(--border);">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.875rem; color: #71717a; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 0.875rem; color: var(--muted-foreground); display: flex; align-items: center; gap: 0.5rem;">
                         <i data-lucide="users" style="width: 14px;"></i> Firma (İşyeri) Limiti
                     </span>
                     <span style="font-weight: 600;"><?php echo $paket->firma_hakki; ?></span>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.875rem; color: #71717a; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 0.875rem; color: var(--muted-foreground); display: flex; align-items: center; gap: 0.5rem;">
                         <i data-lucide="user-plus" style="width: 14px;"></i> Alt Kullanıcı Limiti
                     </span>
                     <span style="font-weight: 600;"><?php echo $paket->alt_kullanici_hakki ?? 0; ?></span>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.875rem; color: #71717a; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 0.875rem; color: var(--muted-foreground); display: flex; align-items: center; gap: 0.5rem;">
                         <i data-lucide="calendar" style="width: 14px;"></i> Abonelik Süresi
                     </span>
                     <span style="font-weight: 600;"><?php echo $paket->sure ?? 1; ?> Ay</span>
@@ -65,26 +65,24 @@ $paketler = $paketModel->all();
                         data-sure="<?php echo $paket->sure; ?>">
                     Düzenle
                 </button>
-                <button class="btn" style="background: #18181b; color: white; flex: 1; height: 2.25rem;">Pasife Al</button>
+                <button class="btn btn-secondary" style="flex: 1; height: 2.25rem;">Pasife Al</button>
             </div>
         </div>
         <?php endforeach; ?>
         
         <!-- Add New Package Card -->
-        <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #e4e4e7; background: transparent; cursor: pointer; min-height: 250px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);" 
-                onclick="document.getElementById('add-package-modal').showModal()"
-                onmouseover="this.style.borderColor='#18181b'; this.style.backgroundColor='#f9fafb';" 
-                onmouseout="this.style.borderColor='#e4e4e7'; this.style.backgroundColor='transparent';">
-            <div style="width: 48px; height: 48px; border-radius: 50%; background: #f4f4f5; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
-                <i data-lucide="plus" style="width: 24px; color: #71717a;"></i>
+        <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--border); background: transparent; cursor: pointer; min-height: 250px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);" 
+                onclick="document.getElementById('add-package-modal').showModal()">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--muted); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                <i data-lucide="plus" style="width: 24px; color: var(--muted-foreground);"></i>
             </div>
-            <span style="font-weight: 600; color: #18181b;">Yeni Paket Ekle</span>
+            <span style="font-weight: 600; color: var(--foreground);">Yeni Paket Ekle</span>
         </div>
     </div>
 
     <!-- Modals -->
     <dialog id="add-package-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                 <i data-lucide="package-plus" style="width: 20px;"></i> Yeni Paket Ekle
             </h2>
@@ -119,13 +117,13 @@ $paketler = $paketModel->all();
             </div>
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button type="button" class="btn btn-outline" style="flex: 1;" onclick="this.closest('dialog').close()">Vazgeç</button>
-                <button type="submit" class="btn" style="flex: 1; background: #18181b; color: white;">Paketi Oluştur</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Paketi Oluştur</button>
             </div>
         </form>
     </dialog>
 
     <dialog id="edit-package-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                 <i data-lucide="edit-3" style="width: 20px;"></i> Paketi Düzenle
             </h2>
@@ -159,7 +157,7 @@ $paketler = $paketModel->all();
             </div>
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button type="button" class="btn btn-outline" style="flex: 1;" onclick="this.closest('dialog').close()">Vazgeç</button>
-                <button type="submit" class="btn" style="flex: 1; background: #18181b; color: white;">Güncelle</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Güncelle</button>
             </div>
         </form>
     </dialog>
