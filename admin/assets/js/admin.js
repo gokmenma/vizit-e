@@ -64,11 +64,11 @@ App.loadPage = async (rawRoute, pushState = true) => {
         appContent.style.opacity = '1';
         appContent.classList.add('animate-fade-in');
         
-        // Initialize components in new content
+        // Initialize components
         if (window.lucide) window.lucide.createIcons();
-        if (App.initCustomSelects) App.initCustomSelects(appContent);
-        if (App.initDatePickers) App.initDatePickers(appContent);
         if (App.TableFilter) App.TableFilter.init(appContent);
+        if (App.initCustomSelects) App.initCustomSelects(); // Global to catch popovers in body
+        if (App.initDatePickers) App.initDatePickers(appContent);
 
         // Update Breadcrumb
         const breadcrumb = document.getElementById('breadcrumb');
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Always run initial global inits
     if (App.initCustomSelects) App.initCustomSelects();
     if (App.initDatePickers) App.initDatePickers();
-    if (App.TableFilter) App.TableFilter.init();
+    // TableFilter is already initialized above via appContent or loadPage
 
     // Close user dropdown when clicking outside
     document.addEventListener('click', (e) => {

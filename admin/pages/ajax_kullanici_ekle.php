@@ -13,7 +13,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 // Gelen action değerini koru, eğer yoksa varsayılan ata
 if (!isset($_POST['action'])) {
-    $_POST['action'] = 'admin-abone-ekle';
+    $_POST['action'] = 'admin-kullanici-ekle';
 }
 
 require_once __DIR__ . '/../../App/Api/APIuser.php';

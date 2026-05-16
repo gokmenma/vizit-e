@@ -15,17 +15,17 @@ $stmt = $db->prepare("SELECT ka.*, k.adi_soyadi as ad_soyad, k.kullanici_adi, k.
 $stmt->execute();
 $abonelikler = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-// Fetch All Subscribers (for Add Purchase modal)
-$subStmt = $db->prepare("SELECT id, adi_soyadi, kullanici_adi, email FROM kullanicilar WHERE admin_id = 0 AND (silinme_tarihi IS NULL OR silinme_tarihi = '') ORDER BY adi_soyadi ASC");
-$subStmt->execute();
-$subscribers = $subStmt->fetchAll(PDO::FETCH_OBJ);
+// Fetch All Users (for Add Purchase modal)
+$userStmt = $db->prepare("SELECT id, adi_soyadi, kullanici_adi, email FROM kullanicilar WHERE admin_id = 0 AND (silinme_tarihi IS NULL OR silinme_tarihi = '') ORDER BY adi_soyadi ASC");
+$userStmt->execute();
+$kullanicilar = $userStmt->fetchAll(PDO::FETCH_OBJ);
 
-// Pre-process subscribers to fix "0" or empty names
-foreach ($subscribers as $sub) {
-    if (empty($sub->adi_soyadi) || $sub->adi_soyadi == '0') {
-        $sub->display_name = $sub->kullanici_adi;
+// Pre-process users to fix "0" or empty names
+foreach ($kullanicilar as $user) {
+    if (empty($user->adi_soyadi) || $user->adi_soyadi == '0') {
+        $user->display_name = $user->kullanici_adi;
     } else {
-        $sub->display_name = $sub->adi_soyadi;
+        $user->display_name = $user->adi_soyadi;
     }
 }
 ?>
@@ -57,7 +57,7 @@ foreach ($subscribers as $sub) {
                 <thead style="background: #fafafa; border-bottom: 1px solid #e4e4e7;">
                     <tr>
                         <th class="sortable" style="width: 80px;">ID</th>
-                        <th class="sortable" style="width: 250px;">Abone</th>
+                        <th class="sortable" style="width: 250px;">Kullanıcı</th>
                         <th class="sortable" style="width: 150px;">Paket</th>
                         <th class="sortable" style="width: 180px;">Başlangıç / Bitiş</th>
                         <th class="sortable" style="width: 120px;">Tutar</th>
@@ -136,23 +136,23 @@ foreach ($subscribers as $sub) {
         </div>
         <form id="add-purchase-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitAddPurchase(this);">
             <div class="form-group">
-                <label class="form-label">Abone Seçin</label>
+                <label class="form-label">Kullanıcı Seçin</label>
                 <div class="custom-select" id="subscriber-select">
                     <button type="button" class="select-trigger btn-outline">
-                        <span class="select-label truncate">Abone seçiniz...</span>
+                        <span class="select-label truncate">Kullanıcı seçiniz...</span>
                         <i data-lucide="chevrons-up-down" style="width: 14px; opacity: 0.5;"></i>
                     </button>
                     <div class="select-popover" popover="manual">
                         <header>
                             <i data-lucide="search" style="width: 14px; opacity: 0.5;"></i>
-                            <input type="text" class="select-search" placeholder="Abone ara..." autocomplete="off">
+                            <input type="text" class="select-search" placeholder="Kullanıcı ara..." autocomplete="off">
                         </header>
                         <div class="select-options">
-                            <?php foreach ($subscribers as $sub): ?>
-                                <div class="select-option" data-value="<?php echo $sub->id; ?>">
+                            <?php foreach ($kullanicilar as $user): ?>
+                                <div class="select-option" data-value="<?php echo $user->id; ?>">
                                     <div style="display: flex; flex-direction: column;">
-                                        <span style="font-weight: 500;"><?php echo $sub->display_name; ?></span>
-                                        <span style="font-size: 0.75rem; color: #71717a;"><?php echo $sub->email; ?></span>
+                                        <span style="font-weight: 500;"><?php echo $user->display_name; ?></span>
+                                        <span style="font-size: 0.75rem; color: #71717a;"><?php echo $user->email; ?></span>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -202,11 +202,11 @@ foreach ($subscribers as $sub) {
     <dialog id="edit-subscriber-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
         <div style="padding: 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="user-cog" style="width: 20px;"></i> Abone Düzenle
+                <i data-lucide="user-cog" style="width: 20px;"></i> Kullanıcı Düzenle
             </h2>
             <button onclick="this.closest('dialog').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
-        <form id="edit-subscriber-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); if(App.validateForm('edit-subscriber-form')) { App.toast('success', 'Güncellendi', 'Abone bilgileri başarıyla güncellendi.'); this.closest('dialog').close(); }">
+        <form id="edit-subscriber-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); if(App.validateForm('edit-subscriber-form')) { App.toast('success', 'Güncellendi', 'Kullanıcı bilgileri başarıyla güncellendi.'); this.closest('dialog').close(); }">
             <input type="hidden" id="sub-edit-id">
             <div class="form-group">
                 <label class="form-label">Ad Soyad / Firma</label>
@@ -247,9 +247,9 @@ foreach ($subscribers as $sub) {
 
         try {
             const formData = new FormData(form);
-            formData.append('action', 'admin-abone-satin-al');
+            formData.append('action', 'admin-kullanici-satin-al');
 
-            const response = await fetch('admin-abone-satin-al', {
+            const response = await fetch('admin-kullanici-satin-al', {
                 method: 'POST',
                 body: formData,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }

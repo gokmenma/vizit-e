@@ -223,9 +223,13 @@ $router->get('profile', function () {
 
 $router->get('forgot-password', function () {
     require 'forgot_password.php';
+})->post('forgot-password', function () {
+    require 'forgot_password.php';
 });
 
 $router->get('reset-password', function () {
+    require 'reset_password.php';
+})->post('reset-password', function () {
     require 'reset_password.php';
 });
 
@@ -235,13 +239,19 @@ $router->get('temizle', function () {
 
 $router->get('sign-in', function () {
     require 'sign-in.php';
+})->post('sign-in', function () {
+    require 'sign-in.php';
 });
 
 $router->get('sign-up', function () {
     require 'sign-up.php';
+})->post('sign-up', function () {
+    require 'sign-up.php';
 });
 
 $router->get('sign-up/{davetid}', function ($davetid) {
+    require 'sign-up.php';
+})->post('sign-up/{davetid}', function ($davetid) {
     require 'sign-up.php';
 });
 
@@ -274,5 +284,5 @@ $router->get('rapor/{tarih}', function ($tarih) {
 });
 
 // Çalıştır
-$url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+$url = $_GET['url'] ?? trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $router->dispatch($url);

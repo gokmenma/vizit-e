@@ -13,5 +13,5 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 // API dosyasını çağır (Oradaki logic'i kullanmak için)
 // Not: APIuser.php POST['action'] kontrolü yapar
-$_POST['action'] = 'admin-abone-satin-al';
+$_POST['action'] = 'admin-kullanici-satin-al';
 require_once __DIR__ . '/../../App/Api/APIuser.php';

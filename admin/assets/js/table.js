@@ -15,8 +15,18 @@ App.DataTable = {
         rows.forEach(row => {
             const name = row.querySelector(nameClass)?.textContent.toUpperCase() || '';
             const email = row.querySelector(emailClass)?.textContent.toUpperCase() || '';
-            row.style.display = (name.includes(filter) || email.includes(filter)) ? "" : "none";
+            if (name.includes(filter) || email.includes(filter)) {
+                row.removeAttribute('data-filtered-out');
+            } else {
+                row.setAttribute('data-filtered-out', 'true');
+            }
         });
+
+        // Get table ID from row
+        const table = rows[0]?.closest('table');
+        if (table && table.id && App.TablePagination) {
+            App.TablePagination.init(table.id);
+        }
     },
 
     sort: (tableId, n) => {
@@ -54,6 +64,9 @@ App.DataTable = {
                 }
             }
         }
+
+        // Re-paginate after sort
+        if (App.TablePagination) App.TablePagination.init(tableId);
     }
 };
 
@@ -62,6 +75,15 @@ App.TableFilter = {
     activeFilters: {}, // tableId -> { columnIndex -> { type, rules: [...] } }
 
     init: (container = document) => {
+        // Clean up ONLY if the container itself is being replaced (SPA navigation)
+        // We check for data-tf-initialized to avoid double-cleaning in the same cycle
+        if (container.id === 'app-content' && !container.dataset.tfInitialized) {
+            document.querySelectorAll('.tf-popover').forEach(p => p.remove());
+            container.dataset.tfInitialized = 'true';
+            // Reset for next navigation
+            setTimeout(() => delete container.dataset.tfInitialized, 500);
+        }
+
         // Target both explicit data-tables and general card tables
         container.querySelectorAll('table.data-table, .card > table, .table-container > table').forEach(table => {
             if (!table.id) table.id = 'table-' + Math.random().toString(36).substr(2, 9);
@@ -76,7 +98,25 @@ App.TableFilter = {
             
             // Restore from URL
             App.TableFilter.restoreFromUrl(table.id);
+
+            // Initial pagination
+            if (App.TablePagination) App.TablePagination.init(table.id);
         });
+
+        // Global Outside Click listener for Filter Popovers
+        if (!document.dataset || !document.dataset.tfGlobalBound) {
+            document.addEventListener('click', (e) => {
+                const popover = e.target.closest('.tf-popover');
+                const trigger = e.target.closest('.tf-trigger');
+                
+                if (!popover && !trigger) {
+                    document.querySelectorAll('.tf-popover').forEach(p => {
+                        if (p.matches(':popover-open')) p.hidePopover();
+                    });
+                }
+            });
+            if (document.dataset) document.dataset.tfGlobalBound = 'true';
+        }
     },
 
     restoreFromUrl: (tableId) => {
@@ -209,6 +249,13 @@ App.TableFilter = {
             if (lowerText.includes('tarih') || lowerText.includes('bitiş') || lowerText.includes('başlangıç')) type = 'date';
             if (lowerText.includes('durum') || lowerText.includes('paket')) type = 'select';
 
+            popover.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) {
+                    const applyBtn = popover.querySelector('.tf-apply');
+                    if (applyBtn) applyBtn.click();
+                }
+            });
+
             popover.innerHTML = `
                 <div class="tf-header">
                     <span>${text}</span>
@@ -239,6 +286,12 @@ App.TableFilter = {
                 popover.style.left = Math.min(rect.right - 240, window.innerWidth - 260) + 'px';
                 popover.showPopover();
                 if (window.lucide) lucide.createIcons();
+
+                // Focus first input
+                setTimeout(() => {
+                    const firstInput = popover.querySelector('input');
+                    if (firstInput) firstInput.focus();
+                }, 50);
             };
         });
         if (window.lucide) lucide.createIcons();
@@ -455,10 +508,149 @@ App.TableFilter = {
                 }
                 if (!show) break;
             }
-            row.style.display = show ? '' : 'none';
+            // Instead of display: none, we use a data attribute so pagination knows what's available
+            if (show) {
+                row.removeAttribute('data-filtered-out');
+                row.style.display = '';
+            } else {
+                row.setAttribute('data-filtered-out', 'true');
+                row.style.display = 'none';
+            }
         });
 
         // Remove filtering class to show filtered table
         table.classList.remove('is-filtering');
+
+        // Re-paginate if pagination is enabled for this table
+        if (App.TablePagination) App.TablePagination.init(tableId);
+    }
+};
+
+// TablePagination Module (Client-side Pagination)
+App.TablePagination = {
+    settings: {}, // tableId -> { currentPage, pageSize, totalRows, totalPages }
+
+    init: (tableId, pageSize = 10) => {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+
+        const container = table.closest('.dt-container');
+        if (!container) return;
+
+        // Ensure we don't double-init if called from a child event
+        if (App.TablePagination.settings[tableId]) {
+            pageSize = App.TablePagination.settings[tableId].pageSize;
+        }
+
+        const visibleRows = Array.from(table.querySelectorAll('tbody tr')).filter(row => {
+            return row.getAttribute('data-filtered-out') !== 'true';
+        });
+        
+        App.TablePagination.settings[tableId] = {
+            currentPage: 1,
+            pageSize: parseInt(pageSize),
+            totalRows: visibleRows.length,
+            totalPages: Math.ceil(visibleRows.length / parseInt(pageSize))
+        };
+
+        App.TablePagination.render(tableId);
+        App.TablePagination.updateUI(tableId);
+    },
+
+    setPageSize: (tableId, size) => {
+        App.TablePagination.init(tableId, size);
+    },
+
+    goToPage: (tableId, page) => {
+        const s = App.TablePagination.settings[tableId];
+        if (!s || page < 1 || page > s.totalPages) return;
+        
+        s.currentPage = page;
+        App.TablePagination.render(tableId);
+        App.TablePagination.updateUI(tableId);
+    },
+
+    render: (tableId) => {
+        const table = document.getElementById(tableId);
+        const s = App.TablePagination.settings[tableId];
+        if (!table || !s) return;
+
+        const visibleRows = Array.from(table.querySelectorAll('tbody tr')).filter(row => {
+            return row.getAttribute('data-filtered-out') !== 'true'; 
+        });
+
+        const start = (s.currentPage - 1) * s.pageSize;
+        const end = start + s.pageSize;
+
+        // Hide all rows
+        table.querySelectorAll('tbody tr').forEach(row => row.style.display = 'none');
+
+        // Show only rows for current page
+        visibleRows.forEach((row, index) => {
+            if (index >= start && index < end) {
+                row.style.display = '';
+            }
+        });
+    },
+
+    updateUI: (tableId) => {
+        const table = document.getElementById(tableId);
+        const s = App.TablePagination.settings[tableId];
+        const container = table?.closest('.dt-container');
+        if (!container || !s) return;
+
+        const footer = container.querySelector('.dt-footer');
+        if (!footer) return;
+
+        const startIdx = s.totalRows === 0 ? 0 : (s.currentPage - 1) * s.pageSize + 1;
+        const endIdx = Math.min(s.currentPage * s.pageSize, s.totalRows);
+
+        // Standard layout: [PageSize + Info] (Left)  [Pagination] (Right)
+        footer.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: #71717a;">
+                    Sayfa başına:
+                    <div class="custom-select no-search" data-placement="top" style="width: 80px;">
+                        <input type="hidden" value="${s.pageSize}" onchange="App.TablePagination.setPageSize('${tableId}', this.value)">
+                        <div class="select-trigger" style="height: 2rem; padding: 0 0.5rem; border-radius: 6px; font-size: 0.75rem;">
+                            <span class="select-label">${s.pageSize}</span>
+                            <i data-lucide="chevron-down" style="width: 12px; margin-left: auto;"></i>
+                        </div>
+                        <div class="select-popover" popover="manual" style="min-width: 80px;">
+                            <header style="display:none;"><input type="text" class="select-search"></header>
+                            <div class="select-options">
+                                <div class="select-option ${s.pageSize === 10 ? 'selected' : ''}" data-value="10"><span>10</span></div>
+                                <div class="select-option ${s.pageSize === 25 ? 'selected' : ''}" data-value="25"><span>25</span></div>
+                                <div class="select-option ${s.pageSize === 50 ? 'selected' : ''}" data-value="50"><span>50</span></div>
+                                <div class="select-option ${s.pageSize === 100 ? 'selected' : ''}" data-value="100"><span>100</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="dt-info" style="font-size: 0.8125rem; color: #71717a;">
+                    Toplam <b>${s.totalRows}</b> kayıttan ${startIdx}-${endIdx} arası gösteriliyor
+                </div>
+            </div>
+            <div class="dt-pagination">
+                <button class="dt-page-btn" ${s.currentPage === 1 ? 'disabled' : ''} onclick="App.TablePagination.goToPage('${tableId}', 1)">
+                    <i data-lucide="chevrons-left" style="width: 14px;"></i>
+                </button>
+                <button class="dt-page-btn" ${s.currentPage === 1 ? 'disabled' : ''} onclick="App.TablePagination.goToPage('${tableId}', ${s.currentPage - 1})">
+                    <i data-lucide="chevron-left" style="width: 14px;"></i>
+                </button>
+                <div class="dt-page-info" style="font-size: 0.8125rem; color: #71717a; min-width: 80px; text-align: center;">
+                    Sayfa <b>${s.currentPage}</b> / ${s.totalPages || 1}
+                </div>
+                <button class="dt-page-btn" ${s.currentPage === s.totalPages || s.totalPages === 0 ? 'disabled' : ''} onclick="App.TablePagination.goToPage('${tableId}', ${s.currentPage + 1})">
+                    <i data-lucide="chevron-right" style="width: 14px;"></i>
+                </button>
+                <button class="btn dt-page-btn" ${s.currentPage === s.totalPages || s.totalPages === 0 ? 'disabled' : ''} onclick="App.TablePagination.goToPage('${tableId}', ${s.totalPages})">
+                    <i data-lucide="chevrons-right" style="width: 14px;"></i>
+                </button>
+            </div>
+        `;
+
+        if (App.initCustomSelects) App.initCustomSelects(footer);
+        if (window.lucide) lucide.createIcons();
     }
 };

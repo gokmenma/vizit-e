@@ -313,4 +313,101 @@ public function AltKullanicilar($adminId)
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
+
+    /**
+     * Admin paneli dashboard istatistiklerini getirir
+     * @return array
+     */
+    public function getAdminDashboardStats()
+    {
+        // 1. Toplam Gelir (Aktif aboneliklerin toplam paket fiyatı)
+        $stmt = $this->db->prepare("SELECT SUM(ap.fiyat) as total_revenue 
+                                    FROM kullanici_abonelikleri ka
+                                    JOIN abonelik_paketleri ap ON ka.paket_id = ap.id
+                                    WHERE ka.durum = 'aktif'");
+        $stmt->execute();
+        $revenue = $stmt->fetch(PDO::FETCH_OBJ)->total_revenue ?? 0;
+
+        // 2. Yeni Kullanıcılar (Son 30 gün - Sadece ana kullanıcılar)
+        $stmt = $this->db->prepare("SELECT COUNT(*) as new_users 
+                                    FROM {$this->table} 
+                                    WHERE admin_id = 0 
+                                    AND kayit_tarihi >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                                    AND (silinme_tarihi IS NULL OR silinme_tarihi = '')");
+        $stmt->execute();
+        $newUsers = $stmt->fetch(PDO::FETCH_OBJ)->new_users ?? 0;
+
+        // 3. Aktif Kullanıcılar (Toplam - Sadece ana kullanıcılar)
+        $stmt = $this->db->prepare("SELECT COUNT(*) as active_users 
+                                    FROM {$this->table} 
+                                    WHERE admin_id = 0 
+                                    AND (silinme_tarihi IS NULL OR silinme_tarihi = '')");
+        $stmt->execute();
+        $activeUsers = $stmt->fetch(PDO::FETCH_OBJ)->active_users ?? 0;
+
+        // 4. Geçen ayki yeni kullanıcılar (Büyüme oranı hesaplaması için)
+        $stmt = $this->db->prepare("SELECT COUNT(*) as last_month_users 
+                                    FROM {$this->table} 
+                                    WHERE admin_id = 0 
+                                    AND kayit_tarihi < DATE_SUB(NOW(), INTERVAL 30 DAY)
+                                    AND kayit_tarihi >= DATE_SUB(NOW(), INTERVAL 60 DAY)
+                                    AND (silinme_tarihi IS NULL OR silinme_tarihi = '')");
+        $stmt->execute();
+        $lastMonthUsers = $stmt->fetch(PDO::FETCH_OBJ)->last_month_users ?? 0;
+
+        $growthRate = 0;
+        if ($lastMonthUsers > 0) {
+            $growthRate = (($newUsers - $lastMonthUsers) / $lastMonthUsers) * 100;
+        }
+
+        // 5. Son Kayıt Olan 5 Kullanıcı
+        $stmt = $this->db->prepare("SELECT k.*, ap.ad as paket_adi 
+                                    FROM {$this->table} k
+                                    LEFT JOIN (
+                                        SELECT ka1.* FROM kullanici_abonelikleri ka1
+                                        INNER JOIN (
+                                            SELECT kullanici_id, MAX(id) as max_id 
+                                            FROM kullanici_abonelikleri 
+                                            WHERE durum = 'aktif' 
+                                            GROUP BY kullanici_id
+                                        ) ka2 ON ka1.id = ka2.max_id
+                                    ) ka ON ka.kullanici_id = k.id
+                                    LEFT JOIN abonelik_paketleri ap ON ap.id = ka.paket_id
+                                    WHERE k.admin_id = 0
+                                    AND (k.silinme_tarihi IS NULL OR k.silinme_tarihi = '')
+                                    ORDER BY k.id DESC
+                                    LIMIT 5");
+        $stmt->execute();
+        $recentUsers = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        // 6. Son Aktiviteler (Kritik işlemler)
+        $recentActivities = $this->getRecentActivities(5);
+
+        return [
+            'total_revenue' => $revenue,
+            'new_users' => $newUsers,
+            'active_users' => $activeUsers,
+            'growth_rate' => round($growthRate, 1),
+            'recent_users' => $recentUsers,
+            'recent_activities' => $recentActivities
+        ];
+    }
+
+    /**
+     * Kritik sistem aktivitelerini getirir
+     * @param int $limit
+     * @return array
+     */
+    public function getRecentActivities($limit = 10)
+    {
+        $stmt = $this->db->prepare("SELECT l.*, k.adi_soyadi, k.kullanici_adi 
+                                    FROM logs l
+                                    LEFT JOIN kullanicilar k ON l.user_id = k.id
+                                    WHERE l.channel IN ('auth', 'admin-auth', 'user-management', 'workplace-management', 'subscription')
+                                    ORDER BY l.created_at DESC
+                                    LIMIT :limit");
+        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
 }

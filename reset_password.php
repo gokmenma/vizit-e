@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Gerekli sınıfları dahil edelim
 
 use App\Helper\Security;
@@ -75,85 +75,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 ?>
 <!doctype html>
-<html class="no-js " lang="tr">
+<html class="no-js" lang="tr">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta name="description" content="Sgk Rapor işlemlerinizi sms şifresi olmadan yapın">
+
     <title>Vizit-e - Yeni Şifre Belirle</title>
+    <!-- Favicon-->
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/color_skins.css">
+    <link rel="stylesheet" href="/assets/plugins/bootstrap/css/bootstrap.min.css">
+
+    <!-- Custom Css -->
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/color_skins.css">
+    <link rel="stylesheet" href="/assets/css/login.css?v=<?php echo filemtime(__DIR__ . '/assets/css/login.css') ?>">
     <style>
         .alert { margin-bottom: 20px !important; font-size: 15px; font-weight: 500; border-radius: 0.35rem; }
-        .authentication .card-plain { max-width: 550px !important; }
     </style>
 </head>
+
 <body class="theme-black">
     <div class="authentication">
         <div class="container">
-            <div class="col-md-12 content-center">
-                <div class="row">
-                    <div class="col-lg-6 col-md-12">
-                        <div class="company_detail">
-                            <h4 class="logo"><img src="assets/images/logo.svg" alt=""> <strong>VİZİT-E</strong></h4>
-                            <h5>YENİ ŞİFRE BELİRLEME</h5>
-                            <p>Lütfen hesabınız için yeni bir şifre belirleyin.</p>
-                        </div>
-                    </div>
-                    <div class="col-lg-5 col-md-12 offset-lg-1">
+            <div class="login-center">
+                <div class="login-hero">
+                    <img src="/assets/images/logo.svg" alt="Vizit-e" class="login-hero__logo">
+                </div>
+                <h3 class="center-title">Yeni Şifre Belirle</h3>
+                <?php if ($showForm): ?>
+                <p class="center-subtitle">Hesabınız için güvenli bir şifre oluşturun</p>
+                <?php endif; ?>
+                
+                <?php if (!empty($error_message)): ?>
+                    <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
+                <?php endif; ?>
+                
+                <?php if (!empty($success_message)): ?>
+                    <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
+                <?php endif; ?>
+
+                <?php if ($showForm): ?>
+                <div class="login-card">
+                    <form class="login-form" method="POST" autocomplete="off">
+                        <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
                         
-                        <?php
-                            if (!empty($error_message)) {
-                                echo '<div class="alert alert-danger">' . htmlspecialchars($error_message) . '</div>';
-                            }
-                            if (!empty($success_message)) {
-                                echo '<div class="alert alert-success">' . htmlspecialchars($success_message) . '</div>';
-                            }
-                            ?>
-
-                            <div class="card-plain">
-                            <div class="header">
-                                <h5>Yeni Şifre Oluştur</h5>
-                            </div>
-
-                          
-
-                            <?php if ($showForm): // Sadece token geçerliyse formu göster ?>
-                                <form class="form" method="POST" autocomplete="off">
-                                    <!-- Token'ı formla birlikte tekrar göndermek için gizli input -->
-                                    <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
-                                    
-                                    <div class="input-group">
-                                        <input type="password" class="form-control" name="sifre" placeholder="Yeni Şifre" required>
-                                        <span class="input-group-addon"><i class="zmdi zmdi-lock"></i></span>
-                                    </div>
-                                    <div class="input-group">
-                                        <input type="password" class="form-control" name="sifre_tekrar" placeholder="Yeni Şifre (Tekrar)" required>
-                                        <span class="input-group-addon"><i class="zmdi zmdi-lock"></i></span>
-                                    </div>
-                                    <div class="footer">
-                                        <button type="submit" class="btn btn-primary btn-block">ŞİFREYİ GÜNCELLE</button>
-                                    </div>
-                                </form>
-                            <?php endif; ?>
-
-                            <div class="text-center" style="margin-top: 20px;">
-                                <!-- Başarılı mesajı varsa Giriş Yap linkini göster, yoksa talep sayfasına yönlendir -->
-                                <?php if (!empty($success_message)): ?>
-                                    <a href="sign-in">Giriş Yap</a>
-                                <?php else: ?>
-                                    <a href="forgot-password">Yeni Sıfırlama Talebi Oluştur</a>
-                                <?php endif; ?>
+                        <div class="field">
+                            <label class="form-label">Yeni Şifre</label>
+                            <div class="input-group field-control">
+                                <span class="input-group-addon"><i class="zmdi zmdi-lock"></i></span>
+                                <input type="password" class="form-control" name="sifre" placeholder="••••••••" required>
                             </div>
                         </div>
-                    </div>
+
+                        <div class="field">
+                            <label class="form-label">Yeni Şifre (Tekrar)</label>
+                            <div class="input-group field-control">
+                                <span class="input-group-addon"><i class="zmdi zmdi-lock"></i></span>
+                                <input type="password" class="form-control" name="sifre_tekrar" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-login btn-block">Şifreyi Güncelle</button>
+                    </form>
+                </div>
+                <?php endif; ?>
+
+                <div class="center-footer">
+                    <?php if (!empty($success_message)): ?>
+                        <a href="sign-in">Giriş Yap'a Dön</a>
+                    <?php else: ?>
+                        <a href="forgot-password">Yeni Sıfırlama Talebi Oluştur</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
-    <script src="assets/bundles/libscripts.bundle.js"></script>
-    <script src="assets/bundles/vendorscripts.bundle.js"></script>
+    
+    <!-- Jquery Core Js -->
+    <script src="/assets/bundles/libscripts.bundle.js"></script>
+    <script src="/assets/bundles/vendorscripts.bundle.js"></script>
 </body>
+
 </html>

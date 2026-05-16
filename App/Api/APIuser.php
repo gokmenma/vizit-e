@@ -128,6 +128,9 @@ if ($_POST['action'] == "register") {
 
         // Kullanıcıyı kaydet
         $lastInsertId = $UserModel->saveWithAttr($data);
+        
+        $logger = new \Core\Services\DatabaseLogger('auth');
+        $logger->info("Yeni kullanıcı kayıt oldu: " . $_POST["kullanici_adi"]);
 
         $data = [
             "id" => 0,
@@ -327,7 +330,7 @@ $mail_icerik = str_replace(
     exit;
 }
 
-if ($_POST['action'] == "admin-abone-ekle") {
+if ($_POST['action'] == "admin-kullanici-ekle") {
     $adi_soyadi = $_POST["adi_soyadi"] ?? '';
     $email = $_POST["email"] ?? '';
     $paket_id = $_POST["paket_id"] ?? '';
@@ -358,7 +361,7 @@ if ($_POST['action'] == "admin-abone-ekle") {
             "kullanici_adi" => $kullanici_adi,
             "email" => $email,
             "sifre" => password_hash($sifre, PASSWORD_DEFAULT),
-            "role" => "admin",
+            "role" => $_POST["role"] ?? "admin",
             "admin_id" => 0,
             "durum" => "Aktif",
             "referral_code" => substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 10),
@@ -367,11 +370,11 @@ if ($_POST['action'] == "admin-abone-ekle") {
 
         $lastInsertId = $UserModel->saveWithAttr($data);
         
-        // Opsiyonel: Paket aboneliğini de burada başlatabilirsiniz
-        // ...
+        $logger = new \Core\Services\DatabaseLogger('user-management');
+        $logger->info("Yeni kullanıcı eklendi (Admin tarafından): " . $adi_soyadi);
 
         if (ob_get_length()) ob_clean();
-        echo json_encode(["status" => "success", "message" => "Yeni abone başarıyla eklendi."]);
+        echo json_encode(["status" => "success", "message" => "Yeni kullanıcı başarıyla eklendi."]);
     } catch (Exception $e) {
         if (ob_get_length()) ob_clean();
         echo json_encode(["status" => "error", "message" => "Bir hata oluştu: " . $e->getMessage()]);
@@ -379,7 +382,7 @@ if ($_POST['action'] == "admin-abone-ekle") {
     exit;
 }
 
-if ($_POST['action'] == "admin-abone-guncelle") {
+if ($_POST['action'] == "admin-kullanici-guncelle") {
     $id = Security::decrypt($_POST["id"]);
     $adi_soyadi = $_POST["adi_soyadi"] ?? '';
     $email = $_POST["email"] ?? '';
@@ -400,7 +403,8 @@ if ($_POST['action'] == "admin-abone-guncelle") {
         $UserModel->saveWithAttr([
             "id" => $id,
             "adi_soyadi" => $adi_soyadi,
-            "email" => $email
+            "email" => $email,
+            "role" => $_POST["role"] ?? "admin"
         ]);
 
         // Paket aboneliğini güncelle (Varsa güncelle, yoksa ekle)
@@ -415,13 +419,13 @@ if ($_POST['action'] == "admin-abone-guncelle") {
             $stmt->execute([$id, $paket_id, date('Y-m-d')]);
         }
 
-        echo json_encode(["status" => "success", "message" => "Abone bilgileri başarıyla güncellendi."]);
+        echo json_encode(["status" => "success", "message" => "Kullanıcı bilgileri başarıyla güncellendi."]);
     } catch (Exception $e) {
         echo json_encode(["status" => "error", "message" => "Hata: " . $e->getMessage()]);
     }
     exit;
 }
-if ($_POST['action'] == "admin-abone-satin-al") {
+if ($_POST['action'] == "admin-kullanici-satin-al") {
     $kullanici_id = $_POST["kullanici_id"] ?? '';
     $paket_id = $_POST["paket_id"] ?? '';
     $baslangic_tarihi = $_POST["baslangic_tarihi"] ?? '';
@@ -442,6 +446,9 @@ if ($_POST['action'] == "admin-abone-satin-al") {
         // Yeni abonelik ekle
         $stmt = $db->prepare("INSERT INTO kullanici_abonelikleri (kullanici_id, paket_id, durum, baslangic_tarihi, bitis_tarihi, olusturma_tarihi) VALUES (?, ?, 'aktif', ?, ?, ?)");
         $stmt->execute([$kullanici_id, $paket_id, $baslangic_tarihi, $bitis_tarihi, date('Y-m-d H:i:s')]);
+
+        $logger = new \Core\Services\DatabaseLogger('subscription');
+        $logger->success("Kullanıcıya paket tanımlandı. Kullanıcı ID: $kullanici_id, Paket ID: $paket_id");
 
         echo json_encode(["status" => "success", "message" => "Satın alma işlemi başarıyla kaydedildi."]);
     } catch (Exception $e) {
@@ -495,6 +502,9 @@ if ($_POST['action'] == "profil-guncelle") {
 
         // Kullanıcıyı güncelle
         $UserModel->saveWithAttr($data);
+
+        $logger = new \Core\Services\DatabaseLogger('user-management');
+        $logger->info("Profil güncellendi: " . $adi_soyadi);
 
         $status = "success";
         $message = "Profil güncelleme işlemi başarılı.";
@@ -584,6 +594,9 @@ if ($_POST['action'] == "hesabimi-sil") {
 
         // Kullanıcıyı sil
         $UserModel->softDeleteUser($kullanici_id);
+
+        $logger = new \Core\Services\DatabaseLogger('auth');
+        $logger->warning("Kullanıcı hesabını sildi: " . $user->kullanici_adi);
 
         // Oturumu sonlandır
         session_unset();
@@ -695,6 +708,9 @@ if ($_POST['action'] == "alt-kullanici-olustur") {
         // Kullanıcıyı kaydet
         $lastInsertId = $UserModel->saveWithAttr($data);
 
+        $logger = new \Core\Services\DatabaseLogger('user-management');
+        $logger->info("Alt kullanıcı oluşturuldu: " . $kullanici_adi . " (Üst Kullanıcı ID: $ust_kullanici_id)");
+
         // //Kullanıcı ayarlarını oluştur
         // $data = [
         //     "saat_9_mail_bildirimi" => 1,
@@ -765,6 +781,9 @@ if ($_POST['action'] == "alt-kullanici-sil") {
         // Kullanıcıyı sil
         $UserModel->softDeleteUser($kullanici_id);
 
+        $logger = new \Core\Services\DatabaseLogger('user-management');
+        $logger->warning("Alt kullanıcı silindi: " . $user->kullanici_adi);
+
         $status = "success";
         $message = "Alt kullanıcı silme işlemi başarılı.";
     } catch (PDOException $ex) {
@@ -794,6 +813,9 @@ if ($_POST['action'] == "kullanici-durum-guncelle") {
 
         // Kullanıcıyı güncelle
         $UserModel->saveWithAttr($data);
+
+        $logger = new \Core\Services\DatabaseLogger('user-management');
+        $logger->warning("Kullanıcı durumu güncellendi: $durum (ID: $kullanici_id)");
 
         $status = "success";
         $message = "Kullanıcı durumu güncelleme işlemi başarılı.";

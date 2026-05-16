@@ -59,6 +59,9 @@ if ($_POST["action"] == "isyeri_kaydet") {
 
         $lastInsertId = $IsyeriModel->saveWithAttr($data);
 
+        $logger = new \Core\Services\DatabaseLogger('workplace-management');
+        $logger->info(($id == 0 ? "Yeni işyeri eklendi: " : "İşyeri güncellendi: ") . $_POST["firma_adi"]);
+
         $status = "success";
         $message = "İşyeri başarıyla kaydedildi.";
     } catch (PDOException $ex) {
@@ -97,6 +100,10 @@ if ($_POST["action"] == "isyeri_sil") {
 
 
         $IsyeriModel->delete($isyeriId);
+        
+        $logger = new \Core\Services\DatabaseLogger('workplace-management');
+        $logger->warning("İşyeri silindi. ID: $isyeriId");
+
         $status = "success";
         $message = "İşyeri başarıyla silindi.";
     } catch (PDOException $ex) {
@@ -232,9 +239,14 @@ if ($_POST["action"] == "excel_upload_isyeri") {
             ];
 
 
-            $IsyeriModel->saveWithAttr($data);
+            $lastInsertId = $IsyeriModel->saveWithAttr($data);
             $basaliKayitSayisi++;
             $kalan_firma_hakki--;
+        }
+
+        if ($basaliKayitSayisi > 0) {
+            $logger = new \Core\Services\DatabaseLogger('workplace-management');
+            $logger->info("Excel ile toplu işyeri yüklendi. Sayı: $basaliKayitSayisi");
         }
 
         //Hataları kontrol et

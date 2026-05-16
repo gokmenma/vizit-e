@@ -43,6 +43,8 @@ try {
     $result = $userModel->softDeleteUser($id);
 
     if ($result) {
+        $logger = new \Core\Services\DatabaseLogger('user-management');
+        $logger->warning("Kullanıcı silindi: " . $user->adi_soyadi . " (ID: $id)");
         echo json_encode(['success' => true, 'message' => 'Kullanıcı ve bağlı tüm veriler (alt kullanıcılar, işyerleri) başarıyla silindi.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Silme işlemi veritabanı seviyesinde başarısız oldu.']);

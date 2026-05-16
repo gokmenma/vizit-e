@@ -52,8 +52,8 @@ App.validateForm = (formId) => {
 
 // Custom Searchable/Popover Select
 App.initCustomSelects = (container = document) => {
-    container.querySelectorAll('.custom-select').forEach(select => {
-        if (select.dataset.initialized) return;
+    const selector = '.custom-select:not([data-initialized])';
+    container.querySelectorAll(selector).forEach(select => {
         select.dataset.initialized = 'true';
 
         const trigger = select.querySelector('.select-trigger');
@@ -84,11 +84,20 @@ App.initCustomSelects = (container = document) => {
         const openPopover = () => {
             closeAll();
             const rect = trigger.getBoundingClientRect();
+            const placement = select.dataset.placement || 'bottom';
+            
             popover.style.position = 'fixed';
             popover.style.margin = '0';
             popover.style.width = rect.width + 'px';
             popover.style.left = rect.left + 'px';
-            popover.style.top = (rect.bottom + 4) + 'px';
+            
+            if (placement === 'top') {
+                popover.style.top = 'auto';
+                popover.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+            } else {
+                popover.style.bottom = 'auto';
+                popover.style.top = (rect.bottom + 4) + 'px';
+            }
             
             if (popover.hasAttribute('popover')) {
                 popover.showPopover();

@@ -92,7 +92,7 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
                         <li>
                             <a href="kullanicilar" class="nav-link <?php echo $currentRoute === 'kullanicilar' ? 'active' : ''; ?>" data-route="kullanicilar">
                                 <i data-lucide="users"></i>
-                                <span>Aboneler</span>
+                                <span>Kullanıcılar</span>
                             </a>
                         </li>
                         <li>
@@ -125,7 +125,14 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
                                 <span>Ayarlar</span>
                             </a>
                         </li>
-                        
+                        <?php if ($_SESSION['user_role'] === 'superadmin'): ?>
+                        <li>
+                            <a href="aktiviteler" class="nav-link <?php echo $currentRoute === 'aktiviteler' ? 'active' : ''; ?>" data-route="aktiviteler">
+                                <i data-lucide="activity"></i>
+                                <span>Sistem Aktiviteleri</span>
+                            </a>
+                        </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </section>

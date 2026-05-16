@@ -33,6 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_ad'] = $user['adi_soyadi'];
                 $_SESSION['user_email'] = $user['email'];
                 $_SESSION['user_role'] = $user['role'];
+                $_SESSION['kullanici_id'] = $user['id']; // DatabaseLogger uses this
+
+                require_once __DIR__ . '/../Core/Services/DatabaseLogger.php';
+                $logger = new \Core\Services\DatabaseLogger('admin-auth');
+                $logger->info("Süper Admin giriş yaptı: " . $user['adi_soyadi']);
                 
                 header("Location: dashboard");
                 exit();

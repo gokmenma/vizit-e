@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $UserModel->saveWithAttr($data);
 
             // 3. Şifre sıfırlama linkini oluştur
-            $reset_link = 'https://vizit-e.com/reset-password?token=' . $token;
+            $reset_link = $_ENV['APP_URL'] . '/reset-password?token=' . $token;
             // 4. Kullanıcıya e-posta gönder
 
 
@@ -183,11 +183,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <img src="/assets/images/logo.svg" alt="Vizit-e" class="login-hero__logo">
                 </div>
                 <h3 class="center-title">Şifre Sıfırlama</h3>
+                <?php if ($showForm): ?>
                 <p class="center-subtitle">Kayıtlı e-posta adresinizi girin</p>
+                <?php endif; ?>
+                
                 <?php if (!empty($error_message)) { echo '<div class="alert alert-danger">' . htmlspecialchars($error_message) . '</div>'; } ?>
                 <?php if (!empty($success_message)) { echo '<div class="alert alert-success">' . htmlspecialchars($success_message) . '</div>'; } ?>
+                
+                <?php if ($showForm): ?>
                 <div class="login-card">
-                    <?php if ($showForm): ?>
                     <form class="login-form" action="forgot-password" method="POST" autocomplete="off">
                         <div class="field">
                             <label class="form-label">E-Posta Adresi</label>
@@ -198,8 +202,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <button type="submit" name="submitButton" class="btn btn-login btn-block">Sıfırlama Linki Gönder</button>
                     </form>
-                    <?php endif; ?>
                 </div>
+                <?php endif; ?>
                 <div class="center-footer"><a href="sign-in">Giriş Yap'a Geri Dön</a></div>
             </div>
         </div>

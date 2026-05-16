@@ -7,6 +7,7 @@ $prefix = $is_admin_host ? '' : 'admin';
 
 $router->prefix($prefix, 'admin/')
     ->get('sign-in', 'login.php')
+    ->post('sign-in', 'login.php')
     ->get('index', 'index.php')
     ->get('dashboard', 'pages/dashboard.php')
     ->get('kullanicilar', 'pages/kullanicilar.php')
@@ -14,10 +15,11 @@ $router->prefix($prefix, 'admin/')
     ->get('paketler', 'pages/paketler.php')
     ->get('satinalmalar', 'pages/satinalmalar.php')
     ->get('ayarlar', 'pages/ayarlar.php')
+    ->get('aktiviteler', 'pages/aktiviteler.php')
     // AJAX Routes
     ->post('kullanici-sil', 'pages/ajax_kullanici_sil.php')
-    ->post('admin-abone-ekle', 'pages/ajax_abone_ekle.php')
-    ->post('admin-abone-satin-al', 'pages/ajax_abone_satin_al.php')
+    ->post('admin-kullanici-ekle', 'pages/ajax_kullanici_ekle.php')
+    ->post('admin-kullanici-satin-al', 'pages/ajax_kullanici_satin_al.php')
 
     ->get('logout', function () {
         $config = require __DIR__ . '/../config.php';
