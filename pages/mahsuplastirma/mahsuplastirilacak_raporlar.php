@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sorgula_buton'])) {
                                             <td><?php echo htmlspecialchars($rapor['odemeBitTar'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($rapor['odenenTutar'] ?? ''); ?> TL</td>
                                             <td class="text-center">
-                                                <?php if($userRole == "admin"): ?>
+                                                <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
                                                     <button class="btn btn-success btn-icon btn-icon-mini btn-round mahsuplastir" title="Mahsuplaştır">
                                                         <i class="zmdi zmdi-check" style="font-weight: 900;"></i>
                                                     </button>

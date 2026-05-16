@@ -141,10 +141,10 @@ try {
                                                 </select>
                                             </td>
                                             <td class="text-center d-flex justify-content-center align-items-center gap-1">
-                                                <?php // if($userRole == "admin"): // Bu kontrolü kendi sisteminize göre açabilirsiniz ?>
+                                                <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
                                                     <button type="button" class="btn btn-info btn-md btn-onayla">Onayla</button>
                                                     <button type="button" class="btn btn-secondary btn-md btn-personel-degil">Personelim Değil</button>
-                                                <?php // endif; ?>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

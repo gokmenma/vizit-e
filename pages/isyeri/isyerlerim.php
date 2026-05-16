@@ -76,7 +76,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
 <!-- ANA İÇERİK BÖLÜMÜ -->
 <section class="content">
     <div class="container">
-        <?php if($userRole == "admin"): ?>
+        <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
         <div class="row clearfix">
             <div class="col-lg-12 col-md-12 col-sm-12">
                 <div class="card">
@@ -134,7 +134,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                         <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
 
                             <!-- Firma ekleme hakkı hala varsa -->
-                            <?php if ($kullanilan_firma_hakki < $firma_hakki && $userRole == "admin"): ?>
+                            <?php if ($kullanilan_firma_hakki < $firma_hakki && ($userRole == "admin" || $userRole == "superadmin")): ?>
                                 <a href="#defaultModal" data-bs-toggle="modal" data-bs-target="#defaultModal"
                                     class="btn btn-raised btn-primary waves-effect"><i
                                         class="zmdi zmdi-arrow-plus"></i>Yeni Ekle</a>
@@ -235,7 +235,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                                                                 <?php echo $selected; ?>
                                                             </button>
                                                         </form>
-                                                        <?php if($userRole == "admin"): ?>
+                                                        <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
                                                         <!-- Düzenle Butonu -->
                                                         <button type="button" data-id="<?php echo $enc_id; ?>"
                                                             class="btn btn-primary btn-simple waves-effect isyeri-duzenle">
@@ -261,7 +261,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                                             <tr>
                                                 <td colspan="5" class="text-center">
                                                     <p>İşyeriniz bulunmamaktadır. Lütfen yeni işyeri ekleyin.</p>
-                                                    <?php if($userRole == "admin"): ?>
+                                                    <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
                                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                                         data-bs-target="#defaultModal">Yeni Ekle</button>
                                                     <?php endif; ?>
@@ -325,7 +325,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                                                 </button>
                                             </form>
                                             
-                                            <?php if($userRole == "admin"): ?>
+                                            <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
                                                 <button type="button" data-id="<?php echo $enc_id; ?>" class="btn btn-outline-primary py-2 px-3 waves-effect isyeri-duzenle" title="Düzenle">
                                                     <i class="zmdi zmdi-edit"></i>
                                                 </button>

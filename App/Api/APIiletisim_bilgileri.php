@@ -1,7 +1,7 @@
 <?php
 
 
-require "../../vendor/autoload.php";
+require __DIR__ . "/../../vendor/autoload.php";
 require_once '../../Core/Services/SgkViziteService.php'; // Yolun doğru olduğundan emin olun
 
 session_start();

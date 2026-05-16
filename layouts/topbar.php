@@ -57,7 +57,7 @@ $aktif_isyeri = $_SESSION['isyeri_id'] ?? null;
                 <a href="https://api.whatsapp.com/send?phone=905079432723" target="_blank" class="mega-menu" title="Destek"><i class="zmdi zmdi-whatsapp"></i></a>
 
                 <a href="profile" class="mega-menu" title="Profil"><i class="zmdi zmdi-account"></i></a>
-                <?php if ($userRole == "admin"): ?>
+                <?php if ($userRole == "admin" || $userRole == "superadmin"): ?>
                     <a href="abonelik-paketleri" class="mega-menu" title="Paketler"><i class="zmdi zmdi-shopping-basket"></i></a>
                 <?php endif; ?>
                 <a href="logout" class="mega-menu" title="Çıkış Yap"><i class="zmdi zmdi-power"></i></a>
@@ -106,7 +106,7 @@ $aktif_isyeri = $_SESSION['isyeri_id'] ?? null;
     <ul class="popup-menu__list">
         <li><a href="tarihe-gore-rapor-ara">Tarihe göre Rapor Ara</a></li>
         <li><a href="onayli-rapor-ara">Onaylı Rapor Ara</a></li>
-        <?php if ($userRole == "admin"): ?>
+        <?php if ($userRole == "admin" || $userRole == "superadmin"): ?>
             <li><a href="mahsuplastirilacak-raporlar">Mahsuplaşma İşlemleri</a></li>
             <li><a href="manuel-rapor-bildirimi">Manuel Rapor Bildirimi</a></li>
         <?php endif; ?>
@@ -156,12 +156,12 @@ $aktif_isyeri = $_SESSION['isyeri_id'] ?? null;
     </div>
     <ul class="popup-menu__list">
         <li><a href="https://api.whatsapp.com/send?phone=905079432723" target="_blank">Destek</a></li>
-        <?php if ($userRole == "admin"): ?>
+        <?php if ($userRole == "admin" || $userRole == "superadmin"): ?>
             <li><a href="/kullanicilar">Kullanıcılar</a></li>
         <?php endif; ?>
 
         <li><a href="/profile">Profil</a></li>
-        <?php if ($userRole == "admin"): ?>
+        <?php if ($userRole == "admin" || $userRole == "superadmin"): ?>
             <li><a href="/abonelik-paketleri">Abonelik Paketleri</a></li>
         <?php endif; ?>
 

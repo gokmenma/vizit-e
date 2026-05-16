@@ -82,7 +82,7 @@ $rapor_otomatik_onay_bildirim = $KullaniciAyarModel->getSetting('rapor_otomatik_
                         <li class="nav-item"><a class="nav-link active" data-toggle="tab"
                                 href="#profile_with_icon_title"><i class="zmdi zmdi-account zmdi-hc-fw"></i>
                                 PROFİL BİLGİLERİ </a></li>
-                        <?php if ($userRole == "admin") : ?>
+                        <?php if ($userRole == "admin" || $userRole == "superadmin") : ?>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#messages_with_icon_title"><i
                                         class="zmdi zmdi-email zmdi-hc-fw"></i>
                                     BİLDİRİM AYARLARI </a></li>
@@ -91,7 +91,7 @@ $rapor_otomatik_onay_bildirim = $KullaniciAyarModel->getSetting('rapor_otomatik_
                         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#logins_with_icon_title"><i
                                     class="zmdi zmdi-lock zmdi-hc-fw"></i>
                                 GİRİŞ KAYITLARI </a></li>
-                        <?php if ($userRole == "admin") : ?>
+                        <?php if ($userRole == "admin" || $userRole == "superadmin") : ?>
                             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#kvkk_bilgileri"><i
                                         class="zmdi zmdi-file-text zmdi-hc-fw"></i>
 

@@ -375,7 +375,7 @@ try {
                                                 }
                                                 $disabled_attr = $is_future ? 'disabled title="Rapor süresi henüz dolmadı veya bitiş tarihi belirsiz"' : '';
                                                 ?>
-                                                <?php if ($userRole == "admin"): ?>
+                                                <?php if ($userRole == "admin" || $userRole == "superadmin"): ?>
                                                     <button type="button" class="btn btn-info btn-sm btn-onayla" <?php echo $disabled_attr; ?>>
                                                     <!-- İkon Ekle     -->
                                                      <i class="zmdi zmdi-check zmdi-hc-fw"></i>
@@ -473,7 +473,7 @@ try {
                                     </div>
 
                                     <div class="d-grid gap-2">
-                                        <?php if ($userRole == "admin"): ?>
+                                        <?php if ($userRole == "admin" || $userRole == "superadmin"): ?>
                                             <button type="button" class="btn btn-success w-100 py-2.5 btn-onayla d-flex align-items-center justify-content-center gap-1" <?php echo $disabled_attr; ?> style="border-radius: 8px; font-weight: 600; background-color: <?php echo $is_future ? '#6c757d' : '#2cc711'; ?>; border-color: <?php echo $is_future ? '#6c757d' : '#2cc711'; ?>; font-size: 0.95rem; color: #fff;">
                                                 <i class="zmdi zmdi-check"></i> Onayla
                                             </button>

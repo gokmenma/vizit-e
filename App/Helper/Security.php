@@ -92,7 +92,7 @@ class Security
 */
     public static function checkUserRole()
     {
-        if ($_SESSION['role'] != 'admin') {
+        if ($_SESSION['role'] != 'admin' && $_SESSION['role'] != 'superadmin') {
             $_SESSION['hata'] = 'Bu sayfaya erişim izniniz yok.';
             header('Location: unauthorize');
             exit();

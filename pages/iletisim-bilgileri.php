@@ -84,7 +84,7 @@ $mevcutTel = $mevcutBilgiler ? (string)$mevcutBilgiler->tel : 'Kayıt bulunamad�
                             <hr> <!-- Ayırıcı çizgi -->
 
 
-                            <?php if($userRole == "admin"): ?>
+                            <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
                             <!-- GÜNCELLEME FORMU BÖLÜMÜ -->
                             <h6>İletişim Bilgilerini Güncelleme</h6>
 

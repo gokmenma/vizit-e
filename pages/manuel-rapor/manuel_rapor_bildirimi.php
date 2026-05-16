@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bildirim_kaydet_buton
                                 <div class="col-md-2"></div>
 
                                 <div class="col-lg-10 col-md-10">
-                                    <?php if($userRole == "admin"): ?>
+                                    <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
                                         <button type="submit" name="bildirim_kaydet_buton"
                                             class="btn btn-primary waves-effect mt-0 text-nowrap">Kaydet</button>
                                     <?php endif ?>
