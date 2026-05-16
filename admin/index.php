@@ -12,6 +12,19 @@ $config = require __DIR__ . '/../config.php';
 $is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com' || $_SERVER['HTTP_HOST'] === 'admin.vizit-e.com');
 $basePath = $config['base_path'] ?? '/';
 
+// Kullanıcı bilgilerini tazeleyelim
+if (isset($_SESSION['user_id'])) {
+    require_once __DIR__ . '/../Core/Database.php';
+    $db = \Core\Database::getInstance()->getConnection();
+    $stmt = $db->prepare("SELECT adi_soyadi, email FROM kullanicilar WHERE id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($currentUser) {
+        $_SESSION['user_ad'] = !empty($currentUser['adi_soyadi']) ? $currentUser['adi_soyadi'] : $_SESSION['user_ad'];
+        $_SESSION['user_email'] = $currentUser['email'];
+    }
+}
+
 // Eğer bir AJAX isteği ise raw içeriği döndür ve çık
 if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
     require_once __DIR__ . '/../router.php';
@@ -73,7 +86,7 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
                         <i data-lucide="sparkles"></i>
                     </div>
                     <div class="logo-text">
-                        <span class="logo-title">SGK Vizite</span>
+                        <span class="logo-title">Vizit-e</span>
                         <span class="logo-subtitle">Admin v1.0</span>
                     </div>
                 </div>
@@ -144,22 +157,22 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
                             <?php 
                             $nameParts = explode(' ', $_SESSION['user_ad'] ?? 'MA');
                             $initials = '';
-                            foreach ($nameParts as $part) { $initials .= substr($part, 0, 1); }
-                            echo strtoupper(substr($initials, 0, 2));
+                            foreach ($nameParts as $part) { $initials .= mb_substr($part, 0, 1, 'UTF-8'); }
+                            echo mb_strtoupper(mb_substr($initials, 0, 2, 'UTF-8'), 'UTF-8');
                             ?>
                         </div>
                         <div class="user-info">
-                            <span class="user-name"><?php echo $_SESSION['user_ad'] ?? 'Kullanıcı'; ?></span>
-                            <span class="user-email"><?php echo $_SESSION['user_email'] ?? ''; ?></span>
+                            <span class="user-name"><?php echo htmlspecialchars($_SESSION['user_ad'] ?? 'Kullanıcı'); ?></span>
+                            <span class="user-email"><?php echo htmlspecialchars($_SESSION['user_email'] ?? ''); ?></span>
                         </div>
                         <i data-lucide="chevrons-up-down" class="dropdown-icon"></i>
                     </summary>
                     <div class="dropdown-content">
                         <div class="dropdown-header">
                             <p class="dropdown-label">Hesabım</p>
-                            <p class="dropdown-email"><?php echo $_SESSION['user_email'] ?? ''; ?></p>
+                            <p class="dropdown-email"><?php echo htmlspecialchars($_SESSION['user_email'] ?? ''); ?></p>
                         </div>
-                        <a href="profil" class="dropdown-item">
+                        <a href="profil" class="dropdown-item nav-link" data-route="profil">
                             <i data-lucide="user"></i>
                             <span>Profil</span>
                         </a>

@@ -1,7 +1,7 @@
 <?php
 // Session'dan veri okunabilir, bu yüzden başlatalım
 session_start();
-require_once '../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 // PhpSpreadsheet sınıflarını kullanıma hazırla
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
