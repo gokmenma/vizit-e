@@ -231,6 +231,20 @@ foreach ($kullanicilar as $user) {
             </div>
         </form>
     </dialog>
+
+    <dialog id="confirm-delete-modal" class="card" style="width: 400px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+        <div style="padding: 1.5rem; text-align: center;">
+            <div style="width: 48px; height: 48px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <i data-lucide="alert-triangle" style="width: 24px;"></i>
+            </div>
+            <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">Kaydı Sil?</h2>
+            <p style="color: #71717a; font-size: 0.875rem;">Bu satın alma kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
+        </div>
+        <div style="padding: 1rem 1.5rem; background: #fafafa; border-top: 1px solid #e4e4e7; display: flex; gap: 0.75rem; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+            <button type="button" class="btn btn-outline" style="flex: 1;" onclick="this.closest('dialog').close()">Vazgeç</button>
+            <button type="button" id="confirm-delete-btn" class="btn" style="flex: 1; background: #ef4444; color: white;">Evet, Sil</button>
+        </div>
+    </dialog>
 </div>
 
 <script>
@@ -283,30 +297,43 @@ foreach ($kullanicilar as $user) {
         document.getElementById('edit-subscriber-modal').showModal();
     }
 
-    async function deletePurchase(id) {
-        if (!confirm('Bu satın alma kaydını silmek istediğinize emin misiniz?')) return;
+    function deletePurchase(id) {
+        const modal = document.getElementById('confirm-delete-modal');
+        const confirmBtn = document.getElementById('confirm-delete-btn');
+        
+        modal.showModal();
+        
+        confirmBtn.onclick = async () => {
+            const originalText = confirmBtn.innerHTML;
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px;"></div>';
 
-        try {
-            const formData = new FormData();
-            formData.append('id', id);
+            try {
+                const formData = new FormData();
+                formData.append('id', id);
 
-            const response = await fetch('satinalma-sil', {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
+                const response = await fetch('satinalma-sil', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
 
-            const result = await response.json();
+                const result = await response.json();
 
-            if (result.success) {
-                App.toast('success', 'Başarılı', result.message);
-                setTimeout(() => App.refreshContent(), 500);
-            } else {
-                App.toast('error', 'Hata', result.message || 'Bir hata oluştu.');
+                if (result.success) {
+                    App.toast('success', 'Başarılı', result.message);
+                    modal.close();
+                    setTimeout(() => App.refreshContent(), 500);
+                } else {
+                    App.toast('error', 'Hata', result.message || 'Bir hata oluştu.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                App.toast('error', 'Hata', 'Sunucuya bağlanılamadı.');
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalText;
             }
-        } catch (error) {
-            console.error('Error:', error);
-            App.toast('error', 'Hata', 'Sunucuya bağlanılamadı.');
-        }
+        };
     }
 </script>

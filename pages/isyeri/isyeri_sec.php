@@ -6,7 +6,7 @@ use App\Helper\Security;
 Security::checkLogin();
 
 
-require  __DIR__ .  "/../../vendor/autoload.php";
+require_once __DIR__ . "/../../vendor/autoload.php";
 
 
 use Models\KullaniciIsyeriModel;
