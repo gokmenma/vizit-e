@@ -1,108 +1,542 @@
 <?php
-
-require_once "vendor/autoload.php";
-
-
-
-use App\Helper\Security;
-use App\Helper\Date;
-use Models\UserModel;
-
-
-$title = "Kullanıcılar";
-
-$UserModel = new UserModel();
-
-$kullanicilar = $UserModel->all();
-
-
-Security::checkAdmin("sign-in");
-
+require_once __DIR__ . '/../../autoload.php';
+$userModel = new \Models\UserModel();
+$kullanicilar = $userModel->AktifKullanicilar();
 ?>
 
-<?php require "admin/layouts/head.php"; ?>
+<div class="animate-in" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+        <div>
+            <h1 style="font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;">Aboneler</h1>
+            <p style="color: #71717a; font-size: 0.875rem; margin-top: 0.25rem;">Sisteme kayıtlı ana kullanıcılar ve firma yöneticileri.</p>
+        </div>
+        <button class="btn" style="background: #18181b; color: white;" onclick="document.getElementById('add-subscriber-modal').showModal()">
+            <i data-lucide="user-plus" style="width: 16px;"></i> Yeni Abone Ekle
+        </button>
+    </div>
 
-<?php require "admin/layouts/preloader.php"; ?>
 
-<div class="overlay"></div><!-- Overlay For Sidebars -->
 
-<?php require "admin/layouts/topbar.php"; ?>
-<?php require "admin/layouts/navbar.php"; ?>
+    <div class="card dt-container" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid #e4e4e7; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);">
+        <!-- Data Table Header -->
+        <div class="dt-header">
+            <div class="dt-tabs">
+                <button class="dt-tab active" onclick="filterByStatus('all')">
+                    Hepsi <span class="dt-tab-count"><?php echo count($kullanicilar); ?></span>
+                </button>
+                <button class="dt-tab" onclick="filterByStatus('active')">
+                    <i data-lucide="check-circle" style="width: 14px;"></i> Aktif <span class="dt-tab-count"><?php echo count($kullanicilar); ?></span>
+                </button>
+                <button class="dt-tab" onclick="filterByStatus('passive')">
+                    <i data-lucide="clock" style="width: 14px;"></i> Pasif <span class="dt-tab-count">0</span>
+                </button>
+            </div>
 
-<!-- Main Content -->
-<section class="content">
-    <div class="container">
-        <div class="block-header">
-            <div class="row clearfix">
-                <div class="col-lg-5 col-md-5 col-sm-12">
-                    <h2>Projects List</h2>                    
-                </div>            
-                <div class="col-lg-7 col-md-7 col-sm-12">
-                    <ul class="breadcrumb float-md-right padding-0">
-                        <li class="breadcrumb-item"><a href="index.html"><i class="zmdi zmdi-home"></i></a></li>
-                        <li class="breadcrumb-item"><a href="javascript:void(0);">Pages</a></li>
-                        <li class="breadcrumb-item active">Projects List</li>
-                    </ul>
+            <div class="dt-actions">
+                <div class="dt-search-wrapper">
+                    <i data-lucide="search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 16px; color: #71717a; z-index: 10;"></i>
+                    <input type="text" id="subscriber-search" class="dt-search-input" placeholder="Her şeyi ara..." onkeyup="searchTable()">
                 </div>
             </div>
         </div>
-        <div class="row clearfix">
-            <div class="col-lg-12 col-md-12">
-                <div class="card">
-                    <div class="body project_report">
-                        <div class="table-responsive">
-                            <table class="table m-b-0 table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Status</th>
-                                        <th>Adı Soyadı</th>
-                                        <th>Kullanıcı Adı</th>
-                                        <th>Telefon</th>
-                                        <th>Email</th>
-                                        
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($kullanicilar as $kullanici):
-                                       // $badge_color = $abonelik->durum == 'aktif' ? 'success' : ($abonelik->durum == 'pasif' ? 'danger' : 'warning');
 
-                                        ?>
+        <!-- Table Body -->
+        <div class="table-container">
+            <table class="data-table" id="subscribers-table">
+                <thead style="background: #fafafa; border-bottom: 1px solid #e4e4e7;">
+                    <tr>
+                        <th class="sortable" onclick="sortTable(0)" style="width: 80px;">ID <i data-lucide="chevron-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(1)">Abone / Firma <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(2)">Paket / İletişim <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(3)" style="text-align: center;">Alt Kullanıcı <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(4)">Kayıt Tarihi <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th>Durum</th>
+                        <th style="text-align: right;">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($kullanicilar as $user): 
+                        $initials = mb_substr($user->ad_soyad ?? $user->kullanici_adi, 0, 2, 'UTF-8');
+                    ?>
+                    <tr class="subscriber-row" data-id="<?php echo $user->id; ?>" data-status="active">
+                        <td style="color: #71717a; font-family: monospace; font-size: 0.75rem;">#<?php echo $user->id; ?></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #f4f4f5; color: #71717a; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; border: 1px solid #e4e4e7;">
+                                    <?php echo strtoupper($initials); ?>
+                                </div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="subscriber-name" style="font-weight: 600; color: #18181b; cursor: pointer;" 
+                                          onclick="openEditModal(this)"
+                                          data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
+                                          data-name="<?php echo htmlspecialchars($user->ad_soyad ?? $user->kullanici_adi); ?>"
+                                          data-email="<?php echo htmlspecialchars($user->email); ?>"
+                                          data-package="<?php echo $user->current_paket_id; ?>">
+                                        <?php echo $user->ad_soyad ?? $user->kullanici_adi; ?>
+                                    </span>
+                                    <span style="font-size: 0.75rem; color: #71717a;">@<?php echo $user->kullanici_adi; ?></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="subscriber-email-cell">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-size: 0.875rem; font-weight: 600; color: #2563eb;"><?php echo $user->paket_adi ?? 'Paketsiz'; ?></span>
+                                <span style="font-size: 0.75rem; color: #71717a;"><?php echo $user->email; ?></span>
+                            </div>
+                        </td>
+                        <td style="text-align: center;">
+                            <a href="alt-kullanicilar?admin_id=<?php echo $user->id; ?>" class="btn btn-ghost btn-sm nav-link" data-route="alt-kullanicilar?admin_id=<?php echo $user->id; ?>" style="gap: 0.375rem; color: #18181b; font-weight: 600;">
+                                <i data-lucide="users" style="width: 16px;"></i>
+                                <?php echo $user->alt_kullanici_sayisi; ?>
+                            </a>
+                        </td>
+                        <td style="color: #71717a; font-size: 0.8125rem;"><?php echo date('d.m.Y', strtotime($user->kayit_tarihi)); ?></td>
+                        <td>
+                            <span class="badge badge-success" style="display: inline-flex; align-items: center; gap: 0.375rem; background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7;">
+                                <span style="width: 6px; height: 6px; border-radius: 50%; background: #22c55e;"></span>
+                                Aktif
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
+                                <button class="btn btn-ghost btn-sm" title="Düzenle" 
+                                        onclick="openEditModal(this)"
+                                        data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
+                                        data-name="<?php echo htmlspecialchars($user->ad_soyad ?? $user->kullanici_adi); ?>"
+                                        data-email="<?php echo htmlspecialchars($user->email); ?>"
+                                        data-package="<?php echo $user->current_paket_id; ?>">
+                                    <i data-lucide="edit-3" style="width: 14px;"></i>
+                                </button>
+                                <button class="btn btn-ghost btn-sm" title="Şifre Değiştir"><i data-lucide="key" style="width: 14px;"></i></button>
+                                <button class="btn btn-ghost btn-sm" title="Sil" style="color: #ef4444;" 
+                                        onclick="confirmDelete(<?php echo $user->id; ?>, '<?php echo htmlspecialchars($user->ad_soyad ?? $user->kullanici_adi); ?>')">
+                                    <i data-lucide="trash-2" style="width: 14px;"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
 
-                                    <tr>
-                                        <td>
-                                            <span class="badge badge-<?php echo $badge_color; ?> m-r-10">
-                                                <?php echo $kullanici->adi_soyadi; ?>
-                                            </span>
-                                        </td>
-                                        <td class="project-title">
-                                            <a href="#"><?php echo $kullanici->kullanici_adi; ?></a>
-
-                                        </td>
-                                        <td>
-                                            <a href="#"><?php echo $kullanici->telefon; ?></a>
-
-                                        </td>
-                                        <td>
-                                            <a href="#"><?php echo $kullanici->email; ?></a>
-
-                                        </td>
-                                        <td class="project-actions">
-                                            <a href="#" class="btn btn-neutral btn-sm"><i class="zmdi zmdi-eye"></i></a>
-                                            <a href="#" class="btn btn-neutral btn-sm"><i class="zmdi zmdi-edit"></i></a>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+        <!-- Data Table Footer -->
+        <div class="dt-footer">
+            <div>
+                Toplam <b><?php echo count($kullanicilar); ?></b> kayıttan 1-<?php echo count($kullanicilar); ?> arası gösteriliyor
+            </div>
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    Sayfa başına:
+                    <select style="background: transparent; border: 1px solid #e4e4e7; border-radius: 6px; padding: 0.2rem 0.5rem; outline: none;">
+                        <option>10</option>
+                        <option>25</option>
+                        <option>50</option>
+                    </select>
+                </div>
+                <div class="dt-pagination">
+                    <button class="dt-page-btn" disabled><i data-lucide="chevrons-left" style="width: 14px;"></i></button>
+                    <button class="dt-page-btn" disabled><i data-lucide="chevron-left" style="width: 14px;"></i></button>
+                    <button class="dt-page-btn active" style="background: #18181b; color: white; border-color: #18181b;">1</button>
+                    <button class="dt-page-btn">2</button>
+                    <button class="dt-page-btn">3</button>
+                    <button class="dt-page-btn"><i data-lucide="chevron-right" style="width: 14px;"></i></button>
+                    <button class="dt-page-btn"><i data-lucide="chevrons-right" style="width: 14px;"></i></button>
                 </div>
             </div>
         </div>
     </div>
-</section>
+    
+    <!-- Modals -->
+    <!-- Modals -->
+    <dialog id="add-subscriber-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+        <div style="padding: 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="user-plus" style="width: 20px; color: #18181b;"></i> Yeni Abone Ekle
+            </h2>
+            <button onclick="document.getElementById('add-subscriber-modal').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
+        </div>
+        <form id="add-subscriber-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitAddSubscriber(this);">
+            <div class="form-group">
+                <label class="form-label">Ad Soyad / Firma</label>
+                <div class="input-icon-wrapper">
+                    <i data-lucide="user" class="input-icon"></i>
+                    <input type="text" name="adi_soyadi" class="form-input" placeholder="Örn: Mehmet Ali Gökmen" required>
+                    <span class="form-error">Bu alan zorunludur.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">E-posta Adresi</label>
+                <div class="input-icon-wrapper">
+                    <i data-lucide="mail" class="input-icon"></i>
+                    <input type="email" name="email" class="form-input" placeholder="ornek@mail.com" required>
+                    <span class="form-error">Geçerli bir e-posta adresi giriniz.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Abonelik Paketi</label>
+                <div class="custom-select" id="add-package-select">
+                    <input type="hidden" name="paket_id" required>
+                    <div class="select-trigger">
+                        <i data-lucide="package" style="width: 16px; color: #71717a;"></i>
+                        <span class="select-label">Paket seçin...</span>
+                        <i data-lucide="chevron-down" style="width: 16px; color: #71717a; margin-left: auto;"></i>
+                    </div>
+                    <div class="select-popover" popover="manual">
+                        <header>
+                            <i data-lucide="search" style="width: 14px; color: #a1a1aa;"></i>
+                            <input type="text" class="select-search" placeholder="Paket ara...">
+                        </header>
+                        <div class="select-options">
+                            <div class="select-option" data-value="1">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: 500;">Başlangıç Paketi</span>
+                                    <span style="font-size: 0.7rem; color: #71717a;">Küçük işletmeler için ideal</span>
+                                </div>
+                            </div>
+                            <div class="select-option" data-value="2">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: 500;">Standart Paket</span>
+                                    <span style="font-size: 0.7rem; color: #71717a;">Gelişmiş özellikler</span>
+                                </div>
+                            </div>
+                            <div class="select-option" data-value="3">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: 500;">Full Paket</span>
+                                    <span style="font-size: 0.7rem; color: #71717a;">Tüm özellikler açık</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('add-subscriber-modal').close()">Vazgeç</button>
+                <button type="submit" class="btn" style="flex: 1; background: #18181b; color: white;">Abone Oluştur</button>
+            </div>
+        </form>
+    </dialog>
 
-<?php require "admin/layouts/vendor-scripts.php"; ?>
-<?php require "admin/layouts/foot.php"; ?>
+    <dialog id="edit-subscriber-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+        <div style="padding: 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="edit-3" style="width: 20px; color: #18181b;"></i> Abone Düzenle
+            </h2>
+            <button onclick="document.getElementById('edit-subscriber-modal').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
+        </div>
+        <form id="edit-subscriber-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitEditSubscriber(this);">
+            <input type="hidden" id="edit-id" name="id">
+            <div class="form-group">
+                <label class="form-label">Ad Soyad / Firma</label>
+                <div class="input-icon-wrapper">
+                    <i data-lucide="user" class="input-icon"></i>
+                    <input type="text" id="edit-name" name="adi_soyadi" class="form-input" required>
+                    <span class="form-error">Bu alan zorunludur.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">E-posta Adresi</label>
+                <div class="input-icon-wrapper">
+                    <i data-lucide="mail" class="input-icon"></i>
+                    <input type="email" id="edit-email" name="email" class="form-input" required>
+                    <span class="form-error">Geçerli bir e-posta adresi giriniz.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Abonelik Paketi</label>
+                <div class="custom-select" id="package-select">
+                    <input type="hidden" name="paket_id" id="edit-package">
+                    <div class="select-trigger">
+                        <i data-lucide="package" style="width: 16px; color: #71717a;"></i>
+                        <span class="select-label">Paket seçin...</span>
+                        <i data-lucide="chevron-down" style="width: 16px; color: #71717a; margin-left: auto;"></i>
+                    </div>
+                    <div class="select-popover" popover="manual">
+                        <header>
+                            <i data-lucide="search" style="width: 14px; color: #a1a1aa;"></i>
+                            <input type="text" class="select-search" placeholder="Paket ara...">
+                        </header>
+                        <div class="select-options">
+                            <div class="select-option" data-value="1">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: 500;">Başlangıç Paketi</span>
+                                    <span style="font-size: 0.7rem; color: #71717a;">Küçük işletmeler için ideal</span>
+                                </div>
+                            </div>
+                            <div class="select-option" data-value="2">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: 500;">Standart Paket</span>
+                                    <span style="font-size: 0.7rem; color: #71717a;">Gelişmiş özellikler</span>
+                                </div>
+                            </div>
+                            <div class="select-option" data-value="3">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: 500;">Full Paket</span>
+                                    <span style="font-size: 0.7rem; color: #71717a;">Tüm özellikler açık</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('edit-subscriber-modal').close()">Vazgeç</button>
+                <button type="submit" class="btn" style="flex: 1; background: #18181b; color: white;">Güncelle</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Delete Confirmation Modal -->
+    <dialog id="alert-dialog" class="card" style="width: 400px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+            <header>
+                <h2 id="alert-dialog-title" style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: #ef4444;">
+                    <i data-lucide="alert-triangle" style="width: 20px;"></i> Emin misiniz?
+                </h2>
+                <p id="alert-dialog-description" style="font-size: 0.875rem; color: #71717a; line-height: 1.5;">
+                    <b id="delete-user-name"></b> isimli kullanıcıyı silmek istediğinize emin misiniz? <br><br>
+                    Bu işlem geri alınamaz. Bu kullanıcı ile birlikte tüm <b>alt kullanıcılar</b> ve <b>işyerleri</b> de kalıcı olarak silinecektir.
+                </p>
+            </header>
+
+            <footer style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('alert-dialog').close()">Vazgeç</button>
+                <button class="btn" id="confirm-delete-btn" style="flex: 1; background: #ef4444; color: white; border-color: #ef4444; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    Silmeyi Onayla
+                </button>
+            </footer>
+        </div>
+    </dialog>
+</div>
+
+<script>
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
+    // Search Table using Global App Helper
+    function searchTable() {
+        App.DataTable.search('subscriber-search', '.subscriber-row', '.subscriber-name', '.subscriber-email-cell');
+    }
+
+    // Sort Table using Global App Helper
+    function sortTable(n) {
+        App.DataTable.sort('subscribers-table', n);
+    }
+
+    // Submit Add Subscriber
+    async function submitAddSubscriber(form) {
+        if (!App.validateForm('add-subscriber-form')) return;
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="spinner"></div> İşleniyor...';
+
+        try {
+            const formData = new FormData(form);
+            formData.append('action', 'admin-abone-ekle');
+
+            // Router üzerinden güvenli ve basit yol
+            const apiPath = 'admin-abone-ekle';
+
+            const response = await fetch(apiPath, {
+                method: 'POST',
+                body: formData
+            });
+
+            const text = await response.text();
+            let result;
+            
+            try {
+                result = JSON.parse(text);
+            } catch (e) {
+                console.error('Server response was not JSON:', text);
+                throw new Error('Sunucu geçersiz bir yanıt döndürdü. Detay: ' + text.substring(0, 50) + '...');
+            }
+
+            if (result.status === 'success') {
+                App.toast('success', 'Başarılı', result.message);
+                document.getElementById('add-subscriber-modal').close();
+                form.reset();
+                // Tabloyu sayfa yenilenmeden güncelle
+                setTimeout(() => App.refreshContent(), 500);
+            } else {
+                App.toast('error', 'Hata', result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            App.toast('error', 'Hata', error.message || 'Bir ağ hatası oluştu.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+
+    // Submit Edit Subscriber
+    async function submitEditSubscriber(form) {
+        if (!App.validateForm('edit-subscriber-form')) return;
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="spinner"></div> Güncelleniyor...';
+
+        try {
+            const formData = new FormData(form);
+            formData.append('action', 'admin-abone-guncelle');
+
+            const apiPath = 'admin-abone-ekle'; // Router bridge'i kullanıyoruz
+
+            const response = await fetch(apiPath, {
+                method: 'POST',
+                body: formData
+            });
+
+            const text = await response.text();
+            let result;
+            try {
+                result = JSON.parse(text);
+            } catch (e) {
+                console.error('Server response was not JSON:', text);
+                throw new Error('Sunucu geçersiz bir yanıt döndürdü.');
+            }
+
+            if (result.status === 'success') {
+                App.toast('success', 'Başarılı', result.message);
+                document.getElementById('edit-subscriber-modal').close();
+                setTimeout(() => App.refreshContent(), 500);
+            } else {
+                App.toast('error', 'Hata', result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            App.toast('error', 'Hata', error.message || 'Bir ağ hatası oluştu.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+
+    // Filter by Status
+    function filterByStatus(status) {
+        document.querySelectorAll('.dt-tab').forEach(tab => tab.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        const rows = document.querySelectorAll('.subscriber-row');
+        rows.forEach(row => {
+            if (status === 'all') {
+                row.style.display = "";
+            } else {
+                row.style.display = (row.getAttribute('data-status') === status) ? "" : "none";
+            }
+        });
+    }
+
+    // Open Edit Modal with Data
+    function openEditModal(el) {
+        const id = el.getAttribute('data-id');
+        const name = el.getAttribute('data-name');
+        const email = el.getAttribute('data-email');
+        const packageId = el.getAttribute('data-package');
+
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-email').value = email;
+        
+        // Custom Select'i güncelle
+        const select = document.getElementById('package-select');
+        if (select) {
+            const hiddenInput = select.querySelector('input[type="hidden"]');
+            const label = select.querySelector('.select-label');
+            const options = select.querySelectorAll('.select-option');
+            
+            hiddenInput.value = packageId;
+            options.forEach(opt => {
+                if (opt.dataset.value == packageId) {
+                    label.textContent = opt.querySelector('span').textContent;
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.remove('selected');
+                }
+            });
+        }
+
+        document.getElementById('edit-subscriber-modal').showModal();
+    }
+
+    // Delete Logic
+    var userIdToDelete = null;
+
+    function confirmDelete(id, name) {
+        userIdToDelete = id;
+        document.getElementById('delete-user-name').innerText = name;
+        document.getElementById('alert-dialog').showModal();
+    }
+
+    document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+        if (!userIdToDelete) return;
+
+        const btn = this;
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px;"></div> İşleniyor...';
+
+        const formData = new FormData();
+        formData.append('id', userIdToDelete);
+
+        fetch('kullanici-sil', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(async response => {
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || 'Sunucu hatası');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                App.toast('success', 'Başarılı', data.message);
+                document.getElementById('alert-dialog').close();
+                // Sayfayı yenilemek yerine satırı kaldıralım
+                const row = document.querySelector(`.subscriber-row[data-id="${userIdToDelete}"]`);
+                if (row) {
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    setTimeout(() => row.remove(), 300);
+                } else {
+                    setTimeout(() => location.reload(), 1000);
+                }
+            } else {
+                App.toast('error', 'Hata', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            App.toast('error', 'Hata', 'Bir hata oluştu.');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            userIdToDelete = null;
+        });
+    });
+
+    // Close on Outside Click
+    window.onclick = function(event) {
+        const addModal = document.getElementById('add-subscriber-modal');
+        const editModal = document.getElementById('edit-subscriber-modal');
+        const alertModal = document.getElementById('alert-dialog');
+        if (event.target == addModal) addModal.close();
+        if (event.target == editModal) editModal.close();
+        if (event.target == alertModal) alertModal.close();
+    }
+</script>

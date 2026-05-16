@@ -1,0 +1,34 @@
+<?php
+
+/** @var Router $router */
+
+$is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com');
+$prefix = $is_admin_host ? '' : 'admin';
+
+$router->prefix($prefix, 'admin/')
+    ->get('sign-in', 'login.php')
+    ->get('index', 'index.php')
+    ->get('dashboard', 'pages/dashboard.php')
+    ->get('kullanicilar', 'pages/kullanicilar.php')
+    ->get('alt-kullanicilar', 'pages/alt_kullanicilar.php')
+    ->get('paketler', 'pages/paketler.php')
+    ->get('satinalmalar', 'pages/satinalmalar.php')
+    ->get('ayarlar', 'pages/ayarlar.php')
+    // AJAX Routes
+    ->post('kullanici-sil', 'pages/ajax_kullanici_sil.php')
+    ->post('admin-abone-ekle', 'pages/ajax_abone_ekle.php')
+    ->post('admin-abone-satin-al', 'pages/ajax_abone_satin_al.php')
+
+    ->get('logout', function () {
+        $config = require __DIR__ . '/../config.php';
+        $basePath = rtrim($config['base_path'], '/');
+        $is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com');
+        $redirectUrl = $is_admin_host ? '/sign-in' : $basePath . '/admin/sign-in';
+        
+        session_destroy();
+        header("Location: " . $redirectUrl);
+        exit();
+    })
+    ->resetPrefix();
+
+

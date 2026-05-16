@@ -122,14 +122,47 @@ class UserModel extends Model
 
     public function softDeleteUser($id)
     {
-        $sql = "UPDATE $this->table 
-                SET silinme_tarihi = :silinme_tarihi 
-                WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':id', $id);
         $silinmeTarihi = date('Y-m-d H:i:s');
-        $stmt->bindParam(':silinme_tarihi', $silinmeTarihi);
-        return $stmt->execute();
+        
+        try {
+            $this->db->beginTransaction();
+
+            // 1. Ana kullanıcıyı sil
+            $sql = "UPDATE $this->table 
+                    SET silinme_tarihi = :silinme_tarihi 
+                    WHERE id = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':id' => $id,
+                ':silinme_tarihi' => $silinmeTarihi
+            ]);
+
+            // 2. Alt kullanıcıları sil
+            $sqlAlt = "UPDATE $this->table 
+                       SET silinme_tarihi = :silinme_tarihi 
+                       WHERE admin_id = :id";
+            $stmtAlt = $this->db->prepare($sqlAlt);
+            $stmtAlt->execute([
+                ':id' => $id,
+                ':silinme_tarihi' => $silinmeTarihi
+            ]);
+
+            // 3. İşyerlerini sil
+            $sqlIsyeri = "UPDATE kullanici_isyerleri 
+                          SET silinme_tarihi = :silinme_tarihi 
+                          WHERE kullanici_id = :id";
+            $stmtIsyeri = $this->db->prepare($sqlIsyeri);
+            $stmtIsyeri->execute([
+                ':id' => $id,
+                ':silinme_tarihi' => $silinmeTarihi
+            ]);
+
+            $this->db->commit();
+            return true;
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            return false;
+        }
     }
 
     /**Kullanıcının giriş kayıtlarını getirir.
@@ -157,9 +190,24 @@ class UserModel extends Model
      */
     public function AktifKullanicilar()
     {
-        $stmt = $this->db->prepare("SELECT * FROM {$this->table} 
-                                            WHERE admin_id = ?  
-                                            AND (silinme_tarihi IS NULL OR silinme_tarihi = '' )");
+        $stmt = $this->db->prepare("SELECT 
+                                        k.*, 
+                                        ap.ad as paket_adi,
+                                        ka.paket_id as current_paket_id,
+                                        (SELECT COUNT(*) FROM kullanicilar k2 WHERE k2.admin_id = k.id AND (k2.silinme_tarihi IS NULL OR k2.silinme_tarihi = '')) as alt_kullanici_sayisi
+                                    FROM {$this->table} k 
+                                    LEFT JOIN (
+                                        SELECT ka1.* FROM kullanici_abonelikleri ka1
+                                        INNER JOIN (
+                                            SELECT kullanici_id, MAX(id) as max_id 
+                                            FROM kullanici_abonelikleri 
+                                            WHERE durum = 'aktif' 
+                                            GROUP BY kullanici_id
+                                        ) ka2 ON ka1.id = ka2.max_id
+                                    ) ka ON ka.kullanici_id = k.id
+                                    LEFT JOIN abonelik_paketleri ap ON ap.id = ka.paket_id
+                                    WHERE k.admin_id = ?  
+                                    AND (k.silinme_tarihi IS NULL OR k.silinme_tarihi = '' )");
         $stmt->execute([0]);
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }

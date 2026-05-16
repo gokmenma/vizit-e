@@ -1,0 +1,185 @@
+/* Flatpickr Custom Minimal Premium Theme */
+.flatpickr-calendar {
+    background: #fff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-family: inherit;
+    padding: 8px;
+    margin-top: 4px;
+    z-index: 99999999 !important;
+    width: 280px !important; /* Daha minimal genişlik */
+}
+
+.dark .flatpickr-calendar {
+    background: #18181b;
+    border-color: #27272a;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+.flatpickr-months {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 0 8px 0;
+}
+
+.flatpickr-months .flatpickr-month {
+    color: #111827;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark .flatpickr-months .flatpickr-month {
+    color: #f3f4f6;
+}
+
+.flatpickr-current-month {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    position: static !important;
+    width: auto !important;
+    padding: 0 !important;
+    font-size: 100%;
+    font-weight: 600;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    padding: 0 2px !important;
+    font-weight: 600;
+}
+
+.flatpickr-current-month .numInputWrapper {
+    width: 55px !important;
+}
+
+.flatpickr-current-month input.cur-year {
+    font-weight: 600;
+    color: inherit;
+}
+
+.flatpickr-months .flatpickr-prev-month, 
+.flatpickr-months .flatpickr-next-month {
+    padding: 8px;
+    color: #9ca3af;
+    fill: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    border-radius: 6px;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover, 
+.flatpickr-months .flatpickr-next-month:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.flatpickr-innerContainer {
+    padding: 0;
+}
+
+.flatpickr-weekdays {
+    height: 28px;
+}
+
+.flatpickr-weekday {
+    font-weight: 400;
+    color: #a1a1aa;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+}
+
+.flatpickr-days {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+}
+
+.dayContainer {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+.flatpickr-day {
+    border-radius: 8px;
+    font-weight: 500;
+    color: #374151;
+    border: 1px solid transparent;
+    max-width: 34px;
+    height: 34px;
+    line-height: 32px;
+    margin: 1px;
+    font-size: 13px;
+}
+
+.dark .flatpickr-day {
+    color: #d1d5db;
+}
+
+.flatpickr-day:hover {
+    background: #f3f4f6;
+    border-color: #f3f4f6;
+}
+
+.dark .flatpickr-day:hover {
+    background: #27272a;
+    border-color: #27272a;
+}
+
+.flatpickr-day.today {
+    border-color: #e5e7eb;
+    color: #3b82f6;
+}
+
+.flatpickr-day.selected, 
+.flatpickr-day.startRange, 
+.flatpickr-day.endRange, 
+.flatpickr-day.selected:hover, 
+.flatpickr-day.selected:focus {
+    background: #18181b !important;
+    border-color: #18181b !important;
+    color: #fff !important;
+}
+
+.dark .flatpickr-day.selected {
+    background: #f4f4f5 !important;
+    border-color: #f4f4f5 !important;
+    color: #18181b !important;
+}
+
+.flatpickr-day.flatpickr-disabled, 
+.flatpickr-day.prevMonthDay, 
+.flatpickr-day.nextMonthDay {
+    color: #e5e7eb;
+    opacity: 0.4;
+}
+
+.dark .flatpickr-day.flatpickr-disabled, 
+.dark .flatpickr-day.prevMonthDay, 
+.dark .flatpickr-day.nextMonthDay {
+    color: #3f3f46;
+}
+
+/* Input styling for flatpickr */
+.flatpickr-input-wrapper, .flatpickr-wrapper {
+    position: relative;
+    display: block;
+}
+
+input.flatpickr-input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.1rem;
+    padding-right: 2.25rem;
+}

@@ -6,7 +6,9 @@ require_once __DIR__ . '/../../Core/Services/MailGonderService.php';
 
 //Sistem tarihini İstanbul olarak ayarla
 date_default_timezone_set('Europe/Istanbul');
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 
 
@@ -322,8 +324,131 @@ $mail_icerik = str_replace(
 
     ];
     echo json_encode($response);
+    exit;
 }
 
+if ($_POST['action'] == "admin-abone-ekle") {
+    $adi_soyadi = $_POST["adi_soyadi"] ?? '';
+    $email = $_POST["email"] ?? '';
+    $paket_id = $_POST["paket_id"] ?? '';
+
+    // Validasyonlar
+    if (empty($adi_soyadi) || empty($email)) {
+        echo json_encode(["status" => "error", "message" => "Ad Soyad ve Email alanları zorunludur."]);
+        exit;
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(["status" => "error", "message" => "Geçersiz email formatı."]);
+        exit;
+    }
+
+    // Email kontrolü
+    if ($UserModel->checkEmailExists($email)) {
+        echo json_encode(["status" => "error", "message" => "Bu e-posta adresi zaten başka bir abone tarafından kullanılıyor."]);
+        exit;
+    }
+
+    try {
+        $kullanici_adi = strtolower(str_replace(' ', '', $adi_soyadi)) . rand(10, 99);
+        $sifre = '123456'; // Varsayılan şifre
+
+        $data = [
+            "adi_soyadi" => $adi_soyadi,
+            "kullanici_adi" => $kullanici_adi,
+            "email" => $email,
+            "sifre" => password_hash($sifre, PASSWORD_DEFAULT),
+            "role" => "admin",
+            "admin_id" => 0,
+            "durum" => "Aktif",
+            "referral_code" => substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 10),
+            "kayit_tarihi" => date('Y-m-d H:i:s')
+        ];
+
+        $lastInsertId = $UserModel->saveWithAttr($data);
+        
+        // Opsiyonel: Paket aboneliğini de burada başlatabilirsiniz
+        // ...
+
+        if (ob_get_length()) ob_clean();
+        echo json_encode(["status" => "success", "message" => "Yeni abone başarıyla eklendi."]);
+    } catch (Exception $e) {
+        if (ob_get_length()) ob_clean();
+        echo json_encode(["status" => "error", "message" => "Bir hata oluştu: " . $e->getMessage()]);
+    }
+    exit;
+}
+
+if ($_POST['action'] == "admin-abone-guncelle") {
+    $id = Security::decrypt($_POST["id"]);
+    $adi_soyadi = $_POST["adi_soyadi"] ?? '';
+    $email = $_POST["email"] ?? '';
+    $paket_id = $_POST["paket_id"] ?? '';
+
+    if (!$id) {
+        echo json_encode(["status" => "error", "message" => "Geçersiz kullanıcı ID."]);
+        exit;
+    }
+
+    if (empty($adi_soyadi) || empty($email)) {
+        echo json_encode(["status" => "error", "message" => "Ad Soyad ve Email alanları zorunludur."]);
+        exit;
+    }
+
+    try {
+        // Kullanıcı temel bilgilerini güncelle
+        $UserModel->saveWithAttr([
+            "id" => $id,
+            "adi_soyadi" => $adi_soyadi,
+            "email" => $email
+        ]);
+
+        // Paket aboneliğini güncelle (Varsa güncelle, yoksa ekle)
+        if (!empty($paket_id)) {
+            // Önce aktif aboneliklerini kapat
+            $db = \Core\Database::getInstance()->getConnection();
+            $stmt = $db->prepare("UPDATE kullanici_abonelikleri SET durum = 'iptal' WHERE kullanici_id = ?");
+            $stmt->execute([$id]);
+
+            // Yeni abonelik ekle
+            $stmt = $db->prepare("INSERT INTO kullanici_abonelikleri (kullanici_id, paket_id, durum, baslangic_tarihi) VALUES (?, ?, 'aktif', ?)");
+            $stmt->execute([$id, $paket_id, date('Y-m-d')]);
+        }
+
+        echo json_encode(["status" => "success", "message" => "Abone bilgileri başarıyla güncellendi."]);
+    } catch (Exception $e) {
+        echo json_encode(["status" => "error", "message" => "Hata: " . $e->getMessage()]);
+    }
+    exit;
+}
+if ($_POST['action'] == "admin-abone-satin-al") {
+    $kullanici_id = $_POST["kullanici_id"] ?? '';
+    $paket_id = $_POST["paket_id"] ?? '';
+    $baslangic_tarihi = $_POST["baslangic_tarihi"] ?? '';
+    $bitis_tarihi = $_POST["bitis_tarihi"] ?? '';
+
+    if (empty($kullanici_id) || empty($paket_id) || empty($baslangic_tarihi) || empty($bitis_tarihi)) {
+        echo json_encode(["status" => "error", "message" => "Lütfen tüm alanları doldurun."]);
+        exit;
+    }
+
+    try {
+        $db = \Core\Database::getInstance()->getConnection();
+        
+        // Kullanıcının diğer aktif aboneliklerini kapat
+        $stmt = $db->prepare("UPDATE kullanici_abonelikleri SET durum = 'iptal' WHERE kullanici_id = ? AND durum = 'aktif'");
+        $stmt->execute([$kullanici_id]);
+
+        // Yeni abonelik ekle
+        $stmt = $db->prepare("INSERT INTO kullanici_abonelikleri (kullanici_id, paket_id, durum, baslangic_tarihi, bitis_tarihi, olusturma_tarihi) VALUES (?, ?, 'aktif', ?, ?, ?)");
+        $stmt->execute([$kullanici_id, $paket_id, $baslangic_tarihi, $bitis_tarihi, date('Y-m-d H:i:s')]);
+
+        echo json_encode(["status" => "success", "message" => "Satın alma işlemi başarıyla kaydedildi."]);
+    } catch (Exception $e) {
+        echo json_encode(["status" => "error", "message" => "Hata: " . $e->getMessage()]);
+    }
+    exit;
+}
 if ($_POST['action'] == "profil-guncelle") {
     $kullanici_adi = $_POST["kullanici_adi"];
     $adi_soyadi = $_POST["adi_soyadi"];

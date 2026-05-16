@@ -1,0 +1,254 @@
+/* DataTables Premium Styling Overrides */
+.dataTables_wrapper {
+    color: inherit !important;
+    padding: 0;
+    font-size: 0.875rem;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    height: 100% !important;
+    min-height: 0 !important; /* Sayfa yüksekliği boyunca */
+    background: transparent !important;
+}
+
+.dark .dataTables_wrapper {
+    background-color: #18181b !important;
+}
+
+.dataTables_wrapper .dataTables_length, 
+.dataTables_wrapper .dataTables_filter, 
+.dataTables_wrapper .dataTables_info, 
+.dataTables_wrapper .dataTables_processing, 
+.dataTables_wrapper .dataTables_paginate {
+    color: inherit !important;
+    padding: 1rem;
+    font-size: 0.875rem;
+}
+
+/* Tablo içeriğini saran kısmı genişletir */
+.dataTable {
+    margin-bottom: 0 !important;
+}
+
+/* Sayfalama ve bilgi kısmını (footer) en alta sabitle */
+.dataTables_wrapper > div:last-child {
+    margin-top: auto !important;
+    border-top: 1px solid #f1f5f9 !important;
+    background-color: #fafafa !important;
+}
+
+.dark .dataTables_wrapper > div:last-child {
+    border-color: #27272a !important;
+    background-color: #18181b !important;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.5rem !important;
+    padding: 0.4rem 0.8rem !important;
+    margin-left: 0.5rem !important;
+    outline: none !important;
+    background-color: white !important;
+}
+
+.dark .dataTables_wrapper .dataTables_filter input {
+    background-color: #18181b !important;
+    border-color: #27272a !important;
+    color: #f4f4f5 !important;
+}
+
+table.dataTable {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+table.dataTable thead th {
+    background-color: #f9fafb !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 1rem !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: #374151 !important;
+}
+
+.dark table.dataTable thead th {
+    background-color: #18181b !important;
+    border-color: #27272a !important;
+    color: #a1a1aa !important;
+}
+
+table.dataTable tbody td {
+    padding: 1rem !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+    font-size: 0.875rem !important;
+    background-color: inherit !important;
+}
+
+.dark table.dataTable tbody td {
+    border-color: #27272a !important;
+    background-color: #18181b !important;
+    color: #d4d4d8 !important;
+}
+
+.dark table.dataTable tbody tr:hover td {
+    background-color: #27272a !important;
+}
+
+table.dataTable.no-footer {
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+.dark table.dataTable.no-footer {
+    border-color: #27272a !important;
+}
+
+.dark table.dataTable thead th,
+.dark table.dataTable thead td,
+.dark table.dataTable tbody td {
+    border-color: #27272a !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border-radius: 0.5rem !important;
+    border: 1px solid #e5e7eb !important;
+    margin-left: 0.25rem !important;
+}
+
+.dark .dataTables_wrapper .dataTables_paginate .paginate_button {
+    border-color: #27272a !important;
+    color: #f4f4f5 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #18181b !important;
+    color: white !important;
+    border-color: #18181b !important;
+}
+
+.dark .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #f4f4f5 !important;
+    color: #18181b !important;
+}
+
+table.dataTable thead .sorting:before, table.dataTable thead .sorting:after, 
+table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after, 
+table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
+    opacity: 0.3 !important;
+    font-size: 0.8rem !important;
+}
+
+/* Dialog Centering */
+dialog.dialog {
+    margin: auto !important;
+    inset: 0 !important;
+    padding: 0 !important;
+}
+
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+/* DataTables Length Menu Select Styling */
+.dataTables_wrapper .dataTables_length {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-bottom: 0 !important;
+}
+
+.dataTables_wrapper .dataTables_length label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+}
+
+.dark .dataTables_wrapper .dataTables_length label {
+    color: #a1a1aa !important;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 0.5rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1rem 1rem !important;
+    padding: 0.25rem 2rem 0.25rem 0.75rem !important;
+    height: 2.25rem !important;
+    min-width: 4rem !important;
+    border-radius: 0.5rem !important;
+    border: 1px solid #e5e7eb !important;
+    background-color: white !important;
+    color: #374151 !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    outline: none !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s ease !important;
+    margin: 0 0.25rem !important;
+}
+
+.dark .dataTables_wrapper .dataTables_length select {
+    background-color: #18181b !important;
+    border-color: #27272a !important;
+    color: #f4f4f5 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a1a1aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+}
+
+.dataTables_wrapper .dataTables_length select:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+
+.dark .dataTables_wrapper .dataTables_length select:focus {
+    border-color: #818cf8 !important;
+    box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.2) !important;
+}
+
+/* Custom Select Reusable Component Styles */
+.custom-select-component {
+    display: inline-block;
+    position: relative;
+    user-select: none;
+}
+
+.custom-select-popover {
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1) !important;
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out !important;
+}
+
+.dark .custom-select-popover {
+    background-color: #18181b !important;
+    border-color: #27272a !important;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4), 0 8px 10px -6px rgba(0,0,0,0.4) !important;
+}
+
+.custom-select-popover [role="option"].selected {
+    background-color: #f4f4f5 !important;
+    color: #18181b !important;
+    font-weight: 700 !important;
+}
+
+.dark .custom-select-popover [role="option"].selected {
+    background-color: #27272a !important;
+    color: #f4f4f5 !important;
+}
+
+.custom-select-popover [role="option"]:hover {
+    background-color: #f9fafb !important;
+}
+
+.dark .custom-select-popover [role="option"]:hover {
+    background-color: #27272a !important;
+}
+
+
