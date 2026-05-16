@@ -150,6 +150,12 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
                                 <span>Ayarlar</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="/kampanyalar" class="nav-link <?php echo $currentRoute === 'kampanyalar' ? 'active' : ''; ?>" data-route="kampanyalar">
+                                <i data-lucide="megaphone"></i>
+                                <span>Kampanya Yönetimi</span>
+                            </a>
+                        </li>
                         <?php if ($_SESSION['user_role'] === 'superadmin'): ?>
                         <li>
                             <a href="/aktiviteler" class="nav-link <?php echo $currentRoute === 'aktiviteler' ? 'active' : ''; ?>" data-route="aktiviteler">

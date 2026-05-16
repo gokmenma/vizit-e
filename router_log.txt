@@ -119,3 +119,5 @@
 19:50:40 - vizite.com - /kullanicilar
 19:53:55 - vizite.com - /isyerlerim
 19:53:59 - vizite.com - /kullanicilar
+20:56:52 - vizite.com - /isyerlerim
+20:57:54 - vizite.com - /kullanicilar
