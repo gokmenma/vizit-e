@@ -5,6 +5,20 @@
 
 window.App = window.App || {};
 
+// Global Fetch Interceptor for Session Management
+const originalFetch = window.fetch;
+window.fetch = async (...args) => {
+    const response = await originalFetch(...args);
+    if (response.status === 401) {
+        // If we get a 401, it means session is dropped
+        window.location.href = 'login.php';
+        // Return a never-resolving promise or just let the redirect happen
+        return new Promise(() => {}); 
+    }
+    return response;
+};
+
+
 // Helper: Normalize route for matching
 const normalizeRoute = (r) => {
     if (!r) return 'dashboard';
@@ -43,6 +57,7 @@ App.loadPage = async (rawRoute, pushState = true) => {
         const response = await fetch(rawRoute, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
+        
         if (!response.ok) throw new Error('Page not found');
         
         const html = await response.text();

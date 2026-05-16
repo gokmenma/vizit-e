@@ -7,11 +7,6 @@ $paketler = $paketModel->all();
 $userModel = new \Models\UserModel();
 ?>
 
-<!-- Summernote Lite -->
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
-
 <div class="animate-in" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
         <div>
@@ -68,7 +63,11 @@ $userModel = new \Models\UserModel();
                             <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
                                 <?php if (!empty($criteria['user_ids'])): ?>
                                     <span class="badge" style="background: var(--muted); font-size: 0.7rem;">Seçili Kullanıcılar (<?php echo count($criteria['user_ids']); ?>)</span>
-                                <?php else: ?>
+                                <?php endif; ?>
+                                <?php if (!empty($criteria['manual_emails'])): ?>
+                                    <span class="badge" style="background: #e0f2fe; color: #0369a1; font-size: 0.7rem;">Manuel E-postalar</span>
+                                <?php endif; ?>
+                                <?php if (empty($criteria['user_ids']) && empty($criteria['manual_emails'])): ?>
                                     <?php if (!empty($criteria['status'])): ?>
                                         <span class="badge" style="background: var(--muted); font-size: 0.7rem;">Durum: <?php echo $criteria['status'] === 'active' ? 'Aktif' : 'Pasif'; ?></span>
                                     <?php endif; ?>
@@ -160,6 +159,7 @@ $userModel = new \Models\UserModel();
             <div class="dt-tabs" style="margin-bottom: 0.5rem; background: var(--muted); padding: 0.25rem; border-radius: 8px; align-self: flex-start;">
                 <button type="button" class="dt-tab active" id="tab-filter" onclick="switchTargetMode('filter')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Filtreleme Kullan</button>
                 <button type="button" class="dt-tab" id="tab-users" onclick="switchTargetMode('users')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Kullanıcı Seç</button>
+                <button type="button" class="dt-tab" id="tab-manual" onclick="switchTargetMode('manual')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Manuel Giriş</button>
             </div>
 
             <div id="target-mode-filter" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -232,6 +232,14 @@ $userModel = new \Models\UserModel();
                     </div>
                     <div id="user-ids-inputs">
                     </div>
+                </div>
+            </div>
+
+            <div id="target-mode-manual" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Manuel E-posta Listesi</label>
+                    <textarea name="criteria[manual_emails]" id="manual-emails" class="form-input" style="min-height: 100px; font-family: monospace; font-size: 0.875rem;" placeholder="Her satıra bir e-posta adresi yazın veya virgülle ayırın..."></textarea>
+                    <p style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.5rem;">Sistemde kayıtlı olmayan kişilere de ulaşmak için burayı kullanabilirsiniz.</p>
                 </div>
             </div>
 
@@ -366,7 +374,11 @@ $userModel = new \Models\UserModel();
 </style>
 
 <script>
-    $(document).ready(function() {
+    function initSummernote() {
+        if (typeof $ === 'undefined' || !$.fn.summernote) {
+            setTimeout(initSummernote, 100);
+            return;
+        }
         $('#campaign-content').summernote({
             placeholder: 'E-posta içeriğini buraya yazın...',
             tabsize: 2,
@@ -381,7 +393,9 @@ $userModel = new \Models\UserModel();
                 ['view', ['fullscreen', 'codeview', 'help']]
             ]
         });
-    });
+    }
+
+    initSummernote();
 
     if (window.lucide) {
         lucide.createIcons();
@@ -410,17 +424,15 @@ $userModel = new \Models\UserModel();
         currentTargetMode = mode;
         document.getElementById('tab-filter').classList.toggle('active', mode === 'filter');
         document.getElementById('tab-users').classList.toggle('active', mode === 'users');
+        document.getElementById('tab-manual').classList.toggle('active', mode === 'manual');
         
-        if (mode === 'filter') {
-            document.getElementById('target-mode-filter').style.display = 'grid';
-            document.getElementById('target-mode-users').style.display = 'none';
-        } else {
-            document.getElementById('target-mode-filter').style.display = 'none';
-            document.getElementById('target-mode-users').style.display = 'block';
-            if (!App.initializedCustomSelects_Users) {
-                App.initCustomSelects(document.getElementById('target-mode-users'));
-                App.initializedCustomSelects_Users = true;
-            }
+        document.getElementById('target-mode-filter').style.display = (mode === 'filter' ? 'grid' : 'none');
+        document.getElementById('target-mode-users').style.display = (mode === 'users' ? 'block' : 'none');
+        document.getElementById('target-mode-manual').style.display = (mode === 'manual' ? 'block' : 'none');
+
+        if (mode === 'users' && !App.initializedCustomSelects_Users) {
+            App.initCustomSelects(document.getElementById('target-mode-users'));
+            App.initializedCustomSelects_Users = true;
         }
     }
 
@@ -489,6 +501,9 @@ $userModel = new \Models\UserModel();
                         });
                     }
                     renderUserTags();
+                } else if (data.criteria.manual_emails) {
+                    switchTargetMode('manual');
+                    document.getElementById('manual-emails').value = data.criteria.manual_emails;
                 } else {
                     switchTargetMode('filter');
                     updateSelect('criteria-status-select', data.criteria.status || '');
@@ -543,7 +558,7 @@ $userModel = new \Models\UserModel();
                 result.logs.forEach(log => {
                     const row = document.createElement('tr');
                     const statusClass = log.status === 'sent' ? 'badge-success' : (log.status === 'failed' ? 'badge-destructive' : 'badge-secondary');
-                    const name = (log.name == '0' || !log.name) ? log.email.split('@')[0] : log.name;
+                    const name = (log.name == '0' || !log.name || log.name == 'Dış Alıcı') ? log.email.split('@')[0] : log.name;
                     row.innerHTML = `
                         <td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6;">${name}</td>
                         <td style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6;">${log.email}</td>
@@ -592,9 +607,15 @@ $userModel = new \Models\UserModel();
 
             if (currentTargetMode === 'filter') {
                 formData.delete('criteria[user_ids][]');
+                formData.delete('criteria[manual_emails]');
+            } else if (currentTargetMode === 'users') {
+                formData.delete('criteria[status]');
+                formData.delete('criteria[paket_id]');
+                formData.delete('criteria[manual_emails]');
             } else {
                 formData.delete('criteria[status]');
                 formData.delete('criteria[paket_id]');
+                formData.delete('criteria[user_ids][]');
             }
 
             const response = await fetch('kampanya-kaydet', {

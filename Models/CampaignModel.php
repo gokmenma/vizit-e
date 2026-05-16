@@ -77,34 +77,63 @@ class CampaignModel extends Model
 
     public function getFilteredUsers($criteria)
     {
+        $users = [];
+
+        // 1. Seçili Kullanıcılar
         if (!empty($criteria['user_ids'])) {
             $ids = is_array($criteria['user_ids']) ? $criteria['user_ids'] : explode(',', $criteria['user_ids']);
             if (!empty($ids)) {
                 $placeholders = rtrim(str_repeat('?, ', count($ids)), ', ');
                 $stmt = $this->db->prepare("SELECT id, email, COALESCE(NULLIF(adi_soyadi, ''), kullanici_adi) as name FROM kullanicilar WHERE id IN ($placeholders) AND (silinme_tarihi IS NULL OR silinme_tarihi = '')");
                 $stmt->execute($ids);
-                return $stmt->fetchAll(PDO::FETCH_OBJ);
+                $users = array_merge($users, $stmt->fetchAll(PDO::FETCH_OBJ));
             }
         }
 
-        $query = "SELECT k.id, k.email, COALESCE(NULLIF(k.adi_soyadi, ''), k.kullanici_adi) as name 
-                  FROM kullanicilar k 
-                  LEFT JOIN kullanici_abonelik a ON k.id = a.kullanici_id 
-                  WHERE (k.silinme_tarihi IS NULL OR k.silinme_tarihi = '')";
-        
-        $params = [];
-        if (!empty($criteria['status'])) {
-            $query .= " AND k.durum = :status";
-            $params[':status'] = $criteria['status'];
-        }
-        if (!empty($criteria['paket_id'])) {
-            $query .= " AND a.paket_id = :paket_id";
-            $params[':paket_id'] = $criteria['paket_id'];
+        // 2. Filtreleme (Sadece Seçili Kullanıcı yoksa veya filtreler doluysa)
+        if (empty($criteria['user_ids']) && (!empty($criteria['status']) || !empty($criteria['paket_id']))) {
+            $query = "SELECT k.id, k.email, COALESCE(NULLIF(k.adi_soyadi, ''), k.kullanici_adi) as name 
+                      FROM kullanicilar k 
+                      LEFT JOIN kullanici_abonelik a ON k.id = a.kullanici_id 
+                      WHERE (k.silinme_tarihi IS NULL OR k.silinme_tarihi = '')";
+            
+            $params = [];
+            if (!empty($criteria['status'])) {
+                $query .= " AND k.durum = :status";
+                $params[':status'] = $criteria['status'];
+            }
+            if (!empty($criteria['paket_id'])) {
+                $query .= " AND a.paket_id = :paket_id";
+                $params[':paket_id'] = $criteria['paket_id'];
+            }
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute($params);
+            $users = array_merge($users, $stmt->fetchAll(PDO::FETCH_OBJ));
         }
 
-        $stmt = $this->db->prepare($query);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
+        // 3. Manuel E-postalar
+        if (!empty($criteria['manual_emails'])) {
+            $emails = preg_split('/[\s,]+/', $criteria['manual_emails']);
+            foreach ($emails as $email) {
+                $email = trim($email);
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    // Mükerrer kontrolü (zaten listede varsa ekleme)
+                    $exists = false;
+                    foreach ($users as $u) if ($u->email === $email) { $exists = true; break; }
+                    
+                    if (!$exists) {
+                        $users[] = (object)[
+                            'id' => 0,
+                            'email' => $email,
+                            'name' => 'Dış Alıcı'
+                        ];
+                    }
+                }
+            }
+        }
+
+        return $users;
     }
 
     public function clearLogs($campaignId)

@@ -5,6 +5,10 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Oturum kontrolü
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+        header('HTTP/1.1 401 Unauthorized');
+        exit('SESSION_EXPIRED');
+    }
     header("Location: login.php");
     exit();
 }
@@ -76,6 +80,11 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- jQuery & Summernote -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
     <script>
         // Theme initialization to prevent flash
