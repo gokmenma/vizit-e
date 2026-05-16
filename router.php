@@ -165,9 +165,13 @@ $router->get('iletisim-bilgileri', function () {
 
 $router->get('tarihe-gore-rapor-ara', function () {
     require __DIR__ . '/pages/tarihe_gore_rapor_ara.php';
+})->post('tarihe-gore-rapor-ara', function () {
+    require __DIR__ . '/pages/tarihe_gore_rapor_ara.php';
 });
 
 $router->get('mahsuplastirilacak-raporlar', function () {
+    require __DIR__ . '/pages/mahsuplastirma/mahsuplastirilacak_raporlar.php';
+})->post('mahsuplastirilacak-raporlar', function () {
     require __DIR__ . '/pages/mahsuplastirma/mahsuplastirilacak_raporlar.php';
 });
 
@@ -181,6 +185,8 @@ $router->get('prim-borcuna-mahsup-edilen-odemeler', function () {
 
 $router->get('onay-bekleyen-raporlar', function () {
     require __DIR__ . '/pages/onay_bekleyen_raporlar.php';
+})->post('onay-bekleyen-raporlar', function () {
+    require __DIR__ . '/pages/onay_bekleyen_raporlar.php';
 });
 
 $router->get('onayli-rapor-ara', function () {
@@ -188,6 +194,8 @@ $router->get('onayli-rapor-ara', function () {
 });
 
 $router->get('onayli-raporlar', function () {
+    require __DIR__ . '/pages/onayli_raporlar.php';
+})->post('onayli-raporlar', function () {
     require __DIR__ . '/pages/onayli_raporlar.php';
 });
 
@@ -205,9 +213,13 @@ $router->get('manuel-rapor-guncelleme', function () {
 
 $router->get('is-kazasi-bildirimi', function () {
     require __DIR__ . '/pages/is_kazasi_bildirimi.php';
+})->post('is-kazasi-bildirimi', function () {
+    require __DIR__ . '/pages/is_kazasi_bildirimi.php';
 });
 
 $router->get('arsivlenmis-raporlar', function () {
+    require __DIR__ . '/pages/arsivlenmis_raporlar.php';
+})->post('arsivlenmis-raporlar', function () {
     require __DIR__ . '/pages/arsivlenmis_raporlar.php';
 });
 

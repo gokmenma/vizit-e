@@ -106,8 +106,6 @@ foreach ($kullanicilar as $user) {
                         </td>
                         <td style="text-align: right;">
                             <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
-                                <button class="btn btn-ghost btn-sm" title="Onayla" style="color: #22c55e;"><i data-lucide="check-circle" style="width: 14px;"></i></button>
-                                <button class="btn btn-ghost btn-sm" title="İptal Et" style="color: #ef4444;"><i data-lucide="x-circle" style="width: 14px;"></i></button>
                                 <button class="btn btn-ghost btn-sm" title="Sil" style="color: #71717a;" onclick="deletePurchase(<?php echo $row->id; ?>)"><i data-lucide="trash-2" style="width: 14px;"></i></button>
                             </div>
                         </td>
@@ -129,14 +127,14 @@ foreach ($kullanicilar as $user) {
 
     <!-- Modals -->
     <dialog id="add-purchase-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="shopping-cart" style="width: 20px;"></i> Yeni İşlem Ekle
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="shopping-cart" style="width: 18px;"></i> Yeni İşlem Ekle
             </h2>
             <button onclick="this.closest('dialog').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
-        <form id="add-purchase-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitAddPurchase(this);">
-            <div class="form-group">
+        <form id="add-purchase-form" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem;" onsubmit="event.preventDefault(); submitAddPurchase(this);">
+            <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Kullanıcı Seçin</label>
                 <div class="custom-select" id="subscriber-select">
                     <button type="button" class="select-trigger btn-outline">
@@ -180,7 +178,17 @@ foreach ($kullanicilar as $user) {
                             <?php endforeach; ?>
                         </div>
                     </div>
-                    <input type="hidden" name="paket_id" required>
+                    <input type="hidden" name="paket_id" required onchange="handlePackageChange(this.value)">
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Firma Hakkı</label>
+                    <input type="number" name="firma_hakki" id="add-firma-hakki" class="form-input" placeholder="30" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kullanıcı Hakkı</label>
+                    <input type="number" name="alt_kullanici_hakki" id="add-alt-kullanici-hakki" class="form-input" placeholder="3" required>
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -248,8 +256,18 @@ foreach ($kullanicilar as $user) {
 </div>
 
 <script>
+    const availablePackages = <?php echo json_encode($paketler); ?>;
+
     if (window.lucide) {
         lucide.createIcons();
+    }
+
+    function handlePackageChange(paketId) {
+        const paket = availablePackages.find(p => p.id == paketId);
+        if (paket) {
+            document.getElementById('add-firma-hakki').value = paket.firma_hakki || 30;
+            document.getElementById('add-alt-kullanici-hakki').value = paket.alt_kullanici_hakki || 3;
+        }
     }
 
     async function submitAddPurchase(form) {

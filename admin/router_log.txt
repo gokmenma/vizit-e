@@ -1335,3 +1335,16 @@
 17:38:31 - admin.vizite.com - /satinalmalar
 17:38:41 - admin.vizite.com - /satinalmalar
 17:38:59 - admin.vizite.com - /satinalmalar
+17:41:01 - admin.vizite.com - /satinalmalar
+17:41:07 - admin.vizite.com - /satinalma-sil
+17:41:08 - admin.vizite.com - /satinalmalar
+17:41:42 - admin.vizite.com - /satinalma-sil
+17:41:43 - admin.vizite.com - /satinalmalar
+17:42:34 - admin.vizite.com - /admin-kullanici-satin-al
+17:42:34 - admin.vizite.com - /satinalmalar
+17:43:45 - admin.vizite.com - /satinalmalar
+17:47:31 - admin.vizite.com - /ayarlar
+17:47:32 - admin.vizite.com - /dashboard
+17:47:38 - admin.vizite.com - /kullanicilar
+17:47:42 - admin.vizite.com - /alt-kullanicilar
+17:47:52 - admin.vizite.com - /satinalmalar

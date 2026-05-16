@@ -20,6 +20,7 @@ use Models\KullaniciIsyeriModel;
 use Models\KullaniciAyarModel;
 use Core\Services\MailGonderService;
 use Models\KvkkRizaModel;
+use Models\KullaniciAbonelikModel;
 
 
 
@@ -444,8 +445,11 @@ if ($_POST['action'] == "admin-kullanici-satin-al") {
         $stmt->execute([$kullanici_id]);
 
         // Yeni abonelik ekle
-        $stmt = $db->prepare("INSERT INTO kullanici_abonelikleri (kullanici_id, paket_id, durum, baslangic_tarihi, bitis_tarihi, olusturma_tarihi) VALUES (?, ?, 'aktif', ?, ?, ?)");
-        $stmt->execute([$kullanici_id, $paket_id, $baslangic_tarihi, $bitis_tarihi, date('Y-m-d H:i:s')]);
+        $firma_hakki = $_POST["firma_hakki"] ?? 30;
+        $alt_kullanici_hakki = $_POST["alt_kullanici_hakki"] ?? 3;
+
+        $stmt = $db->prepare("INSERT INTO kullanici_abonelikleri (kullanici_id, paket_id, durum, baslangic_tarihi, bitis_tarihi, firma_hakki, alt_kullanici_hakki, olusturma_tarihi) VALUES (?, ?, 'aktif', ?, ?, ?, ?, ?)");
+        $stmt->execute([$kullanici_id, $paket_id, $baslangic_tarihi, $bitis_tarihi, $firma_hakki, $alt_kullanici_hakki, date('Y-m-d H:i:s')]);
 
         $logger = new \Core\Services\DatabaseLogger('subscription');
         $logger->success("Kullanıcıya paket tanımlandı. Kullanıcı ID: $kullanici_id, Paket ID: $paket_id");
@@ -632,13 +636,17 @@ if ($_POST['action'] == "alt-kullanici-olustur") {
         : "";
 
 
-      //3 adet kullanıcı ekleme yetkisi ver
+      // Dinamik kullanıcı ekleme yetkisi kontrolü
+    $AbonelikModel = new KullaniciAbonelikModel();
+    $abonelik = $AbonelikModel->getSubscriptionByUserId($ust_kullanici_id);
+    $limit = $abonelik ? ($abonelik->alt_kullanici_hakki ?? 3) : 3;
+
     $altKullaniciSayisi = $UserModel->altKullaniciSayisi($ust_kullanici_id);
-    if ($altKullaniciSayisi >= 3 && $kullanici_id == 0) {
+    if ($altKullaniciSayisi >= $limit && $kullanici_id == 0) {
         $status = "error";
         $response = [
             "status" => $status,
-            "message" => "3 adet kullanıcı ekleme yetkiniz bulunmamaktadır."
+            "message" => "$limit adet kullanıcı ekleme yetkiniz bulunmaktadır. Limitiniz dolmuştur."
         ];
         echo json_encode($response);
         exit;

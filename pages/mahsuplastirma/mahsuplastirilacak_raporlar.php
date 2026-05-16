@@ -7,7 +7,7 @@ Security::checkFirma();
 Security::hasActiveSubscription();
 
 $hataMesaji = '';
-require_once 'Core/Services/SgkViziteService.php';
+require_once __DIR__ . '/../../Core/Services/SgkViziteService.php';
 $title = 'Mahsuplaştırılacak Raporlar';
 $mahsuplasmaRaporlari = []; // Yeni değişken adı
 $hataMesaji = '';
