@@ -75,7 +75,7 @@ App.loadPage = async (rawRoute, pushState = true) => {
         if (breadcrumb) {
             const formattedRoute = route.split('/').pop().split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
             breadcrumb.innerHTML = `
-                <span style="font-size: 0.875rem; color: #71717a;">SGK Vizite</span>
+                <a href="dashboard" style="font-size: 0.875rem; color: #71717a;">Ana Sayfa</a>
                 <span style="font-size: 0.875rem; color: #d4d4d8;">/</span>
                 <span style="font-size: 0.875rem; font-weight: 500; color: #18181b;">${formattedRoute}</span>
             `;

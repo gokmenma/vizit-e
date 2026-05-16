@@ -2,11 +2,7 @@
 
 /** @var Router $router */
 
-$is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com');
-$prefix = $is_admin_host ? '' : 'admin';
-
-$router->prefix($prefix, 'admin/')
-    ->get('sign-in', 'login.php')
+$router->get('sign-in', 'login.php')
     ->post('sign-in', 'login.php')
     ->get('index', 'index.php')
     ->get('dashboard', 'pages/dashboard.php')
@@ -24,7 +20,7 @@ $router->prefix($prefix, 'admin/')
     ->get('logout', function () {
         $config = require __DIR__ . '/../config.php';
         $basePath = rtrim($config['base_path'], '/');
-        $is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com');
+        $is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com' || $_SERVER['HTTP_HOST'] === 'admin.vizit-e.com');
         $redirectUrl = $is_admin_host ? '/sign-in' : $basePath . '/admin/sign-in';
         
         session_destroy();

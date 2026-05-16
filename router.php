@@ -118,15 +118,19 @@ class Router
 $router = new Router();
 
 // Subdomain tespiti
-$is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com');
+$is_admin_host = (isset($_SERVER['HTTP_HOST']) && ($_SERVER['HTTP_HOST'] === 'admin.vizite.com' || $_SERVER['HTTP_HOST'] === 'admin.vizit-e.com'));
 
 if ($is_admin_host) {
-    // Admin subdomain'indeysek öncelikle admin rotalarını yükle (prefix olmadan)
+    // Admin subdomain'indeysek prefix yok, ana dizin gibi çalışır
+    $router->prefix('', 'admin/');
     require_once 'admin/route.php';
+    $router->resetPrefix();
 } else {
     // Normal domaindeysek 'admin' prefix'li istekleri yönlendir
     if (isset($_GET['url']) && str_starts_with($_GET['url'], 'admin')) {
+        $router->prefix('admin', 'admin/');
         require_once 'admin/route.php';
+        $router->resetPrefix();
     }
 }
 

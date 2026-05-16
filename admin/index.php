@@ -9,7 +9,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit();
 }
 $config = require __DIR__ . '/../config.php';
-$is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com');
+$is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com' || $_SERVER['HTTP_HOST'] === 'admin.vizit-e.com');
 $basePath = $config['base_path'] ?? '/';
 
 // Eğer bir AJAX isteği ise raw içeriği döndür ve çık
@@ -84,7 +84,7 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
                     <h3 id="group-label-menu">Menü</h3>
                     <ul>
                         <li>
-                            <a href="dashboard" class="nav-link <?php echo $currentRoute === 'dashboard' ? 'active' : ''; ?>" data-route="dashboard">
+                            <a href="/dashboard" class="nav-link <?php echo $currentRoute === 'dashboard' ? 'active' : ''; ?>" data-route="dashboard">
                                 <i data-lucide="layout-dashboard"></i>
                                 <span>Ana Sayfa</span>
                             </a>
@@ -96,7 +96,7 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
                             </a>
                         </li>
                         <li>
-                            <a href="alt-kullanicilar" class="nav-link <?php echo $currentRoute === 'alt-kullanicilar' ? 'active' : ''; ?>" data-route="alt-kullanicilar">
+                            <a href="/alt-kullanicilar" class="nav-link <?php echo $currentRoute === 'alt-kullanicilar' ? 'active' : ''; ?>" data-route="alt-kullanicilar">
                                 <i data-lucide="user-plus"></i>
                                 <span>Alt Kullanıcılar</span>
                             </a>
@@ -108,26 +108,26 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
                     <h3 id="group-label-yönetim">Yönetim</h3>
                     <ul>
                         <li>
-                            <a href="paketler" class="nav-link <?php echo $currentRoute === 'paketler' ? 'active' : ''; ?>" data-route="paketler">
+                            <a href="/paketler" class="nav-link <?php echo $currentRoute === 'paketler' ? 'active' : ''; ?>" data-route="paketler">
                                 <i data-lucide="package"></i>
                                 <span>Paket Tanımları</span>
                             </a>
                         </li>
                         <li>
-                            <a href="satinalmalar" class="nav-link <?php echo $currentRoute === 'satinalmalar' ? 'active' : ''; ?>" data-route="satinalmalar">
+                            <a href="/satinalmalar" class="nav-link <?php echo $currentRoute === 'satinalmalar' ? 'active' : ''; ?>" data-route="satinalmalar">
                                 <i data-lucide="shopping-cart"></i>
                                 <span>Satın Almalar</span>
                             </a>
                         </li>
                          <li>
-                            <a href="ayarlar" class="nav-link <?php echo $currentRoute === 'ayarlar' ? 'active' : ''; ?>" data-route="ayarlar">
+                            <a href="/ayarlar" class="nav-link <?php echo $currentRoute === 'ayarlar' ? 'active' : ''; ?>" data-route="ayarlar">
                                 <i data-lucide="settings"></i>
                                 <span>Ayarlar</span>
                             </a>
                         </li>
                         <?php if ($_SESSION['user_role'] === 'superadmin'): ?>
                         <li>
-                            <a href="aktiviteler" class="nav-link <?php echo $currentRoute === 'aktiviteler' ? 'active' : ''; ?>" data-route="aktiviteler">
+                            <a href="/aktiviteler" class="nav-link <?php echo $currentRoute === 'aktiviteler' ? 'active' : ''; ?>" data-route="aktiviteler">
                                 <i data-lucide="activity"></i>
                                 <span>Sistem Aktiviteleri</span>
                             </a>

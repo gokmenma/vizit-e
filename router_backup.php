@@ -254,7 +254,7 @@ $router->get('sign-up/{davetid}', function ($davetid) {
 
 
 // Subdomain tespiti
-$is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com');
+$is_admin_host = (isset($_SERVER['HTTP_HOST']) && ($_SERVER['HTTP_HOST'] === 'admin.vizite.com' || $_SERVER['HTTP_HOST'] === 'admin.vizit-e.com'));
 
 if ($is_admin_host) {
     // Admin subdomain'indeysek direkt admin rotalarını yükle (prefix olmadan)
