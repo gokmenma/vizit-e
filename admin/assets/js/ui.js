@@ -192,3 +192,18 @@ App.initDatePickers = (container = document) => {
         });
     });
 };
+
+// Global Dialog Close on Outside Click
+document.addEventListener('click', (e) => {
+    if (e.target.tagName === 'DIALOG') {
+        const rect = e.target.getBoundingClientRect();
+        if (
+            e.clientX < rect.left ||
+            e.clientX > rect.right ||
+            e.clientY < rect.top ||
+            e.clientY > rect.bottom
+        ) {
+            e.target.close();
+        }
+    }
+});

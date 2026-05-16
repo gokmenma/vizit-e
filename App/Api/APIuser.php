@@ -408,16 +408,25 @@ if ($_POST['action'] == "admin-kullanici-guncelle") {
             "role" => $_POST["role"] ?? "admin"
         ]);
 
-        // Paket aboneliğini güncelle (Varsa güncelle, yoksa ekle)
+        // Paket aboneliğini güncelle
         if (!empty($paket_id)) {
-            // Önce aktif aboneliklerini kapat
             $db = \Core\Database::getInstance()->getConnection();
-            $stmt = $db->prepare("UPDATE kullanici_abonelikleri SET durum = 'iptal' WHERE kullanici_id = ?");
-            $stmt->execute([$id]);
+            $firma_hakki = $_POST["firma_hakki"] ?? 30;
+            $alt_kullanici_hakki = $_POST["alt_kullanici_hakki"] ?? 3;
+            $subscription_id = $_POST["subscription_id"] ?? null;
 
-            // Yeni abonelik ekle
-            $stmt = $db->prepare("INSERT INTO kullanici_abonelikleri (kullanici_id, paket_id, durum, baslangic_tarihi) VALUES (?, ?, 'aktif', ?)");
-            $stmt->execute([$id, $paket_id, date('Y-m-d')]);
+            if ($subscription_id) {
+                // Spesifik kaydı güncelle
+                $stmt = $db->prepare("UPDATE kullanici_abonelikleri SET paket_id = ?, firma_hakki = ?, alt_kullanici_hakki = ? WHERE id = ?");
+                $stmt->execute([$paket_id, $firma_hakki, $alt_kullanici_hakki, $subscription_id]);
+            } else {
+                // Genel güncelleme: Diğerlerini kapat, yenisini aç
+                $stmt = $db->prepare("UPDATE kullanici_abonelikleri SET durum = 'iptal' WHERE kullanici_id = ?");
+                $stmt->execute([$id]);
+
+                $stmt = $db->prepare("INSERT INTO kullanici_abonelikleri (kullanici_id, paket_id, durum, baslangic_tarihi, firma_hakki, alt_kullanici_hakki) VALUES (?, ?, 'aktif', ?, ?, ?)");
+                $stmt->execute([$id, $paket_id, date('Y-m-d'), $firma_hakki, $alt_kullanici_hakki]);
+            }
         }
 
         echo json_encode(["status" => "success", "message" => "Kullanıcı bilgileri başarıyla güncellendi."]);

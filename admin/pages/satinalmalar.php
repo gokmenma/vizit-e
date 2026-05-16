@@ -74,9 +74,14 @@ foreach ($kullanicilar as $user) {
                                 <span style="font-weight: 600; color: #18181b; cursor: pointer;" 
                                       onclick="openEditSubscriberModal(this)"
                                       data-id="<?php echo $row->kullanici_id; ?>"
+                                      data-purchase-id="<?php echo $row->id; ?>"
                                       data-name="<?php echo htmlspecialchars($row->ad_soyad ?? $row->kullanici_adi); ?>"
                                       data-email="<?php echo htmlspecialchars($row->email); ?>"
-                                      data-package="<?php echo $row->current_package_id; ?>">
+                                      data-package="<?php echo $row->current_package_id; ?>"
+                                      data-firma-hakki="<?php echo $row->firma_hakki; ?>"
+                                      data-alt-kullanici-hakki="<?php echo $row->alt_kullanici_hakki; ?>"
+                                      data-start-date="<?php echo $row->baslangic_tarihi; ?>"
+                                      data-end-date="<?php echo $row->bitis_tarihi; ?>">
                                     <?php echo !empty($row->ad_soyad) ? $row->ad_soyad : $row->kullanici_adi; ?>
                                 </span>
                                 <span style="font-size: 0.75rem; color: #71717a;">@<?php echo $row->kullanici_adi; ?></span>
@@ -105,8 +110,21 @@ foreach ($kullanicilar as $user) {
                             <?php endif; ?>
                         </td>
                         <td style="text-align: right;">
-                            <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
-                                <button class="btn btn-ghost btn-sm" title="Sil" style="color: #71717a;" onclick="deletePurchase(<?php echo $row->id; ?>)"><i data-lucide="trash-2" style="width: 14px;"></i></button>
+                            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                                <button class="btn-icon-outline" title="Düzenle" 
+                                        onclick="openEditSubscriberModal(this)"
+                                        data-id="<?php echo $row->kullanici_id; ?>"
+                                        data-purchase-id="<?php echo $row->id; ?>"
+                                        data-name="<?php echo htmlspecialchars($row->ad_soyad ?? $row->kullanici_adi); ?>"
+                                        data-email="<?php echo htmlspecialchars($row->email); ?>"
+                                        data-package="<?php echo $row->current_package_id; ?>"
+                                        data-firma-hakki="<?php echo $row->firma_hakki; ?>"
+                                        data-alt-kullanici-hakki="<?php echo $row->alt_kullanici_hakki; ?>">
+                                    <i data-lucide="edit-2"></i>
+                                </button>
+                                <button class="btn-icon-outline" title="Sil" onclick="deletePurchase(<?php echo $row->id; ?>)">
+                                    <i data-lucide="trash-2" style="color: #ef4444;"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -127,13 +145,13 @@ foreach ($kullanicilar as $user) {
 
     <!-- Modals -->
     <dialog id="add-purchase-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                 <i data-lucide="shopping-cart" style="width: 18px;"></i> Yeni İşlem Ekle
             </h2>
             <button onclick="this.closest('dialog').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
-        <form id="add-purchase-form" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem;" onsubmit="event.preventDefault(); submitAddPurchase(this);">
+        <form id="add-purchase-form" style="padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;" onsubmit="event.preventDefault(); submitAddPurchase(this);">
             <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Kullanıcı Seçin</label>
                 <div class="custom-select" id="subscriber-select">
@@ -209,30 +227,69 @@ foreach ($kullanicilar as $user) {
     </dialog>
 
     <dialog id="edit-subscriber-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="user-cog" style="width: 20px;"></i> Kullanıcı Düzenle
+        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="shopping-cart" style="width: 18px;"></i> İşlem Düzenle
             </h2>
             <button onclick="this.closest('dialog').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
-        <form id="edit-subscriber-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); if(App.validateForm('edit-subscriber-form')) { App.toast('success', 'Güncellendi', 'Kullanıcı bilgileri başarıyla güncellendi.'); this.closest('dialog').close(); }">
-            <input type="hidden" id="sub-edit-id">
-            <div class="form-group">
-                <label class="form-label">Ad Soyad / Firma</label>
-                <input type="text" id="sub-edit-name" class="form-input" required>
+        <form id="edit-subscriber-form" style="padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;" onsubmit="event.preventDefault(); submitEditSubscriber(this);">
+            <input type="hidden" id="sub-edit-id" name="kullanici_id">
+            <input type="hidden" id="sub-edit-purchase-id" name="subscription_id">
+            
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Kullanıcı</label>
+                <div class="custom-select disabled" id="edit-user-select" style="opacity: 0.7; pointer-events: none;">
+                    <button type="button" class="select-trigger btn-outline">
+                        <span class="select-label truncate">Kullanıcı seçiniz...</span>
+                    </button>
+                </div>
             </div>
+
             <div class="form-group">
-                <label class="form-label">E-posta Adresi</label>
-                <input type="email" id="sub-edit-email" class="form-input" required>
+                <label class="form-label">Paket Seçin</label>
+                <div class="custom-select" id="edit-package-select">
+                    <button type="button" class="select-trigger btn-outline">
+                        <span class="select-label truncate">Paket seçiniz...</span>
+                        <i data-lucide="chevrons-up-down" style="width: 14px; opacity: 0.5;"></i>
+                    </button>
+                    <div class="select-popover" popover="manual">
+                        <header>
+                            <i data-lucide="search" style="width: 14px; opacity: 0.5;"></i>
+                            <input type="text" class="select-search" placeholder="Paket ara..." autocomplete="off">
+                        </header>
+                        <div class="select-options">
+                            <?php foreach ($paketler as $p): ?>
+                                <div class="select-option" data-value="<?php echo $p->id; ?>"><?php echo $p->ad; ?> (₺<?php echo number_format($p->fiyat, 0); ?>)</div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <input type="hidden" id="sub-edit-package" name="paket_id" required onchange="handleEditPackageChange(this.value)">
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Abonelik Paketi</label>
-                <select id="sub-edit-package" class="form-input" required>
-                    <?php foreach ($paketler as $p): ?>
-                        <option value="<?php echo $p->id; ?>"><?php echo $p->ad; ?></option>
-                    <?php endforeach; ?>
-                </select>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Firma Hakkı</label>
+                    <input type="number" id="sub-edit-firma-hakki" name="firma_hakki" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kullanıcı Hakkı</label>
+                    <input type="number" id="sub-edit-alt-kullanici-hakki" name="alt_kullanici_hakki" class="form-input" required>
+                </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Başlangıç Tarihi</label>
+                    <input type="date" id="sub-edit-start-date" name="baslangic_tarihi" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bitiş Tarihi</label>
+                    <input type="date" id="sub-edit-end-date" name="bitis_tarihi" class="form-input" required>
+                </div>
+            </div>
+
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button type="button" class="btn btn-outline" style="flex: 1;" onclick="this.closest('dialog').close()">Vazgeç</button>
                 <button type="submit" class="btn" style="flex: 1; background: #18181b; color: white;">Güncelle</button>
@@ -307,12 +364,90 @@ foreach ($kullanicilar as $user) {
         }
     }
 
+    function handleEditPackageChange(paketId) {
+        const paket = availablePackages.find(p => p.id == paketId);
+        if (paket) {
+            document.getElementById('sub-edit-firma-hakki').value = paket.firma_hakki || 30;
+            document.getElementById('sub-edit-alt-kullanici-hakki').value = paket.alt_kullanici_hakki || 3;
+        }
+    }
+
     function openEditSubscriberModal(el) {
         document.getElementById('sub-edit-id').value = el.dataset.id;
-        document.getElementById('sub-edit-name').value = el.dataset.name;
-        document.getElementById('sub-edit-email').value = el.dataset.email;
-        document.getElementById('sub-edit-package').value = el.dataset.package;
+        document.getElementById('sub-edit-purchase-id').value = el.dataset.purchaseId;
+        
+        // User Label Update
+        const userSelect = document.getElementById('edit-user-select');
+        userSelect.querySelector('.select-label').textContent = el.dataset.name + ' (' + el.dataset.email + ')';
+
+        // Package Select Update
+        const pkgId = el.dataset.package;
+        const pkgSelect = document.getElementById('edit-package-select');
+        const pkgInput = pkgSelect.querySelector('input[type="hidden"]');
+        const pkgLabel = pkgSelect.querySelector('.select-label');
+        const pkgOption = pkgSelect.querySelector(`.select-option[data-value="${pkgId}"]`);
+        
+        pkgInput.value = pkgId;
+        pkgLabel.textContent = pkgOption ? pkgOption.textContent.trim() : 'Paket seçiniz...';
+        pkgSelect.querySelectorAll('.select-option').forEach(opt => opt.classList.toggle('selected', opt.dataset.value == pkgId));
+
+        document.getElementById('sub-edit-firma-hakki').value = el.dataset.firmaHakki;
+        document.getElementById('sub-edit-alt-kullanici-hakki').value = el.dataset.altKullaniciHakki;
+        
+        // Date Update
+        const startDate = el.dataset.startDate;
+        const endDate = el.dataset.endDate;
+        
+        if (startDate) {
+            const startInput = document.getElementById('sub-edit-start-date');
+            startInput.value = startDate;
+            if (startInput._flatpickr) startInput._flatpickr.setDate(startDate);
+        }
+        
+        if (endDate) {
+            const endInput = document.getElementById('sub-edit-end-date');
+            endInput.value = endDate;
+            if (endInput._flatpickr) endInput._flatpickr.setDate(endDate);
+        }
+
         document.getElementById('edit-subscriber-modal').showModal();
+    }
+
+    async function submitEditSubscriber(form) {
+        if (!App.validateForm('edit-subscriber-form')) return;
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px;"></div> Kaydediliyor...';
+
+        try {
+            const formData = new FormData(form);
+            formData.append('action', 'admin-kullanici-guncelle');
+            // Form verileri name attributeleri üzerinden zaten otomatik alınacak
+
+            const response = await fetch('admin-kullanici-guncelle', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            const result = await response.json();
+
+            if (result.success || result.status === 'success') {
+                App.toast('success', 'Başarılı', result.message || 'Kullanıcı bilgileri güncellendi.');
+                document.getElementById('edit-subscriber-modal').close();
+                setTimeout(() => App.refreshContent(), 500);
+            } else {
+                App.toast('error', 'Hata', result.message || 'Bir hata oluştu.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            App.toast('error', 'Hata', 'Sunucuya bağlanılamadı.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
     }
 
     function deletePurchase(id) {

@@ -122,7 +122,7 @@ $activeMenu = getActiveMenu($currentPage, $menuItems);
                             <a href="isyerlerim">İşyerlerim</a>
                         </li>
                         <!-- Kullanıcılar     -->
-                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') : ?>
+                        <?php if (isset($_SESSION['role']) && ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'superadmin')) : ?>
                             <li class="<?= ($activeMenu === 'kullanicilar') ? 'open active' : 'open' ?>">
                                 <a href="kullanicilar">Kullanıcılar</a>
 
