@@ -158,7 +158,7 @@ $userModel = new \Models\UserModel();
             
             <div class="dt-tabs" style="margin-bottom: 0.5rem; background: var(--muted); padding: 0.25rem; border-radius: 8px; align-self: flex-start;">
                 <button type="button" class="dt-tab active" id="tab-filter" onclick="window.CampaignApp.switchTargetMode('filter')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Filtreleme Kullan</button>
-                <button type="button" class="dt-tab" id="tab-users" onclick="window.CampaignApp.switchTargetMode('users')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Kullanıcı Seç & Manuel Giriş</button>
+                <button type="button" class="dt-tab" id="tab-users" onclick="window.CampaignApp.switchTargetMode('users')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Alıcı Seçimi (Kullanıcı veya E-posta)</button>
             </div>
 
             <div id="target-mode-filter" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -200,45 +200,45 @@ $userModel = new \Models\UserModel();
             </div>
 
             <div id="target-mode-users" style="display: none;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label class="form-label">Sistemden Kullanıcı Seç</label>
-                        <div class="custom-select" id="user-multi-select">
-                            <div class="select-trigger">
-                                <span class="select-label">Kullanıcı ara ve ekle...</span>
-                                <i data-lucide="search" style="width: 16px; color: #71717a; margin-left: auto;"></i>
-                            </div>
-                            <div class="select-popover" popover="manual">
-                                <header style="padding: 0.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem;">
-                                    <i data-lucide="search" style="width: 14px; color: #a1a1aa;"></i>
-                                    <input type="text" class="select-search" placeholder="İsim veya e-posta ara..." style="flex: 1; border: none; outline: none; background: transparent; font-size: 0.875rem;">
-                                </header>
-                                <div class="select-options" id="user-options-list" style="max-height: 200px; overflow-y: auto;">
-                                    <?php 
-                                        $allUsers = $userModel->AktifKullanicilarAltKullanici();
-                                        foreach($allUsers as $u): 
-                                    ?>
-                                    <div class="select-option" data-value="<?php echo $u->id; ?>" data-name="<?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?>" onclick="window.CampaignApp.addUserToSelection(this)">
+                <div class="form-group">
+                    <label class="form-label">Alıcı Ekle (Kullanıcı ara veya direkt e-posta yaz)</label>
+                    <div class="custom-select" id="unified-recipient-select">
+                        <div class="select-trigger">
+                            <span class="select-label">Kullanıcı ismi veya e-posta adresi yazın...</span>
+                            <i data-lucide="search" style="width: 16px; color: #71717a; margin-left: auto;"></i>
+                        </div>
+                        <div class="select-popover" popover="manual">
+                            <header style="padding: 0.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="search" style="width: 14px; color: #a1a1aa;"></i>
+                                <input type="text" class="select-search" id="recipient-search-input" placeholder="Ara veya yeni e-posta yaz..." style="flex: 1; border: none; outline: none; background: transparent; font-size: 0.875rem;" onkeydown="window.CampaignApp.handleRecipientKeydown(event)">
+                            </header>
+                            <div class="select-options" id="unified-options-list" style="max-height: 250px; overflow-y: auto;">
+                                <div id="manual-email-option" class="select-option" style="display: none; background: #f0f9ff; border-bottom: 1px solid #bae6fd;" onclick="window.CampaignApp.addManualEmailFromSearch()">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem; color: #0369a1;">
+                                        <i data-lucide="plus-circle" style="width: 16px;"></i>
                                         <div style="display: flex; flex-direction: column;">
-                                            <span style="font-weight: 500;"><?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?></span>
-                                            <span style="font-size: 0.7rem; color: #71717a;"><?php echo $u->email; ?></span>
+                                            <span style="font-weight: 600;" id="manual-email-text">Harici E-posta Olarak Ekle</span>
+                                            <span style="font-size: 0.7rem; opacity: 0.8;">Sistem dışı alıcı</span>
                                         </div>
                                     </div>
-                                    <?php endforeach; ?>
                                 </div>
+                                <?php 
+                                    $allUsers = $userModel->AktifKullanicilarAltKullanici();
+                                    foreach($allUsers as $u): 
+                                ?>
+                                <div class="select-option recipient-option" data-value="<?php echo $u->id; ?>" data-name="<?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?>" data-email="<?php echo strtolower($u->email); ?>" onclick="window.CampaignApp.addUserToSelection(this)">
+                                    <div style="display: flex; flex-direction: column;">
+                                        <span style="font-weight: 500;"><?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?></span>
+                                        <span style="font-size: 0.7rem; color: #71717a;"><?php echo $u->email; ?></span>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
                             </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Manuel E-posta Ekle</label>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <input type="email" id="manual-email-input" class="form-input" placeholder="E-posta adresi yazın...">
-                            <button type="button" class="btn btn-secondary" style="padding: 0 1rem; border-radius: 8px;" onclick="window.CampaignApp.addManualEmail()">Ekle</button>
                         </div>
                     </div>
                 </div>
-                <div id="selected-users-tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; border: 1px dashed var(--border); padding: 0.75rem; border-radius: 8px; min-height: 48px;">
-                    <span style="color: var(--muted-foreground); font-size: 0.8125rem;">Henüz alıcı seçilmedi.</span>
+                <div id="selected-users-tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; border: 1px dashed var(--border); padding: 0.75rem; border-radius: 8px; min-height: 52px; background: #fafafa;">
+                    <span style="color: var(--muted-foreground); font-size: 0.8125rem; width: 100%; text-align: center; padding: 0.5rem;">Henüz alıcı seçilmedi.</span>
                 </div>
                 <div id="user-ids-inputs"></div>
             </div>
@@ -330,7 +330,7 @@ $userModel = new \Models\UserModel();
     .user-tag.manual { background: #0369a1; }
     .user-tag button { background: none; border: none; cursor: pointer; padding: 0; color: inherit; opacity: 0.7; display: flex; align-items: center; }
     .user-tag button:hover { opacity: 1; }
-    #user-options-list .select-option.hidden { display: none !important; }
+    .recipient-option.hidden { display: none !important; }
     .modal-body-scrollable table { width: 100% !important; table-layout: fixed; }
     .modal-body-scrollable td, .modal-body-scrollable th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
@@ -389,9 +389,51 @@ $userModel = new \Models\UserModel();
             document.getElementById('target-mode-filter').style.display = (mode === 'filter' ? 'grid' : 'none');
             document.getElementById('target-mode-users').style.display = (mode === 'users' ? 'block' : 'none');
 
-            if (mode === 'users' && !App.initializedCustomSelects_Users) {
-                App.initCustomSelects(document.getElementById('target-mode-users'));
-                App.initializedCustomSelects_Users = true;
+            if (mode === 'users' && !this.initializedRecipients) {
+                this.initUnifiedSearch();
+                this.initializedRecipients = true;
+            }
+        },
+
+        initUnifiedSearch: function() {
+            const searchInput = document.getElementById('recipient-search-input');
+            const manualOption = document.getElementById('manual-email-option');
+            const manualText = document.getElementById('manual-email-text');
+            const options = document.querySelectorAll('.recipient-option');
+
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.trim().toLowerCase();
+                let foundMatch = false;
+
+                options.forEach(opt => {
+                    const name = opt.dataset.name.toLowerCase();
+                    const email = opt.dataset.email.toLowerCase();
+                    const isSelected = selectedUsers.has(opt.dataset.value);
+                    
+                    if (!isSelected && (name.includes(term) || email.includes(term))) {
+                        opt.style.display = 'flex';
+                        foundMatch = true;
+                    } else {
+                        opt.style.display = 'none';
+                    }
+                });
+
+                if (term.includes('@') && term.length > 5) {
+                    manualOption.style.display = 'flex';
+                    manualText.textContent = `"${term}" Adresini Harici Olarak Ekle`;
+                } else {
+                    manualOption.style.display = 'none';
+                }
+            });
+        },
+
+        handleRecipientKeydown: function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const term = e.target.value.trim();
+                if (term.includes('@') && term.length > 5) {
+                    this.addManualEmailFromSearch();
+                }
             }
         },
 
@@ -401,30 +443,35 @@ $userModel = new \Models\UserModel();
             if (selectedUsers.has(id)) return;
             selectedUsers.set(id, name);
             option.classList.add('hidden');
+            option.style.display = 'none';
             this.renderUserTags();
+            document.getElementById('recipient-search-input').value = '';
+            document.getElementById('manual-email-option').style.display = 'none';
         },
 
-        addManualEmail: function() {
-            const input = document.getElementById('manual-email-input');
+        addManualEmailFromSearch: function() {
+            const input = document.getElementById('recipient-search-input');
             const email = input.value.trim().toLowerCase();
-            if (!email) return;
-            if (!email.includes('@')) {
-                App.toast('error', 'Hata', 'Lütfen geçerli bir e-posta adresi girin.');
-                return;
-            }
+            if (!email || !email.includes('@')) return;
+            
             if (manualEmails.has(email)) {
                 App.toast('warning', 'Uyarı', 'Bu e-posta zaten eklendi.');
                 return;
             }
+
             manualEmails.add(email);
             input.value = '';
+            document.getElementById('manual-email-option').style.display = 'none';
             this.renderUserTags();
         },
 
         removeUserFromSelection: function(id) {
             selectedUsers.delete(id.toString());
-            const option = document.querySelector(`#user-options-list .select-option[data-value="${id}"]`);
-            if (option) option.classList.remove('hidden');
+            const option = document.querySelector(`.recipient-option[data-value="${id}"]`);
+            if (option) {
+                option.classList.remove('hidden');
+                option.style.display = 'flex';
+            }
             this.renderUserTags();
         },
 
@@ -440,7 +487,7 @@ $userModel = new \Models\UserModel();
             inputsContainer.innerHTML = '';
             
             if (selectedUsers.size === 0 && manualEmails.size === 0) {
-                container.innerHTML = '<span style="color: var(--muted-foreground); font-size: 0.8125rem;">Henüz alıcı seçilmedi.</span>';
+                container.innerHTML = '<span style="color: var(--muted-foreground); font-size: 0.8125rem; width: 100%; text-align: center; padding: 0.5rem;">Henüz alıcı seçilmedi.</span>';
                 return;
             }
 
@@ -491,15 +538,18 @@ $userModel = new \Models\UserModel();
                     
                     selectedUsers.clear();
                     manualEmails.clear();
-                    document.querySelectorAll('#user-options-list .select-option').forEach(opt => opt.classList.remove('hidden'));
+                    document.querySelectorAll('.recipient-option').forEach(opt => {
+                        opt.classList.remove('hidden');
+                        opt.style.display = 'flex';
+                    });
 
                     if (data.criteria.user_ids || data.criteria.manual_emails) {
                         this.switchTargetMode('users');
                         if (data.selected_users_data) {
                             data.selected_users_data.forEach(u => {
                                 selectedUsers.set(u.id.toString(), u.name);
-                                const opt = document.querySelector(`#user-options-list .select-option[data-value="${u.id}"]`);
-                                if (opt) opt.classList.add('hidden');
+                                const opt = document.querySelector(`.recipient-option[data-value="${u.id}"]`);
+                                if (opt) { opt.classList.add('hidden'); opt.style.display = 'none'; }
                             });
                         }
                         if (data.criteria.manual_emails) {
@@ -590,8 +640,6 @@ $userModel = new \Models\UserModel();
             try {
                 const formData = new FormData(form);
                 formData.set('content', $('#campaign-content').summernote('code'));
-                
-                // Convert manual_emails_array to a string for the backend criteria
                 const mEmails = Array.from(manualEmails).join(',');
                 formData.set('criteria[manual_emails]', mEmails);
 
@@ -669,8 +717,6 @@ $userModel = new \Models\UserModel();
 
     // Global Expose
     window.CampaignApp = CampaignApp;
-    
-    // Initial calls
     CampaignApp.initSummernote();
     if (window.lucide) lucide.createIcons();
 })();

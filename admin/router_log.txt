@@ -1812,3 +1812,16 @@
 22:08:37 - admin.vizite.com - /kampanyalar
 22:08:44 - admin.vizite.com - /kampanya-gonder
 22:08:45 - admin.vizite.com - /kampanyalar
+22:18:16 - admin.vizite.com - /kampanyalar
+22:20:38 - admin.vizite.com - /kampanyalar
+22:20:57 - admin.vizite.com - /kampanyalar
+22:22:50 - admin.vizite.com - /kampanyalar
+22:24:26 - admin.vizite.com - /kampanyalar
+22:25:15 - admin.vizite.com - /kampanyalar
+22:26:55 - admin.vizite.com - /kampanyalar
+22:28:39 - admin.vizite.com - /kampanyalar
+22:30:15 - admin.vizite.com - /kampanyalar
+22:43:53 - admin.vizite.com - /kampanyalar
+22:44:00 - admin.vizite.com - /dashboard
+22:44:01 - admin.vizite.com - /kullanicilar
+22:44:03 - admin.vizite.com - /alt-kullanicilar
