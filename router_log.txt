@@ -53,3 +53,9 @@
 16:50:57 - vizite.com - /sign-in
 16:51:22 - vizite.com - /sign-in
 16:51:22 - vizite.com - /isyerlerim
+16:57:53 - vizite.com - /logout
+16:57:53 - vizite.com - /sign-in
+16:57:55 - vizite.com - /sign-in
+16:57:56 - vizite.com - /isyerlerim
+16:58:26 - vizite.com - /isyerlerim
+16:58:27 - vizite.com - /isyerlerim

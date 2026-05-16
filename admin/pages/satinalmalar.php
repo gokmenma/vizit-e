@@ -108,6 +108,7 @@ foreach ($kullanicilar as $user) {
                             <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
                                 <button class="btn btn-ghost btn-sm" title="Onayla" style="color: #22c55e;"><i data-lucide="check-circle" style="width: 14px;"></i></button>
                                 <button class="btn btn-ghost btn-sm" title="İptal Et" style="color: #ef4444;"><i data-lucide="x-circle" style="width: 14px;"></i></button>
+                                <button class="btn btn-ghost btn-sm" title="Sil" style="color: #71717a;" onclick="deletePurchase(<?php echo $row->id; ?>)"><i data-lucide="trash-2" style="width: 14px;"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -280,5 +281,32 @@ foreach ($kullanicilar as $user) {
         document.getElementById('sub-edit-email').value = el.dataset.email;
         document.getElementById('sub-edit-package').value = el.dataset.package;
         document.getElementById('edit-subscriber-modal').showModal();
+    }
+
+    async function deletePurchase(id) {
+        if (!confirm('Bu satın alma kaydını silmek istediğinize emin misiniz?')) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('id', id);
+
+            const response = await fetch('satinalma-sil', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                App.toast('success', 'Başarılı', result.message);
+                setTimeout(() => App.refreshContent(), 500);
+            } else {
+                App.toast('error', 'Hata', result.message || 'Bir hata oluştu.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            App.toast('error', 'Hata', 'Sunucuya bağlanılamadı.');
+        }
     }
 </script>

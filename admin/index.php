@@ -2,6 +2,8 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+// API dosyalarındaki ../../ yollarının doğru çalışması için CWD ayarla
+chdir(__DIR__ . '/pages');
 
 // Oturum kontrolü
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {

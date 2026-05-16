@@ -19,7 +19,7 @@ class Router
 {
     private $routes = [];
     private $prefix = '';
-    private $basePath = 'pages/'; // Varsayılan base path
+    private $basePath = __DIR__ . '/pages/'; // Varsayılan base path (mutlak)
 
     // Base path ayarla
     public function setBasePath($path)
@@ -33,7 +33,7 @@ class Router
     {
         $this->prefix = trim($prefix, '/');
         if ($basePath !== null) {
-            $this->basePath = rtrim($basePath, '/') . '/';
+            $this->basePath = __DIR__ . '/' . rtrim($basePath, '/') . '/';
         }
         return $this;
     }
@@ -42,7 +42,7 @@ class Router
     public function resetPrefix()
     {
         $this->prefix = '';
-        $this->basePath = 'pages/'; // Varsayılan değere dön
+        $this->basePath = __DIR__ . '/pages/'; // Varsayılan değere dön (mutlak)
         return $this;
     }
     // GET route ekle
@@ -110,7 +110,7 @@ class Router
 
         // Hiçbir route eşleşmezse 404
         http_response_code(404);
-        require 'pages/404.php';
+        require __DIR__ . '/pages/404.php';
     }
 }
 

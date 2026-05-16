@@ -18,6 +18,7 @@ $router->get('sign-in', 'login.php')
     ->post('kullanici-sil', 'pages/ajax_kullanici_sil.php')
     ->post('admin-kullanici-ekle', 'pages/ajax_kullanici_ekle.php')
     ->post('admin-kullanici-satin-al', 'pages/ajax_kullanici_satin_al.php')
+    ->post('satinalma-sil', 'pages/ajax_satinalma_sil.php')
 
     ->get('logout', function () {
         $config = require __DIR__ . '/../config.php';

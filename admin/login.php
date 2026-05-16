@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$identifier, $identifier]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && ($password === $user['sifre'] || md5($password) === $user['sifre'] || password_verify($password, $user['sifre']))) {
+        if ($user && password_verify($password, $user['sifre'])) {
             if ($user['role'] === 'superadmin') {
                 $_SESSION['admin_logged_in'] = true;
                 $_SESSION['user_id'] = $user['id'];
