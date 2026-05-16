@@ -1322,3 +1322,4 @@
 16:40:12 - admin.vizite.com - /satinalmalar
 16:40:28 - admin.vizite.com - /admin-kullanici-satin-al
 16:40:29 - admin.vizite.com - /satinalmalar
+16:47:21 - admin.vizite.com - /satinalmalar

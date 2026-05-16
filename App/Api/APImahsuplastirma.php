@@ -1,7 +1,7 @@
 <?php
 
 require_once '../../Core/Services/SgkViziteService.php';
-require_once __DIR__ . "/../../vendor/autoload.php";
+require_once "../../vendor/autoload.php";
 
 use App\Helper\Security;
 
