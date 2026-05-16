@@ -1,0 +1,12 @@
+AJAX SIL CALL: 19:52:01 - Array
+(
+    [id] => 46
+)
+AJAX SIL CALL: 19:52:07 - Array
+(
+    [id] => 53
+)
+AJAX SIL CALL: 19:52:16 - Array
+(
+    [id] => 52
+)

@@ -73,8 +73,8 @@ foreach ($kullanicilar as $user) {
                             <div style="display: flex; flex-direction: column;">
                                 <span style="font-weight: 600; color: #18181b; cursor: pointer;" 
                                       onclick="openEditSubscriberModal(this)"
-                                      data-id="<?php echo $row->kullanici_id; ?>"
-                                      data-purchase-id="<?php echo $row->id; ?>"
+                                      data-id="<?php echo \App\Helper\Security::encrypt($row->kullanici_id); ?>"
+                                      data-purchase-id="<?php echo \App\Helper\Security::encrypt($row->id); ?>"
                                       data-name="<?php echo htmlspecialchars($row->ad_soyad ?? $row->kullanici_adi); ?>"
                                       data-email="<?php echo htmlspecialchars($row->email); ?>"
                                       data-package="<?php echo $row->current_package_id; ?>"
@@ -113,13 +113,15 @@ foreach ($kullanicilar as $user) {
                             <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
                                 <button class="btn-icon-outline" title="Düzenle" 
                                         onclick="openEditSubscriberModal(this)"
-                                        data-id="<?php echo $row->kullanici_id; ?>"
-                                        data-purchase-id="<?php echo $row->id; ?>"
+                                        data-id="<?php echo \App\Helper\Security::encrypt($row->kullanici_id); ?>"
+                                        data-purchase-id="<?php echo \App\Helper\Security::encrypt($row->id); ?>"
                                         data-name="<?php echo htmlspecialchars($row->ad_soyad ?? $row->kullanici_adi); ?>"
                                         data-email="<?php echo htmlspecialchars($row->email); ?>"
                                         data-package="<?php echo $row->current_package_id; ?>"
                                         data-firma-hakki="<?php echo $row->firma_hakki; ?>"
-                                        data-alt-kullanici-hakki="<?php echo $row->alt_kullanici_hakki; ?>">
+                                        data-alt-kullanici-hakki="<?php echo $row->alt_kullanici_hakki; ?>"
+                                        data-start-date="<?php echo $row->baslangic_tarihi; ?>"
+                                        data-end-date="<?php echo $row->bitis_tarihi; ?>">
                                     <i data-lucide="edit-2"></i>
                                 </button>
                                 <button class="btn-icon-outline" title="Sil" onclick="deletePurchase(<?php echo $row->id; ?>)">
@@ -234,7 +236,7 @@ foreach ($kullanicilar as $user) {
             <button onclick="this.closest('dialog').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
         <form id="edit-subscriber-form" style="padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;" onsubmit="event.preventDefault(); submitEditSubscriber(this);">
-            <input type="hidden" id="sub-edit-id" name="kullanici_id">
+            <input type="hidden" id="sub-edit-id" name="id">
             <input type="hidden" id="sub-edit-purchase-id" name="subscription_id">
             
             <div class="form-group" style="margin-bottom: 0;">
@@ -435,7 +437,7 @@ foreach ($kullanicilar as $user) {
             const result = await response.json();
 
             if (result.success || result.status === 'success') {
-                App.toast('success', 'Başarılı', result.message || 'Kullanıcı bilgileri güncellendi.');
+                App.toast('success', 'Başarılı', result.message || 'Satın alma işlemi güncellendi.');
                 document.getElementById('edit-subscriber-modal').close();
                 setTimeout(() => App.refreshContent(), 500);
             } else {

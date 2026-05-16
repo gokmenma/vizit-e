@@ -353,8 +353,14 @@ if ($_POST['action'] == "admin-kullanici-ekle") {
         exit;
     }
 
+    // Kullanıcı adı kontrolü
+    if (!empty($_POST["kullanici_adi"]) && $UserModel->findByUserName($_POST["kullanici_adi"])) {
+        echo json_encode(["status" => "error", "message" => "Bu kullanıcı adı zaten alınmış."]);
+        exit;
+    }
+
     try {
-        $kullanici_adi = strtolower(str_replace(' ', '', $adi_soyadi)) . rand(10, 99);
+        $kullanici_adi = $_POST["kullanici_adi"] ?? (strtolower(str_replace(' ', '', $adi_soyadi)) . rand(10, 99));
         $sifre = '123456'; // Varsayılan şifre
 
         $data = [
@@ -384,7 +390,7 @@ if ($_POST['action'] == "admin-kullanici-ekle") {
 }
 
 if ($_POST['action'] == "admin-kullanici-guncelle") {
-    $id = Security::decrypt($_POST["id"]);
+    $id = isset($_POST["id"]) ? Security::decrypt($_POST["id"]) : null;
     $adi_soyadi = $_POST["adi_soyadi"] ?? '';
     $email = $_POST["email"] ?? '';
     $paket_id = $_POST["paket_id"] ?? '';
@@ -394,26 +400,24 @@ if ($_POST['action'] == "admin-kullanici-guncelle") {
         exit;
     }
 
-    if (empty($adi_soyadi) || empty($email)) {
-        echo json_encode(["status" => "error", "message" => "Ad Soyad ve Email alanları zorunludur."]);
-        exit;
-    }
-
     try {
-        // Kullanıcı temel bilgilerini güncelle
-        $UserModel->saveWithAttr([
-            "id" => $id,
-            "adi_soyadi" => $adi_soyadi,
-            "email" => $email,
-            "role" => $_POST["role"] ?? "admin"
-        ]);
+        // Kullanıcı temel bilgilerini güncelle (Sadece ad soyad ve email gönderildiyse)
+        if (!empty($adi_soyadi) && !empty($email)) {
+            $UserModel->saveWithAttr([
+                "id" => $id,
+                "adi_soyadi" => $adi_soyadi,
+                "kullanici_adi" => $_POST["kullanici_adi"] ?? '',
+                "email" => $email,
+                "role" => $_POST["role"] ?? "admin"
+            ]);
+        }
 
         // Paket aboneliğini güncelle
         if (!empty($paket_id)) {
             $db = \Core\Database::getInstance()->getConnection();
             $firma_hakki = $_POST["firma_hakki"] ?? 30;
             $alt_kullanici_hakki = $_POST["alt_kullanici_hakki"] ?? 3;
-            $subscription_id = $_POST["subscription_id"] ?? null;
+            $subscription_id = isset($_POST["subscription_id"]) ? Security::decrypt($_POST["subscription_id"]) : null;
 
             if ($subscription_id) {
                 // Spesifik kaydı güncelle
@@ -429,7 +433,7 @@ if ($_POST['action'] == "admin-kullanici-guncelle") {
             }
         }
 
-        echo json_encode(["status" => "success", "message" => "Kullanıcı bilgileri başarıyla güncellendi."]);
+        echo json_encode(["status" => "success", "message" => "İşlem başarıyla güncellendi."]);
     } catch (Exception $e) {
         echo json_encode(["status" => "error", "message" => "Hata: " . $e->getMessage()]);
     }
@@ -638,6 +642,9 @@ if ($_POST['action'] == "alt-kullanici-olustur") {
     $email = $_POST["email"];
     $sifre = $_POST["sifre"];
     $ust_kullanici_id = $_SESSION["kullanici_id"];
+    $yetkiler = isset($_POST["yetkiler"]) ? 
+        (is_array($_POST["yetkiler"]) ? implode(",", $_POST["yetkiler"]) : $_POST["yetkiler"]) 
+        : "";
 
     // Debug çıktısı
     $isyerleri_ids =  isset($_POST["isyerleri_ids"]) ? 
@@ -715,6 +722,7 @@ if ($_POST['action'] == "alt-kullanici-olustur") {
             "email" => $email,
             "admin_id" => $ust_kullanici_id,
             "yetkili_oldugu_isyeri_ids" => $isyerleri_ids,
+            "yetkiler" => $yetkiler,
         ];
         if (empty($sifre)) {
             unset($data["sifre"]); //şifre boş ise güncelleme yapma

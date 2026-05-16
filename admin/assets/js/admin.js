@@ -40,7 +40,7 @@ App.loadPage = async (rawRoute, pushState = true) => {
     appContent.style.opacity = '0.5';
     
     try {
-        const response = await fetch(route, {
+        const response = await fetch(rawRoute, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         if (!response.ok) throw new Error('Page not found');
@@ -88,7 +88,7 @@ App.loadPage = async (rawRoute, pushState = true) => {
         if (overlay) overlay.classList.remove('active');
 
         if (pushState) {
-            window.history.pushState({ route }, title, route);
+            window.history.pushState({ route: rawRoute }, title, rawRoute);
         }
 
         // Update sidebar active link

@@ -37,9 +37,15 @@ $paketler = $paketModel->all();
             <div style="display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; padding: 1rem; background: #f9fafb; border-radius: 8px; border: 1px solid #f1f1f4;">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <span style="font-size: 0.875rem; color: #71717a; display: flex; align-items: center; gap: 0.5rem;">
-                        <i data-lucide="users" style="width: 14px;"></i> Kullanıcı Limiti
+                        <i data-lucide="users" style="width: 14px;"></i> Firma (İşyeri) Limiti
                     </span>
                     <span style="font-weight: 600;"><?php echo $paket->firma_hakki; ?></span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.875rem; color: #71717a; display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="user-plus" style="width: 14px;"></i> Alt Kullanıcı Limiti
+                    </span>
+                    <span style="font-weight: 600;"><?php echo $paket->alt_kullanici_hakki ?? 0; ?></span>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <span style="font-size: 0.875rem; color: #71717a; display: flex; align-items: center; gap: 0.5rem;">
@@ -55,6 +61,7 @@ $paketler = $paketModel->all();
                         data-ad="<?php echo htmlspecialchars($paket->ad); ?>"
                         data-fiyat="<?php echo $paket->fiyat; ?>"
                         data-hak="<?php echo $paket->firma_hakki; ?>"
+                        data-alt-hak="<?php echo $paket->alt_kullanici_hakki; ?>"
                         data-sure="<?php echo $paket->sure; ?>">
                     Düzenle
                 </button>
@@ -83,26 +90,32 @@ $paketler = $paketModel->all();
             </h2>
             <button onclick="this.closest('dialog').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
-        <form id="add-package-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); if(App.validateForm('add-package-form')) { App.toast('success', 'Başarılı', 'Yeni paket başarıyla tanımlandı.'); this.closest('dialog').close(); }">
+        <form id="add-package-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="handlePackageSubmit(event, 'add-package-form')">
             <div class="form-group">
                 <label class="form-label">Paket Adı</label>
-                <input type="text" class="form-input" placeholder="Örn: Profesyonel Paket" required>
+                <input type="text" name="ad" class="form-input" placeholder="Örn: Profesyonel Paket" required>
                 <span class="form-error">Paket adı gereklidir.</span>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                     <label class="form-label">Fiyat (₺)</label>
-                    <input type="number" class="form-input" placeholder="0" required>
+                    <input type="number" name="fiyat" class="form-input" placeholder="0" required>
                     <span class="form-error">Geçerli bir fiyat giriniz.</span>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Süre (Ay)</label>
-                    <input type="number" class="form-input" value="12" required>
+                    <input type="number" name="sure" class="form-input" value="12" required>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Kullanıcı (İşyeri) Limiti</label>
-                <input type="number" class="form-input" value="1" required>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Firma (İşyeri) Limiti</label>
+                    <input type="number" name="firma_hakki" class="form-input" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Alt Kullanıcı Limiti</label>
+                    <input type="number" name="alt_kullanici_hakki" class="form-input" value="3" required>
+                </div>
             </div>
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button type="button" class="btn btn-outline" style="flex: 1;" onclick="this.closest('dialog').close()">Vazgeç</button>
@@ -118,25 +131,31 @@ $paketler = $paketModel->all();
             </h2>
             <button onclick="this.closest('dialog').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
-        <form id="edit-package-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); if(App.validateForm('edit-package-form')) { App.toast('success', 'Güncellendi', 'Paket bilgileri başarıyla güncellendi.'); this.closest('dialog').close(); }">
-            <input type="hidden" id="edit-id">
+        <form id="edit-package-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="handlePackageSubmit(event, 'edit-package-form')">
+            <input type="hidden" id="edit-id" name="id">
             <div class="form-group">
                 <label class="form-label">Paket Adı</label>
-                <input type="text" id="edit-ad" class="form-input" required>
+                <input type="text" id="edit-ad" name="ad" class="form-input" required>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                     <label class="form-label">Fiyat (₺)</label>
-                    <input type="number" id="edit-fiyat" class="form-input" required>
+                    <input type="number" id="edit-fiyat" name="fiyat" class="form-input" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Süre (Ay)</label>
-                    <input type="number" id="edit-sure" class="form-input" required>
+                    <input type="number" id="edit-sure" name="sure" class="form-input" required>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Kullanıcı (İşyeri) Limiti</label>
-                <input type="number" id="edit-hak" class="form-input" required>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Firma (İşyeri) Limiti</label>
+                    <input type="number" id="edit-hak" name="firma_hakki" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Alt Kullanıcı Limiti</label>
+                    <input type="number" id="edit-alt-hak" name="alt_kullanici_hakki" class="form-input" required>
+                </div>
             </div>
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button type="button" class="btn btn-outline" style="flex: 1;" onclick="this.closest('dialog').close()">Vazgeç</button>
@@ -147,8 +166,40 @@ $paketler = $paketModel->all();
 </div>
 
 <script>
-    if (window.lucide) {
-        lucide.createIcons();
+    async function handlePackageSubmit(e, formId) {
+        e.preventDefault();
+        if (!App.validateForm(formId)) return;
+
+        const form = document.getElementById(formId);
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerText;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="spinner" style="width: 16px; height: 16px;"></div> İşleniyor...';
+
+        try {
+            const response = await fetch('admin-paket-kaydet', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                App.toast('success', 'Başarılı', result.message);
+                form.closest('dialog').close();
+                App.refreshContent();
+            } else {
+                App.toast('error', 'Hata', result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            App.toast('error', 'Hata', 'Bir sistem hatası oluştu.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+        }
     }
 
     function openEditPackageModal(el) {
@@ -156,6 +207,7 @@ $paketler = $paketModel->all();
         document.getElementById('edit-ad').value = el.dataset.ad;
         document.getElementById('edit-fiyat').value = el.dataset.fiyat;
         document.getElementById('edit-hak').value = el.dataset.hak;
+        document.getElementById('edit-alt-hak').value = el.dataset.altHak;
         document.getElementById('edit-sure').value = el.dataset.sure;
         document.getElementById('edit-package-modal').showModal();
     }

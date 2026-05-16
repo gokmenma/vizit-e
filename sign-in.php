@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 require_once "vendor/autoload.php";
 
@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['kullanici_id'] = $user->id; // Veritabanındaki kullanıcı id'si
                 $_SESSION['kullanici_adi'] = $user->kullanici_adi;
                 $_SESSION["role"] = $user->role; // Kullanıcı rolü (admin veya user)
+                $_SESSION["yetkiler"] = $user->yetkiler ?? ""; // Kullanıcı yetkileri
                 $_SESSION["user"] = $user; // Tüm kullanıcı bilgileri
 
                 //echo "kullanıcı id: " . $_SESSION['kullanici_id'];

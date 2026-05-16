@@ -410,4 +410,32 @@ public function AltKullanicilar($adminId)
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
+
+    /**
+     * Kullanıcının alt kullanıcı ekleme limitini getirir.
+     * Öncelik: Son satın alma (aktif abonelik) -> Paket varsayılanı
+     * @param int $userId
+     * @return int
+     */
+    public function getAltKullaniciLimiti($userId)
+    {
+        $stmt = $this->db->prepare("SELECT ka.alt_kullanici_hakki, ap.alt_kullanici_hakki as paket_limiti
+                                    FROM kullanici_abonelikleri ka
+                                    LEFT JOIN abonelik_paketleri ap ON ka.paket_id = ap.id
+                                    WHERE ka.kullanici_id = :userId AND ka.durum = 'aktif'
+                                    ORDER BY ka.id DESC LIMIT 1");
+        $stmt->execute([':userId' => $userId]);
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        
+        if ($result) {
+            // Eğer satın alma işleminde özel bir hak tanımlanmışsa (0'dan büyükse) onu al, 
+            // yoksa bağlı olduğu paketin varsayılan hakkını al
+            if (isset($result->alt_kullanici_hakki) && $result->alt_kullanici_hakki > 0) {
+                return (int)$result->alt_kullanici_hakki;
+            }
+            return (int)($result->paket_limiti ?? 3);
+        }
+        
+        return 3; // Varsayılan fallback
+    }
 }

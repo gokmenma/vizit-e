@@ -1,5 +1,17 @@
 let url = "App/Api/APIuser.php";
 
+$(document).on("click", '[data-bs-target="#defaultModal"]', function() {
+  if (!$(this).hasClass('kullanici-duzenle')) {
+    $("#kullanici_id").val(0);
+    $("#altKullaniciForm")[0].reset();
+    $("#isyerleri_ids").val([]).trigger("change");
+    $('input[name="yetkiler[]"]').prop('checked', false);
+    $("#defaultModalLabel").text("Yeni Alt Kullanıcı Ekle");
+  } else {
+    $("#defaultModalLabel").text("Alt Kullanıcı Düzenle");
+  }
+});
+
 $(document).on("click", "#kaydetButton", function (e) {
   var form = $("#profileForm");
 
@@ -311,8 +323,13 @@ $(document).on("click", ".kullanici-duzenle", function () {
 
         $("#isyerleri_ids").val(isyeriIds).trigger("change");
 
+        // Yetkileri işaretle
+        const yetkiler = kullanici.yetkiler ? kullanici.yetkiler.split(',') : [];
+        $('input[name="yetkiler[]"]').prop('checked', false); // Önce temizle
+        yetkiler.forEach(val => {
+          $('input[name="yetkiler[]"][value="' + val + '"]').prop('checked', true);
+        });
 
-        // Gerekirse diğer alanları da doldurun
         // Modal'ı göster
         $("#defaultModal").modal("show");
       } else {

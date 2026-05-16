@@ -14,6 +14,7 @@ $kullanici = new UserModel();
 
 $kullanicilar = $kullanici->AltKullanicilar($_SESSION['kullanici_id']);
 $altKullaniciSayisi = count($kullanicilar);
+$altKullaniciLimiti = $kullanici->getAltKullaniciLimiti($_SESSION['kullanici_id']);
 
 $hataMesaji = $_SESSION['hata'] ?? '';
 
@@ -56,13 +57,13 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                             <small>Aboneliğiniz için alt kullanıcılar ekleyebilirsiniz.
                                 Kullanıcıların işlem yapma yetkileri <strong>yoktur</strong>
                                 <p style="padding: 0;margin: 0;font-size: 13px;color: blue;">
-                                    En fazla 3 alt kullanıcı ekleyebilirsiniz.
+                                    En fazla <?php echo $altKullaniciLimiti; ?> alt kullanıcı ekleyebilirsiniz.
                                 </p>
                             </small>
 
                         </div>
                         <div class="col-lg-2">
-                            <?php if ($altKullaniciSayisi < 3): ?>
+                            <?php if ($altKullaniciSayisi < $altKullaniciLimiti): ?>
                                 <a href="#defaultModal" data-bs-toggle="modal" data-bs-target="#defaultModal"
                                     class="btn btn-raised btn-primary waves-effect float-right"><i
                                         class="zmdi zmdi-arrow-plus"></i>Yeni Ekle</a>
@@ -128,6 +129,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
 
                                                 <td class="text-center" style="width: 220px;">
                                                     <a href="#" data-kullanici-id="<?php echo $enc_id; ?>"
+                                                       data-yetkiler="<?php echo htmlspecialchars($kullanici->yetkiler ?? ''); ?>"
                                                         class="btn btn-sm btn-simple btn-round kullanici-duzenle"><i
                                                             class="zmdi zmdi-edit me-1"></i> Düzenle</a>
 
@@ -219,6 +221,18 @@ $hataMesaji = $_SESSION['hata'] ?? '';
 
                             <label class="form-label" for="sifre">Yetki Verilecek işyerleri</label>
                             <?php echo IsyeriHelper::IsyeriSelect("isyerleri_ids[]") ?>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">İşlem Yetkileri</label>
+                            <div class="checkbox">
+                                <input id="yetki_rapor_onay" type="checkbox" name="yetkiler[]" value="rapor_onay">
+                                <label for="yetki_rapor_onay">Rapor Onaylama/Kapatma Yetkisi</label>
+                            </div>
+                            <div class="checkbox">
+                                <input id="yetki_manuel_bildirim" type="checkbox" name="yetkiler[]" value="manuel_bildirim">
+                                <label for="yetki_manuel_bildirim">Manuel Rapor Bildirimi Yetkisi</label>
+                            </div>
                         </div>
 
 

@@ -194,8 +194,13 @@ App.initDatePickers = (container = document) => {
 };
 
 // Global Dialog Close on Outside Click
+let dialogMouseDown = null;
+document.addEventListener('mousedown', (e) => {
+    dialogMouseDown = e.target;
+});
+
 document.addEventListener('click', (e) => {
-    if (e.target.tagName === 'DIALOG') {
+    if (e.target.tagName === 'DIALOG' && e.target === dialogMouseDown) {
         const rect = e.target.getBoundingClientRect();
         if (
             e.clientX < rect.left ||
@@ -206,4 +211,5 @@ document.addEventListener('click', (e) => {
             e.target.close();
         }
     }
+    dialogMouseDown = null;
 });

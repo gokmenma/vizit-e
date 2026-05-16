@@ -49,8 +49,9 @@ $paketler = $paketModel->all();
                         <th class="sortable" onclick="sortTable(1)">Kullanıcı / Firma <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
                         <th class="sortable" onclick="sortTable(2)">Paket / İletişim <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
                         <th class="sortable" onclick="sortTable(3)" style="width: 120px;">Yetki <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
-                        <th class="sortable" onclick="sortTable(4)" style="text-align: center;">Alt Kullanıcı <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
-                        <th class="sortable" onclick="sortTable(5)">Kayıt Tarihi <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th>İşlem Yetkileri</th>
+                        <th class="sortable" onclick="sortTable(5)" style="text-align: center;">Alt Kullanıcı <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(6)">Kayıt Tarihi <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
                         <th>Durum</th>
                         <th style="text-align: right;">İşlemler</th>
                     </tr>
@@ -81,9 +82,11 @@ $paketler = $paketModel->all();
                                           onclick="openEditModal(this)"
                                           data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
                                           data-name="<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>"
+                                          data-username="<?php echo htmlspecialchars($user->kullanici_adi); ?>"
                                           data-email="<?php echo htmlspecialchars($user->email); ?>"
                                           data-role="<?php echo $user->role; ?>"
-                                          data-package="<?php echo $user->current_paket_id; ?>">
+                                          data-package="<?php echo $user->current_paket_id; ?>"
+                                          data-yetkiler="<?php echo htmlspecialchars($user->yetkiler ?? ''); ?>">
                                         <?php echo $user->adi_soyadi  ?: $user->kullanici_adi; ?>
                                     </span>
                                     <span style="font-size: 0.75rem; color: #71717a;">@<?php echo $user->kullanici_adi; ?></span>
@@ -101,8 +104,21 @@ $paketler = $paketModel->all();
                                 <?php echo $roleLabel; ?>
                             </span>
                         </td>
+                        <td>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                                <?php 
+                                    $yetkiler = (isset($user->yetkiler) && $user->yetkiler) ? explode(',', $user->yetkiler) : [];
+                                    foreach ($yetkiler as $yetki) {
+                                        $label = ($yetki == 'rapor_onay') ? 'Rapor Onay' : (($yetki == 'manuel_bildirim') ? 'Manuel Bildirim' : $yetki);
+                                        echo '<span class="badge" style="background: #f4f4f5; color: #18181b; font-size: 0.7rem; border: 1px solid #e4e4e7;">' . $label . '</span>';
+                                    }
+                                    if (empty($yetkiler)) echo '<span style="color: #a1a1aa; font-size: 0.75rem;">-</span>';
+                                ?>
+                            </div>
+                        </td>
                         <td style="text-align: center;">
-                            <a href="alt-kullanicilar?admin_id=<?php echo $user->id; ?>" class="btn btn-ghost btn-sm nav-link" data-route="alt-kullanicilar?admin_id=<?php echo $user->id; ?>" style="gap: 0.375rem; color: #18181b; font-weight: 600;">
+                            <?php $encryptedId = \App\Helper\Security::encrypt($user->id); ?>
+                            <a href="alt-kullanicilar?user=<?php echo $encryptedId; ?>" class="btn btn-ghost btn-sm nav-link" data-route="alt-kullanicilar?user=<?php echo $encryptedId; ?>" style="gap: 0.375rem; color: #18181b; font-weight: 600;">
                                 <i data-lucide="users" style="width: 16px;"></i>
                                 <?php echo $user->alt_kullanici_sayisi; ?>
                             </a>
@@ -118,11 +134,13 @@ $paketler = $paketModel->all();
                             <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
                                 <button class="btn btn-ghost btn-sm" title="Düzenle" 
                                         onclick="openEditModal(this)"
-                                        data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
-                                        data-name="<?php echo htmlspecialchars($user->ad_soyad ?? $user->kullanici_adi); ?>"
-                                        data-email="<?php echo htmlspecialchars($user->email); ?>"
-                                        data-role="<?php echo $user->role; ?>"
-                                        data-package="<?php echo $user->current_paket_id; ?>">
+                                          data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
+                                          data-name="<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>"
+                                          data-username="<?php echo htmlspecialchars($user->kullanici_adi); ?>"
+                                          data-email="<?php echo htmlspecialchars($user->email); ?>"
+                                          data-role="<?php echo $user->role; ?>"
+                                          data-package="<?php echo $user->current_paket_id; ?>"
+                                          data-yetkiler="<?php echo htmlspecialchars($user->yetkiler ?? ''); ?>">
                                     <i data-lucide="edit-3" style="width: 14px;"></i>
                                 </button>
                                 <button class="btn btn-ghost btn-sm" title="Şifre Değiştir"><i data-lucide="key" style="width: 14px;"></i></button>
@@ -162,6 +180,13 @@ $paketler = $paketModel->all();
                     <i data-lucide="user" class="input-icon"></i>
                     <input type="text" name="adi_soyadi" class="form-input" placeholder="Örn: Mehmet Ali Gökmen" required>
                     <span class="form-error">Bu alan zorunludur.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kullanıcı Adı</label>
+                <div class="input-icon-wrapper">
+                    <i data-lucide="at-sign" class="input-icon"></i>
+                    <input type="text" name="kullanici_adi" class="form-input" placeholder="kullaniciadi" onkeyup="sanitizeUsername(this)" required>
                 </div>
             </div>
             <div class="form-group">
@@ -254,6 +279,13 @@ $paketler = $paketModel->all();
                     <i data-lucide="user" class="input-icon"></i>
                     <input type="text" id="edit-name" name="adi_soyadi" class="form-input" required>
                     <span class="form-error">Bu alan zorunludur.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kullanıcı Adı</label>
+                <div class="input-icon-wrapper">
+                    <i data-lucide="at-sign" class="input-icon"></i>
+                    <input type="text" id="edit-username" name="kullanici_adi" class="form-input" onkeyup="sanitizeUsername(this)" required>
                 </div>
             </div>
             <div class="form-group">
@@ -406,6 +438,7 @@ $paketler = $paketModel->all();
 
             const response = await fetch(apiPath, {
                 method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData
             });
 
@@ -454,6 +487,7 @@ $paketler = $paketModel->all();
 
             const response = await fetch(apiPath, {
                 method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData
             });
 
@@ -501,12 +535,14 @@ $paketler = $paketModel->all();
     function openEditModal(el) {
         const id = el.getAttribute('data-id');
         const name = el.getAttribute('data-name');
+        const username = el.getAttribute('data-username');
         const email = el.getAttribute('data-email');
         const packageId = el.getAttribute('data-package');
         const role = el.getAttribute('data-role') || 'admin';
 
         document.getElementById('edit-id').value = id;
         document.getElementById('edit-name').value = name;
+        document.getElementById('edit-username').value = username;
         document.getElementById('edit-email').value = email;
         
         // Custom Select'i güncelle (Paket)
@@ -591,7 +627,10 @@ $paketler = $paketModel->all();
                     row.style.transition = 'all 0.3s ease';
                     row.style.opacity = '0';
                     row.style.transform = 'translateX(20px)';
-                    setTimeout(() => row.remove(), 300);
+                    setTimeout(() => {
+                        row.remove();
+                        updateTableStats();
+                    }, 300);
                 } else {
                     setTimeout(() => location.reload(), 1000);
                 }
@@ -610,13 +649,26 @@ $paketler = $paketModel->all();
         });
     });
 
-    // Close on Outside Click
-    window.onclick = function(event) {
-        const addModal = document.getElementById('add-subscriber-modal');
-        const editModal = document.getElementById('edit-subscriber-modal');
-        const alertModal = document.getElementById('alert-dialog');
-        if (event.target == addModal) addModal.close();
-        if (event.target == editModal) editModal.close();
-        if (event.target == alertModal) alertModal.close();
+    function updateTableStats() {
+        const tableId = 'subscribers-table';
+        const table = document.getElementById(tableId);
+        if (!table) return;
+
+        // Update pagination & Info text
+        if (App.TablePagination) {
+            App.TablePagination.init(tableId);
+        }
+
+        // Update Tab Counts
+        const rows = table.querySelectorAll('tbody tr.subscriber-row');
+        const totalCount = rows.length;
+        
+        // Update Hepsi and Aktif tab counts (assuming deleted users are removed from both)
+        const tabs = document.querySelectorAll('.dt-tab-count');
+        if (tabs.length >= 2) {
+            tabs[0].textContent = totalCount; // Hepsi
+            tabs[1].textContent = totalCount; // Aktif
+        }
     }
+
 </script>

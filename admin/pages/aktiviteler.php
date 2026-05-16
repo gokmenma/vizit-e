@@ -61,12 +61,20 @@ $activities = $userModel->getRecentActivities(100); // Son 100 aktiviteyi getir
                             <?php endif; ?>
                         </td>
                         <td>
-                            <span class="badge badge-outline" style="text-transform: capitalize;">
+                            <?php 
+                                $channel = $activity->channel;
+                                $channelClass = 'badge-secondary';
+                                if (strpos($channel, 'admin') !== false) $channelClass = 'badge-primary';
+                                if (strpos($channel, 'api') !== false) $channelClass = 'badge-success';
+                                if (strpos($channel, 'auth') !== false) $channelClass = 'badge-danger';
+                                if (strpos($channel, 'system') !== false) $channelClass = 'badge-outline';
+                            ?>
+                            <span class="badge <?php echo $channelClass; ?>" style="text-transform: capitalize; font-size: 0.65rem; border-radius: 4px;">
                                 <?php echo str_replace('-', ' ', $activity->channel); ?>
                             </span>
                         </td>
                         <td>
-                            <span class="badge <?php echo $levelBadge; ?>">
+                            <span class="badge <?php echo $levelBadge; ?>" style="min-width: 70px; font-weight: 700;">
                                 <?php echo $activity->level; ?>
                             </span>
                         </td>

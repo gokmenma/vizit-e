@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json');
 require_once __DIR__ . '/../../autoload.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
@@ -19,7 +20,7 @@ $sifre = $_POST['sifre'] ?? '';
 $admin_id = $_POST['admin_id'] ?? 0;
 $ekleyen_id = $_SESSION['user_id'] ?? 0;
 
-if (empty($adi_soyadi) || empty($kullanici_adi) || empty($email) || empty($admin_id)) {
+if (empty($adi_soyadi) || empty($kullanici_adi) || empty($email) || ($id == 0 && empty($admin_id))) {
     echo json_encode(["status" => "error", "message" => "Lütfen zorunlu alanları doldurun."]);
     exit;
 }
@@ -37,15 +38,17 @@ if ($stmt->fetch()) {
     exit;
 }
 
+$yetkiler = isset($_POST['yetkiler']) ? (is_array($_POST['yetkiler']) ? implode(',', $_POST['yetkiler']) : $_POST['yetkiler']) : '';
+
 try {
     if ($id > 0) {
         // Güncelleme
-        $sql = "UPDATE kullanicilar SET adi_soyadi = ?, kullanici_adi = ?, email = ?, admin_id = ? WHERE id = ?";
-        $params = [$adi_soyadi, $kullanici_adi, $email, $admin_id, $id];
+        $sql = "UPDATE kullanicilar SET adi_soyadi = ?, kullanici_adi = ?, email = ?, admin_id = ?, yetkiler = ? WHERE id = ?";
+        $params = [$adi_soyadi, $kullanici_adi, $email, $admin_id, $yetkiler, $id];
         
         if (!empty($sifre)) {
-            $sql = "UPDATE kullanicilar SET adi_soyadi = ?, kullanici_adi = ?, email = ?, admin_id = ?, sifre = ? WHERE id = ?";
-            $params = [$adi_soyadi, $kullanici_adi, $email, $admin_id, password_hash($sifre, PASSWORD_DEFAULT), $id];
+            $sql = "UPDATE kullanicilar SET adi_soyadi = ?, kullanici_adi = ?, email = ?, admin_id = ?, yetkiler = ?, sifre = ? WHERE id = ?";
+            $params = [$adi_soyadi, $kullanici_adi, $email, $admin_id, $yetkiler, password_hash($sifre, PASSWORD_DEFAULT), $id];
         }
         
         $stmt = $db->prepare($sql);
@@ -53,8 +56,8 @@ try {
         $message = "Alt kullanıcı başarıyla güncellendi.";
     } else {
         // Yeni Kayıt
-        $sql = "INSERT INTO kullanicilar (adi_soyadi, kullanici_adi, email, sifre, role, admin_id, ekleyen_id, kayit_tarihi, durum) 
-                VALUES (?, ?, ?, ?, 'user', ?, ?, ?, 'Aktif')";
+        $sql = "INSERT INTO kullanicilar (adi_soyadi, kullanici_adi, email, sifre, role, admin_id, ekleyen_id, yetkiler, kayit_tarihi, durum) 
+                VALUES (?, ?, ?, ?, 'user', ?, ?, ?, ?, 'Aktif')";
         $stmt = $db->prepare($sql);
         $stmt->execute([
             $adi_soyadi,
@@ -63,6 +66,7 @@ try {
             password_hash($sifre, PASSWORD_DEFAULT),
             $admin_id,
             $ekleyen_id,
+            $yetkiler,
             date('Y-m-d H:i:s')
         ]);
         $message = "Alt kullanıcı başarıyla eklendi.";

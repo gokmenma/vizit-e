@@ -17,7 +17,10 @@ $router->get('sign-in', 'login.php')
     ->post('profil-guncelle', 'pages/ajax_profil_guncelle.php')
     ->post('kullanici-sil', 'pages/ajax_kullanici_sil.php')
     ->post('admin-kullanici-ekle', 'pages/ajax_kullanici_ekle.php')
+    ->post('admin-kullanici-guncelle', 'pages/ajax_kullanici_guncelle.php')
     ->post('admin-kullanici-satin-al', 'pages/ajax_kullanici_satin_al.php')
+    ->post('admin-paket-kaydet', 'pages/ajax_paket_kaydet.php')
+    ->post('alt-kullanici-kaydet', 'pages/ajax_alt_kullanici_kaydet.php')
     ->post('satinalma-sil', 'pages/ajax_satinalma_sil.php')
 
     ->get('logout', function () {
