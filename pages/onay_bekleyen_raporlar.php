@@ -80,6 +80,63 @@ try {
     $hataMesaji = "KRİTİK HATA: " . $e->getMessage();
 }
 
+/**
+ * SGK hata mesajlarını kullanıcı dostu ve anlaşılır kılmak için parse eder
+ */
+function parseSgkError($errorMessage) {
+    $result = [
+        'type' => 'unknown',
+        'title' => 'Sistemsel Bir İşlem Hatası',
+        'description' => 'SGK sistemleri ile iletişim kurulurken bir sorun meydana geldi.',
+        'severity' => 'danger',
+        'solutions' => [],
+        'technical_details' => $errorMessage
+    ];
+
+    if (empty($errorMessage)) {
+        return null;
+    }
+
+    if (stripos($errorMessage, 'aktif bir seans mevcuttur') !== false || stripos($errorMessage, 'Oturum Hatası') !== false) {
+        $result['type'] = 'session_conflict';
+        $result['title'] = 'SGK Sunucusunda Aktif Oturum Var';
+        $result['description'] = 'SGK sistemi güvenlik ve veri güvenliği politikaları gereği aynı işveren için aynı anda yalnızca tek bir oturuma izin vermektedir. Şu anda başka bir IP adresi veya cihaz üzerinden aktif bir seans bulunmaktadır.';
+        $result['severity'] = 'warning';
+        $result['solutions'] = [
+            '**Bekleyin (En Kolay Çözüm):** SGK sunucusundaki eski oturumun otomatik olarak sonlanması için **10 - 15 dakika** bekleyip tekrar aramayı deneyin.',
+            '**Yeni IP Alın:** İnternet bağlantınızı kesip tekrar bağlanarak (modem kapat-aç vb.) yeni bir IP adresi almayı deneyin.',
+            '**Diğer Tarayıcıları Kapatın:** Eğer SGK Vizite sistemine başka bir tarayıcı sekmesinde veya başka bir bilgisayarda girdiyseniz, oradaki oturumları kapatın.'
+        ];
+    } elseif (stripos($errorMessage, 'Login başarısız') !== false || stripos($errorMessage, 'şifre hatalı') !== false || stripos($errorMessage, 'Kullanıcı adı') !== false) {
+        $result['type'] = 'auth_failed';
+        $result['title'] = 'SGK Giriş Bilgileri Hatası';
+        $result['description'] = 'SGK web servislerine giriş yetkilendirmesi başarısız oldu. Tanımlı olan SGK kullanıcı adı, şifre veya işyeri kodunuz hatalı veya süresi dolmuş olabilir.';
+        $result['severity'] = 'danger';
+        $result['solutions'] = [
+            '**Ayarları Kontrol Edin:** Yönetim panelinden **"SGK Ayarları"** sayfasına giderek bilgilerinizi kontrol edin ve eksiksiz/doğru yazıldığından emin olun.',
+            '**Şifre Güncelliği:** SGK işveren şifrenizin veya sistem şifrenizin süresinin dolup dolmadığını SGK resmi sitesine direkt giriş yaparak teyit edin.'
+        ];
+    } elseif (stripos($errorMessage, 'timeout') !== false || stripos($errorMessage, 'connect') !== false || stripos($errorMessage, 'ulaşılamadı') !== false || stripos($errorMessage, 'SoapFault') !== false) {
+        $result['type'] = 'connection';
+        $result['title'] = 'SGK Servis Bağlantı Sorunu';
+        $result['description'] = 'SGK web servislerine erişim sağlanırken zaman aşımı veya bağlantı hatası oluştu. Bu durum genellikle SGK sunucularının geçici olarak yoğun veya bakımda olmasından kaynaklanır.';
+        $result['severity'] = 'info';
+        $result['solutions'] = [
+            '**Tekrar Deneyin:** Birkaç dakika bekledikten sonra sayfayı yenileyerek aramayı veya işlemi tekrarlayın.',
+            '**SGK Genel Durumu:** SGK sistemlerinin genel bir kesinti yaşayıp yaşamadığını kontrol edin.'
+        ];
+    } else {
+        $cleanMessage = preg_replace('/^(KRİTİK HATA:\s*|HATA:\s*)/i', '', $errorMessage);
+        $result['title'] = 'SGK Servis Hatası';
+        $result['description'] = $cleanMessage;
+        $result['solutions'] = [
+            'Sayfayı yenileyerek işlemi tekrar deneyin.',
+            'Sorun devam ederse sistem yöneticinizle iletişime geçerek teknik detay kodunu paylaşın.'
+        ];
+    }
+
+    return $result;
+}
 
 ?>
 
@@ -269,6 +326,276 @@ try {
                             font-size: 0.85rem !important;
                         }
                     }
+
+                    /* Premium Alert Card Styling */
+                    .premium-alert {
+                        background: #ffffff;
+                        border: 1px solid #e5e7eb;
+                        border-radius: 16px;
+                        padding: 24px;
+                        margin-bottom: 25px;
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+                        position: relative;
+                        overflow: hidden;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        animation: alertSlideInDown 0.4s ease-out;
+                    }
+
+                    @keyframes alertSlideInDown {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-10px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    .premium-alert:hover {
+                        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+                        transform: translateY(-2px);
+                    }
+
+                    /* Left accent bar */
+                    .premium-alert::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 6px;
+                        height: 100%;
+                    }
+
+                    /* Danger variant (Red) */
+                    .premium-alert.alert-danger-premium {
+                        border-color: #fee2e2;
+                        background: linear-gradient(180deg, #ffffff 0%, #fffbfb 100%);
+                    }
+                    .premium-alert.alert-danger-premium::before {
+                        background-color: #ef4444;
+                    }
+                    .premium-alert.alert-danger-premium .alert-icon-container {
+                        background-color: #fef2f2;
+                        color: #ef4444;
+                    }
+                    .premium-alert.alert-danger-premium .alert-title {
+                        color: #991b1b;
+                    }
+
+                    /* Warning variant (Orange/Amber) */
+                    .premium-alert.alert-warning-premium {
+                        border-color: #fef3c7;
+                        background: linear-gradient(180deg, #ffffff 0%, #fffdf6 100%);
+                    }
+                    .premium-alert.alert-warning-premium::before {
+                        background-color: #f59e0b;
+                    }
+                    .premium-alert.alert-warning-premium .alert-icon-container {
+                        background-color: #fffbeb;
+                        color: #d97706;
+                    }
+                    .premium-alert.alert-warning-premium .alert-title {
+                        color: #92400e;
+                    }
+
+                    /* Info/Connection variant (Blue/Cyan) */
+                    .premium-alert.alert-info-premium {
+                        border-color: #e0f2fe;
+                        background: linear-gradient(180deg, #ffffff 0%, #f7fbfe 100%);
+                    }
+                    .premium-alert.alert-info-premium::before {
+                        background-color: #3b82f6;
+                    }
+                    .premium-alert.alert-info-premium .alert-icon-container {
+                        background-color: #f0f9ff;
+                        color: #0284c7;
+                    }
+                    .premium-alert.alert-info-premium .alert-title {
+                        color: #075985;
+                    }
+
+                    /* Success variant (Green) */
+                    .premium-alert.alert-success-premium {
+                        border-color: #d1fae5;
+                        background: linear-gradient(180deg, #ffffff 0%, #f6fdf9 100%);
+                    }
+                    .premium-alert.alert-success-premium::before {
+                        background-color: #10b981;
+                    }
+                    .premium-alert.alert-success-premium .alert-icon-container {
+                        background-color: #ecfdf5;
+                        color: #059669;
+                    }
+                    .premium-alert.alert-success-premium .alert-title {
+                        color: #065f46;
+                    }
+
+                    /* Internal Layout */
+                    .alert-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 16px;
+                        margin-bottom: 14px;
+                    }
+
+                    .alert-icon-container {
+                        width: 48px;
+                        height: 48px;
+                        border-radius: 12px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 1.5rem;
+                        flex-shrink: 0;
+                    }
+
+                    .alert-title-area {
+                        display: flex;
+                        flex-direction: column;
+                    }
+
+                    .alert-category {
+                        font-size: 0.75rem;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        color: #6b7280;
+                        margin-bottom: 2px;
+                    }
+
+                    .alert-title {
+                        font-size: 1.15rem;
+                        font-weight: 700;
+                        margin: 0;
+                    }
+
+                    .alert-body {
+                        padding-left: 64px;
+                    }
+
+                    .alert-description {
+                        color: #4b5563;
+                        font-size: 0.95rem;
+                        line-height: 1.5;
+                        margin-bottom: 16px;
+                    }
+
+                    /* Solutions Panel */
+                    .alert-solutions-card {
+                        background-color: #f9fafb;
+                        border: 1px solid #f3f4f6;
+                        border-radius: 12px;
+                        padding: 18px 20px;
+                        margin-bottom: 16px;
+                    }
+
+                    .solutions-title {
+                        font-weight: 700;
+                        font-size: 0.85rem;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        color: #374151;
+                        margin-bottom: 12px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+
+                    .solutions-list {
+                        list-style: none;
+                        padding: 0;
+                        margin: 0;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+
+                    .solutions-list li {
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 10px;
+                        font-size: 0.9rem;
+                        color: #4b5563;
+                        line-height: 1.4;
+                    }
+
+                    .solutions-list li i {
+                        color: #10b981;
+                        font-size: 1.1rem;
+                        margin-top: 2px;
+                        flex-shrink: 0;
+                    }
+
+                    /* Technical Details Accordion */
+                    .tech-details-toggle {
+                        background: none;
+                        border: none;
+                        color: #6b7280;
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                        padding: 0;
+                        cursor: pointer;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        transition: color 0.2s;
+                    }
+
+                    .tech-details-toggle:hover {
+                        color: #374151;
+                    }
+
+                    .tech-details-toggle i {
+                        transition: transform 0.2s;
+                    }
+
+                    .tech-details-toggle.active i {
+                        transform: rotate(180deg);
+                    }
+
+                    .tech-details-content {
+                        display: none;
+                        margin-top: 10px;
+                        background-color: #f3f4f6;
+                        border-radius: 8px;
+                        padding: 12px 16px;
+                        font-family: monospace;
+                        font-size: 0.8rem;
+                        color: #374151;
+                        word-break: break-all;
+                        border-left: 3px solid #d1d5db;
+                        max-height: 200px;
+                        overflow-y: auto;
+                    }
+
+                    /* Mobile responsive */
+                    @media (max-width: 768px) {
+                        .premium-alert {
+                            padding: 16px;
+                        }
+                        .alert-header {
+                            gap: 12px;
+                        }
+                        .alert-icon-container {
+                            width: 40px;
+                            height: 40px;
+                            font-size: 1.25rem;
+                        }
+                        .alert-title {
+                            font-size: 1rem;
+                        }
+                        .alert-body {
+                            padding-left: 0;
+                            margin-top: 10px;
+                        }
+                        .alert-description {
+                            font-size: 0.9rem;
+                        }
+                        .alert-solutions-card {
+                            padding: 12px 14px;
+                        }
+                    }
                 </style>
 
                 <!-- Tarih Seçimi, Arama ve Dışa Aktarma Elemanları -->
@@ -297,12 +624,87 @@ try {
                     <?php endif; ?>
                 </div>
 
-                <?php if ($hataMesaji): ?>
-                    <div class="message-box error-box"><?php echo htmlspecialchars($hataMesaji); ?></div>
+                <?php if ($hataMesaji): 
+                    $parsedError = parseSgkError($hataMesaji);
+                    $severityClass = 'alert-danger-premium';
+                    $iconClass = 'zmdi-alert-triangle';
+                    if ($parsedError['severity'] === 'warning') {
+                        $severityClass = 'alert-warning-premium';
+                        $iconClass = 'zmdi-alert-circle';
+                    } elseif ($parsedError['severity'] === 'info') {
+                        $severityClass = 'alert-info-premium';
+                        $iconClass = 'zmdi-info';
+                    }
+                ?>
+                    <div class="premium-alert <?php echo $severityClass; ?>">
+                        <div class="alert-header">
+                            <div class="alert-icon-container">
+                                <i class="zmdi <?php echo $iconClass; ?>"></i>
+                            </div>
+                            <div class="alert-title-area">
+                                <span class="alert-category">Sistem Bildirimi</span>
+                                <h4 class="alert-title"><?php echo htmlspecialchars($parsedError['title']); ?></h4>
+                            </div>
+                        </div>
+                        <div class="alert-body">
+                            <p class="alert-description"><?php echo htmlspecialchars($parsedError['description']); ?></p>
+                            
+                            <?php if (!empty($parsedError['solutions'])): ?>
+                                <div class="alert-solutions-card">
+                                    <h5 class="solutions-title">
+                                        <i class="zmdi zmdi-wrench"></i> Önerilen Çözüm Adımları
+                                    </h5>
+                                    <ul class="solutions-list">
+                                        <?php foreach ($parsedError['solutions'] as $sol): 
+                                            $solFormatted = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', htmlspecialchars($sol));
+                                        ?>
+                                            <li>
+                                                <i class="zmdi zmdi-check-circle"></i>
+                                                <span><?php echo $solFormatted; ?></span>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
+
+                            <button type="button" class="tech-details-toggle" onclick="toggleTechDetails(this)">
+                                <i class="zmdi zmdi-chevron-down"></i> Teknik Detaylar ve Hata Kodu
+                            </button>
+                            <div class="tech-details-content">
+                                <?php echo htmlspecialchars($parsedError['technical_details']); ?>
+                            </div>
+                        </div>
+                    </div>
                 <?php endif; ?>
+
                 <?php if ($basariMesaji): ?>
-                    <div class="message-box success-box"><?php echo htmlspecialchars($basariMesaji); ?></div>
+                    <div class="premium-alert alert-success-premium">
+                        <div class="alert-header">
+                            <div class="alert-icon-container">
+                                <i class="zmdi zmdi-check-circle"></i>
+                            </div>
+                            <div class="alert-title-area">
+                                <span class="alert-category">İşlem Başarılı</span>
+                                <h4 class="alert-title">İşlem Tamamlandı</h4>
+                            </div>
+                        </div>
+                        <div class="alert-body">
+                            <p class="alert-description" style="margin-bottom: 0;"><?php echo htmlspecialchars($basariMesaji); ?></p>
+                        </div>
+                    </div>
                 <?php endif; ?>
+
+                <script>
+                function toggleTechDetails(btn) {
+                    const content = btn.nextElementSibling;
+                    btn.classList.toggle('active');
+                    if (content.style.display === 'block') {
+                        content.style.display = 'none';
+                    } else {
+                        content.style.display = 'block';
+                    }
+                }
+                </script>
                 <style>
                     .responsive {
                         overflow-x: auto;
