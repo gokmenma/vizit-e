@@ -4,10 +4,10 @@ namespace Admin\Models;
 
 use PDO;
 
-class CampaignModel extends Model {
+class CampaignModel extends \Models\CampaignModel {
 
     public function __construct() {
-        parent::__construct('campaigns');
+        parent::__construct();
     }
 
     /**

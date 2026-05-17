@@ -167,3 +167,4 @@
 11:23:32 - 10.184.113.11 - /boaform/admin/formTracert
 11:23:46 - vizite.com - /isyerlerim
 11:23:48 - vizite.com - /kullanicilar
+12:07:32 - vizite.com - /onay-bekleyen-raporlar

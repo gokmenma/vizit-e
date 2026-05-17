@@ -907,7 +907,7 @@ summary.no-marker::-webkit-details-marker {
 }
 
 .sidebar h3 {
-    padding: 1.25rem 1.25rem 0.5rem;
+    /* padding: 1.25rem 1.25rem 0.5rem; */
     font-size: 0.75rem;
     font-weight: 600;
     color: #a1a1aa; /* zinc-400 */
