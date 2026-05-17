@@ -7,6 +7,24 @@ window.App = window.App || {};
 
 // Toast Notifications
 App.toast = (type, title, message) => {
+    // Ensure the toaster popover container is shown/open in the browser's top-layer.
+    // Hiding and immediately re-showing the popover container forces the browser
+    // to promote it to the absolute top of the top-layer stacking context,
+    // making it render above any active dialog modals and their backdrops.
+    const toaster = document.getElementById('toaster');
+    if (toaster && toaster.showPopover) {
+        try {
+            toaster.hidePopover();
+        } catch (e) {
+            // Ignore error if it was already hidden
+        }
+        try {
+            toaster.showPopover();
+        } catch (e) {
+            // Safe fallback
+        }
+    }
+
     const config = {
         category: type || 'success', // success, error, warning, info
         title: title,

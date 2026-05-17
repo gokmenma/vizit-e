@@ -1,4 +1,7 @@
 <?php
+if (file_exists(__DIR__ . '/../../../autoload.php')) {
+    require_once __DIR__ . '/../../../autoload.php';
+}
 require_once __DIR__ . '/../../autoload.php';
 $campaignModel = new \Models\CampaignModel();
 $campaigns = $campaignModel->getCampaigns();
@@ -524,7 +527,7 @@ $userModel = new \Models\UserModel();
 
         editCampaign: async function(id) {
             try {
-                const response = await fetch(`kampanya-detay?id=${id}`, {
+                const response = await fetch(`kampanya-detay?id=${id}&action=detail`, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 const result = await response.json();
@@ -591,7 +594,7 @@ $userModel = new \Models\UserModel();
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Yükleniyor...</td></tr>';
             document.getElementById('view-logs-modal').showModal();
             try {
-                const response = await fetch(`kampanya-logs?id=${id}`, {
+                const response = await fetch(`kampanya-logs?id=${id}&action=logs`, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 const result = await response.json();
@@ -639,6 +642,7 @@ $userModel = new \Models\UserModel();
             submitBtn.innerHTML = '<div class="spinner"></div> Kaydediliyor...';
             try {
                 const formData = new FormData(form);
+                formData.append('action', 'save');
                 formData.set('content', $('#campaign-content').summernote('code'));
                 const mEmails = Array.from(manualEmails).join(',');
                 formData.set('criteria[manual_emails]', mEmails);
@@ -674,6 +678,7 @@ $userModel = new \Models\UserModel();
                 try {
                     const formData = new FormData();
                     formData.append('id', id);
+                    formData.append('action', 'save');
                     const response = await fetch('kampanya-kaydet', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: formData });
                     const result = await response.json();
                     if (result.status === 'success') this.startSending(id);
@@ -690,6 +695,7 @@ $userModel = new \Models\UserModel();
             try {
                 const formData = new FormData();
                 formData.append('id', id);
+                formData.append('action', 'send');
                 const response = await fetch('kampanya-gonder', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: formData });
                 const result = await response.json();
                 if (result.status === 'success') {
@@ -707,6 +713,7 @@ $userModel = new \Models\UserModel();
             try {
                 const formData = new FormData();
                 formData.append('id', id);
+                formData.append('action', 'delete');
                 const response = await fetch('kampanya-sil', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: formData });
                 const result = await response.json();
                 if (result.status === 'success') { App.toast('success', 'Başarılı', result.message); App.refreshContent(); }

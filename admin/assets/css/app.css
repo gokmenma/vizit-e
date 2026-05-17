@@ -937,6 +937,10 @@ summary.no-marker::-webkit-details-marker {
     transition: all 0.2s;
 }
 
+.card {
+    gap: 0 !important   ;
+}
+
 .dark .card {
     background: #18181b;
     border-color: #27272a;
@@ -1815,9 +1819,9 @@ dialog[open] {
 }
 
 /* Fix for modal clipping */
-/* dialog.card {
+dialog.card {
     overflow: visible !important;
-} */
+}
 .form-group {
     position: relative;
     z-index: 5;

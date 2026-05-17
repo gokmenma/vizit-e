@@ -123,3 +123,6 @@
 20:57:54 - vizite.com - /kullanicilar
 22:08:02 - vizite.com - /isyerlerim
 22:08:05 - vizite.com - /isyeri-sec
+10:31:46 - localhost - /sgk-vizite/admin/ayarlar?autologin=antigravity
+10:32:08 - localhost - /sgk-vizite/admin/ayarlar?autologin=antigravity
+10:37:52 - localhost - /sgk-vizite/admin/index.php?url=ayarlar&autologin=antigravity

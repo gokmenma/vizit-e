@@ -1,24 +1,25 @@
 <?php
+if (file_exists(__DIR__ . '/../../../autoload.php')) {
+    require_once __DIR__ . '/../../../autoload.php';
+}
 require_once __DIR__ . '/../../autoload.php';
-$db = \Core\Database::getInstance()->getConnection();
+
+use Admin\Models\PurchaseModel;
+use Admin\Models\PackageModel;
+use Admin\Models\UserModel;
+
+$purchaseModel = new PurchaseModel();
+$paketModel = new PackageModel();
+$userModel = new UserModel();
 
 // Fetch Packages (for selection)
-$paketModel = new \Models\AbonelikPaketModel();
 $paketler = $paketModel->all();
 
 // Fetch Purchases
-$stmt = $db->prepare("SELECT ka.*, k.adi_soyadi as ad_soyad, k.kullanici_adi, k.email, ka.paket_id as current_package_id, ap.ad as paket_adi, ap.fiyat 
-                      FROM kullanici_abonelikleri ka 
-                      LEFT JOIN kullanicilar k ON ka.kullanici_id = k.id 
-                      LEFT JOIN abonelik_paketleri ap ON ka.paket_id = ap.id 
-                      ORDER BY ka.id DESC");
-$stmt->execute();
-$abonelikler = $stmt->fetchAll(PDO::FETCH_OBJ);
+$abonelikler = $purchaseModel->getPurchases();
 
 // Fetch All Users (for Add Purchase modal)
-$userStmt = $db->prepare("SELECT id, adi_soyadi, kullanici_adi, email FROM kullanicilar WHERE admin_id = 0 AND (silinme_tarihi IS NULL OR silinme_tarihi = '') ORDER BY adi_soyadi ASC");
-$userStmt->execute();
-$kullanicilar = $userStmt->fetchAll(PDO::FETCH_OBJ);
+$kullanicilar = $userModel->getMainUsers();
 
 // Pre-process users to fix "0" or empty names
 foreach ($kullanicilar as $user) {
@@ -466,6 +467,7 @@ foreach ($kullanicilar as $user) {
             try {
                 const formData = new FormData();
                 formData.append('id', id);
+                formData.append('action', 'delete');
 
                 const response = await fetch('satinalma-sil', {
                     method: 'POST',

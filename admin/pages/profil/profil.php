@@ -1,15 +1,17 @@
 <?php
+if (file_exists(__DIR__ . '/../../../autoload.php')) {
+    require_once __DIR__ . '/../../../autoload.php';
+}
 require_once __DIR__ . '/../../autoload.php';
-require_once __DIR__ . '/../../Core/Database.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$db = \Core\Database::getInstance()->getConnection();
-$stmt = $db->prepare("SELECT * FROM kullanicilar WHERE id = ?");
-$stmt->execute([$_SESSION['user_id']]);
-$user = $stmt->fetch(PDO::FETCH_OBJ);
+use Admin\Models\UserModel;
+
+$userModel = new UserModel();
+$user = $userModel->find($_SESSION['user_id'] ?? 0);
 
 if (!$user) {
     echo "Kullanıcı bulunamadı.";

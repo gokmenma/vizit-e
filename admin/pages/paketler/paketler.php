@@ -1,9 +1,12 @@
 <?php
+if (file_exists(__DIR__ . '/../../../autoload.php')) {
+    require_once __DIR__ . '/../../../autoload.php';
+}
 require_once __DIR__ . '/../../autoload.php';
-$db = \Core\Database::getInstance()->getConnection();
 
-// Fetch Packages
-$paketModel = new \Models\AbonelikPaketModel();
+use Admin\Models\PackageModel;
+
+$paketModel = new PackageModel();
 $paketler = $paketModel->all();
 ?>
 
@@ -20,12 +23,19 @@ $paketler = $paketModel->all();
 
     <div class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
         <?php foreach ($paketler as $paket): ?>
-        <div class="card" style="display: flex; flex-direction: column; position: relative; overflow: hidden; padding: 1.5rem;">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--primary);"></div>
+        <div class="card" style="display: flex; flex-direction: column; position: relative; overflow: hidden; padding: 1.5rem; opacity: <?php echo $paket->aktif_mi ? '1' : '0.85'; ?>;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: <?php echo $paket->aktif_mi ? 'var(--primary)' : '#71717a'; ?>;"></div>
             
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                 <div>
-                    <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--foreground);"><?php echo $paket->ad; ?></h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; flex-wrap: wrap;">
+                        <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0; color: var(--foreground);"><?php echo $paket->ad; ?></h3>
+                        <?php if ($paket->aktif_mi): ?>
+                            <span class="badge badge-success" style="font-size: 0.65rem; padding: 0.125rem 0.375rem; border-radius: 4px;">Aktif</span>
+                        <?php else: ?>
+                            <span class="badge badge-secondary" style="font-size: 0.65rem; padding: 0.125rem 0.375rem; border-radius: 4px;">Pasif</span>
+                        <?php endif; ?>
+                    </div>
                     <p style="font-size: 0.875rem; color: var(--muted-foreground);"><?php echo $paket->aciklama ?? 'Tüm temel özellikler dahil.'; ?></p>
                 </div>
                 <div style="text-align: right;">
@@ -56,16 +66,25 @@ $paketler = $paketModel->all();
             </div>
 
             <div style="display: flex; gap: 0.5rem; margin-top: auto;">
-                <button class="btn btn-outline" style="flex: 1; height: 2.25rem;" onclick="openEditPackageModal(this)" 
+                <button class="btn btn-outline" style="flex: 1; height: 2.25rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem;" onclick="openEditPackageModal(this)" 
                         data-id="<?php echo $paket->id; ?>"
                         data-ad="<?php echo htmlspecialchars($paket->ad); ?>"
                         data-fiyat="<?php echo $paket->fiyat; ?>"
                         data-hak="<?php echo $paket->firma_hakki; ?>"
                         data-alt-hak="<?php echo $paket->alt_kullanici_hakki; ?>"
                         data-sure="<?php echo $paket->sure; ?>">
-                    Düzenle
+                    <i data-lucide="edit-3" style="width: 14px;"></i> Düzenle
                 </button>
-                <button class="btn btn-secondary" style="flex: 1; height: 2.25rem;">Pasife Al</button>
+                <button class="btn btn-secondary" style="flex: 1; height: 2.25rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem;" onclick="togglePackageStatus(<?php echo $paket->id; ?>, <?php echo $paket->aktif_mi; ?>)">
+                    <?php if ($paket->aktif_mi): ?>
+                        <i data-lucide="eye-off" style="width: 14px;"></i> Pasif Yap
+                    <?php else: ?>
+                        <i data-lucide="eye" style="width: 14px;"></i> Aktif Yap
+                    <?php endif; ?>
+                </button>
+                <button class="btn-delete" style="width: 2.25rem; height: 2.25rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; background-color: rgba(239, 68, 68, 0.08); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.backgroundColor='rgba(239, 68, 68, 0.16)'" onmouseout="this.style.backgroundColor='rgba(239, 68, 68, 0.08)'" title="Sil" onclick="openDeletePackageModal(<?php echo $paket->id; ?>, '<?php echo htmlspecialchars($paket->ad, ENT_QUOTES); ?>')">
+                    <i data-lucide="trash-2" style="width: 14px;"></i>
+                </button>
             </div>
         </div>
         <?php endforeach; ?>
@@ -161,9 +180,35 @@ $paketler = $paketModel->all();
             </div>
         </form>
     </dialog>
+
+    <!-- Delete Confirmation Modal -->
+    <dialog id="delete-package-modal" class="card" style="width: 400px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+            <header>
+                <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--destructive);">
+                    <i data-lucide="alert-triangle" style="width: 20px;"></i> Emin misiniz?
+                </h2>
+                <p style="font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.5;">
+                    <b id="delete-package-name"></b> isimli paketi silmek istediğinize emin misiniz? <br><br>
+                    Bu işlem paketi arşivleyecek ve yeni abonelikler için seçilemez yapacaktır. Mevcut aboneler bu durumdan etkilenmeyecektir.
+                </p>
+            </header>
+
+            <footer style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('delete-package-modal').close()">Vazgeç</button>
+                <button class="btn btn-destructive" id="confirm-delete-package-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: #ef4444 !important; color: #fff !important; border: 1px solid #ef4444 !important;">
+                    Silmeyi Onayla
+                </button>
+            </footer>
+        </div>
+    </dialog>
 </div>
 
 <script>
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
     async function handlePackageSubmit(e, formId) {
         e.preventDefault();
         if (!App.validateForm(formId)) return;
@@ -209,4 +254,77 @@ $paketler = $paketModel->all();
         document.getElementById('edit-sure').value = el.dataset.sure;
         document.getElementById('edit-package-modal').showModal();
     }
+
+    let packageIdToDelete = null;
+
+    function openDeletePackageModal(id, name) {
+        packageIdToDelete = id;
+        document.getElementById('delete-package-name').innerText = name;
+        document.getElementById('delete-package-modal').showModal();
+    }
+
+    document.getElementById('confirm-delete-package-btn').addEventListener('click', async function() {
+        if (!packageIdToDelete) return;
+
+        const btn = this;
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px;"></div> İşleniyor...';
+
+        try {
+            const formData = new FormData();
+            formData.append('id', packageIdToDelete);
+            formData.append('action', 'delete');
+
+            const response = await fetch('admin-paket-sil', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                App.toast('success', 'Başarılı', result.message);
+                document.getElementById('delete-package-modal').close();
+                setTimeout(() => App.refreshContent(), 500);
+            } else {
+                App.toast('error', 'Hata', result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            App.toast('error', 'Hata', 'Bir hata oluştu.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            packageIdToDelete = null;
+        }
+    });
+
+    async function togglePackageStatus(id, currentStatus) {
+        try {
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('action', 'toggle-status');
+
+            const response = await fetch('admin-paket-kaydet', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                App.toast('success', 'Başarılı', result.message);
+                setTimeout(() => App.refreshContent(), 500);
+            } else {
+                App.toast('error', 'Hata', result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            App.toast('error', 'Hata', 'Bir hata oluştu.');
+        }
+    }
 </script>
+

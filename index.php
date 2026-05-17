@@ -1,7 +1,28 @@
 <?php
 
 require_once "vendor/autoload.php";
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// ==========================================
+// BAKIM MODU INTERCEPTOR (Tüm Kullanıcılar İçin)
+// ==========================================
+try {
+    require_once __DIR__ . '/Models/Model.php';
+    require_once __DIR__ . '/Models/KullaniciAyarModel.php';
+    
+    $ayarModel = new \Models\KullaniciAyarModel();
+    $maintenance_mode = $ayarModel->getSetting('maintenance_mode', 0);
+    
+    if ($maintenance_mode === '1') {
+        http_response_code(503);
+        require_once __DIR__ . '/pages/bakim.php';
+        exit();
+    }
+} catch (\Exception $e) {
+    // Veritabanı veya model yükleme hatasında sitenin kilitlenmemesi için sessizce devam et
+}
 
 use App\Helper\Security;
 use App\Helper\Date;

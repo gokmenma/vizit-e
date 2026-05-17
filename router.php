@@ -6,6 +6,47 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// ==========================================
+// BAKIM MODU INTERCEPTOR (Süper Admin Hariç)
+// ==========================================
+try {
+    require_once __DIR__ . '/Models/Model.php';
+    require_once __DIR__ . '/Models/KullaniciAyarModel.php';
+    
+    $ayarModel = new \Models\KullaniciAyarModel();
+    $maintenance_mode = $ayarModel->getSetting('maintenance_mode', 0);
+    
+    if ($maintenance_mode === '1') {
+        // Süper Admin kontrolü (Oturumdaki rolden)
+        $is_superadmin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'superadmin') || 
+                         (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') ||
+                         (isset($_SESSION['user']) && is_object($_SESSION['user']) && isset($_SESSION['user']->role) && $_SESSION['user']->role === 'superadmin');
+        
+        if (!$is_superadmin) {
+            $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+            $url_param = $_GET['url'] ?? '';
+            
+            // Bypass edilebilir rotalar (Giriş/Çıkış ekranı, Assets, reCAPTCHA vb.)
+            $is_bypass_url = str_contains($request_uri, 'sign-in') || 
+                              str_contains($request_uri, 'login.php') || 
+                              str_contains($request_uri, 'logout') || 
+                              str_contains($request_uri, '/assets/') ||
+                              str_contains($request_uri, '/vendor/') ||
+                              str_contains($request_uri, 'autologin') ||
+                              str_contains($url_param, 'sign-in') ||
+                              str_contains($url_param, 'logout');
+            
+            if (!$is_bypass_url) {
+                http_response_code(503);
+                require_once __DIR__ . '/pages/bakim.php';
+                exit();
+            }
+        }
+    }
+} catch (\Exception $e) {
+    // Veritabanı veya model yükleme hatasında sitenin kilitlenmemesi için sessizce devam et
+}
+
 if (php_sapi_name() === 'cli-server') {
     $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $file = __DIR__ . $path;

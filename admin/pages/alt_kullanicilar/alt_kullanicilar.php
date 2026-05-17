@@ -1,53 +1,41 @@
 <?php
+if (file_exists(__DIR__ . '/../../../autoload.php')) {
+    require_once __DIR__ . '/../../../autoload.php';
+}
 require_once __DIR__ . '/../../autoload.php';
-$db = \Core\Database::getInstance()->getConnection();
+
+use Admin\Models\UserModel;
+
+$userModel = new UserModel();
+
 $adminId = 0;
 if (isset($_GET['user'])) {
     $adminId = \App\Helper\Security::decrypt($_GET['user']);
 }
 
-$sql = "SELECT k.*, 
-               a.adi_soyadi as admin_ad, a.kullanici_adi as admin_username,
-               e.adi_soyadi as ekleyen_ad, e.kullanici_adi as ekleyen_username
-        FROM kullanicilar k 
-        LEFT JOIN kullanicilar a ON k.admin_id = a.id 
-        LEFT JOIN kullanicilar e ON k.ekleyen_id = e.id
-        WHERE k.admin_id > 0 AND (k.silinme_tarihi IS NULL OR k.silinme_tarihi = '')";
+// 1. Get sub-users and filtered admin details through the localized model
+$altKullanicilar = $userModel->getSubUsers($adminId);
+$adminUser = $adminId > 0 ? $userModel->getAdminDetails($adminId) : null;
 
-if ($adminId > 0) {
-    $sql .= " AND k.admin_id = :admin_id";
-}
-
-$stmt = $db->prepare($sql);
-if ($adminId > 0) {
-    $stmt->bindParam(':admin_id', $adminId);
-}
-$stmt->execute();
-$altKullanicilar = $stmt->fetchAll(PDO::FETCH_OBJ);
-$adminUser = null;
-if ($adminId > 0) {
-    $stmtAdmin = $db->prepare("SELECT id, adi_soyadi, kullanici_adi FROM kullanicilar WHERE id = :id");
-    $stmtAdmin->execute([':id' => $adminId]);
-    $adminUser = $stmtAdmin->fetch(PDO::FETCH_OBJ);
-}
-
-// Ana kullanıcıları getir (modal için)
-$stmtMain = $db->prepare("SELECT id, adi_soyadi, kullanici_adi FROM kullanicilar WHERE admin_id = 0 AND (silinme_tarihi IS NULL OR silinme_tarihi = '') ORDER BY adi_soyadi ASC");
-$stmtMain->execute();
-$mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
+// 2. Get main users for dropdown selection in modals
+$mainUsers = $userModel->getMainUsers();
 ?>
 
 <div class="animate-in" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
         <div>
-            <h1 style="font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;">Alt Kullanıcılar</h1>
+            <h1 style="font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;">Alt Kullanıcılar
+            </h1>
             <p style="color: #71717a; font-size: 0.875rem; margin-top: 0.25rem;">
                 <?php if ($adminUser): ?>
                     <span class="badge badge-primary" style="padding: 0.25rem 0.5rem; gap: 0.5rem;">
                         <i data-lucide="filter" style="width: 12px;"></i>
-                        <b><?php echo htmlspecialchars($adminUser->adi_soyadi ?: $adminUser->kullanici_adi); ?></b> kullanıcısının alt hesapları
+                        <b><?php echo htmlspecialchars($adminUser->adi_soyadi ?: $adminUser->kullanici_adi); ?></b>
+                        kullanıcısının alt hesapları
                     </span>
-                    <a href="alt-kullanicilar" class="nav-link" data-route="alt-kullanicilar" style="color: #2563eb; margin-left: 0.5rem; text-decoration: underline; font-size: 0.75rem;">Filtreyi Temizle</a>
+                    <a href="alt-kullanicilar" class="nav-link" data-route="alt-kullanicilar"
+                        style="color: #2563eb; margin-left: 0.5rem; text-decoration: underline; font-size: 0.75rem;">Filtreyi
+                        Temizle</a>
                 <?php else: ?>
                     Kullanıcılara bağlı çalışan alt kullanıcı hesapları.
                 <?php endif; ?>
@@ -58,19 +46,24 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
         </button>
     </div>
 
-    <div class="card dt-container" style="padding: 0; overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+    <div class="card dt-container"
+        style="padding: 0; overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0;">
         <!-- Data Table Header -->
         <div class="dt-header">
             <div class="dt-tabs">
-                <button class="dt-tab active">Hepsi <span class="dt-tab-count"><?php echo count($altKullanicilar); ?></span></button>
-                <button class="dt-tab">Aktif <span class="dt-tab-count"><?php echo count($altKullanicilar); ?></span></button>
+                <button class="dt-tab active">Hepsi <span
+                        class="dt-tab-count"><?php echo count($altKullanicilar); ?></span></button>
+                <button class="dt-tab">Aktif <span
+                        class="dt-tab-count"><?php echo count($altKullanicilar); ?></span></button>
                 <button class="dt-tab">Pasif <span class="dt-tab-count">0</span></button>
             </div>
 
             <div class="dt-actions">
                 <div class="dt-search-wrapper">
-                    <i data-lucide="search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 16px; color: #71717a; z-index: 10;"></i>
-                    <input type="text" id="alt-user-search" class="dt-search-input" placeholder="Alt kullanıcı ara..." onkeyup="searchAltTable()">
+                    <i data-lucide="search"
+                        style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 16px; color: #71717a; z-index: 10;"></i>
+                    <input type="text" id="alt-user-search" class="dt-search-input" placeholder="Alt kullanıcı ara..."
+                        onkeyup="searchAltTable()">
                 </div>
             </div>
         </div>
@@ -80,80 +73,95 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
             <table class="data-table" id="alt-users-table">
                 <thead>
                     <tr>
-                        <th class="sortable" onclick="sortAltTable(0)" style="width: 80px;">ID <i data-lucide="chevron-down" class="sort-icon" style="width: 12px;"></i></th>
-                        <th class="sortable" onclick="sortAltTable(1)">Alt Kullanıcı <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortAltTable(0)" style="width: 80px;">ID <i
+                                data-lucide="chevron-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortAltTable(1)">Alt Kullanıcı <i data-lucide="chevrons-up-down"
+                                class="sort-icon" style="width: 12px;"></i></th>
                         <th>Yetkiler</th>
-                        <th class="sortable" onclick="sortAltTable(3)">Bağlı Olduğu Kullanıcı <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
-                        <th class="sortable" onclick="sortAltTable(4)">Ekleyen Kullanıcı <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
-                        <th class="sortable" onclick="sortAltTable(5)">Eklenme Tarihi <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortAltTable(3)">Bağlı Olduğu Kullanıcı <i
+                                data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortAltTable(4)">Ekleyen Kullanıcı <i
+                                data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortAltTable(5)">Eklenme Tarihi <i data-lucide="chevrons-up-down"
+                                class="sort-icon" style="width: 12px;"></i></th>
                         <th style="text-align: right;">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($altKullanicilar as $user): ?>
-                    <tr class="alt-user-row">
-                        <td style="color: var(--muted-foreground); font-family: monospace; font-size: 0.75rem;">#<?php echo $user->id; ?></td>
-                        <td class="alt-user-name">
-                            <div style="display: flex; flex-direction: column;">
-                                <?php 
-                                    $displayName = (!empty($user->admin_ad) && $user->admin_ad !== '0') ? $user->admin_ad : $user->admin_username;
-                                ?>
-                                <span style="font-weight: 600; cursor: pointer; color: var(--foreground);" 
-                                      onclick="openEditAltModal(this)"
-                                      data-id="<?php echo $user->id; ?>"
-                                      data-name="<?php echo htmlspecialchars($user->adi_soyadi); ?>"
-                                      data-username="<?php echo htmlspecialchars($user->kullanici_adi); ?>"
-                                      data-email="<?php echo htmlspecialchars($user->email); ?>"
-                                      data-admin-id="<?php echo $user->admin_id; ?>"
-                                      data-admin-name="<?php echo htmlspecialchars($displayName); ?>"
-                                      data-yetkiler="<?php echo htmlspecialchars($user->yetkiler ?? ''); ?>">
-                                    <?php echo $user->adi_soyadi ?? '-'; ?>
-                                </span>
-                                <span style="color: var(--muted-foreground); font-size: 0.75rem;">@<?php echo $user->kullanici_adi; ?></span>
-                            </div>
-                        </td>
-                        <td>
-                            <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
-                                <?php 
+                        <tr class="alt-user-row">
+                            <td style="color: var(--muted-foreground); font-family: monospace; font-size: 0.75rem;">
+                                #<?php echo $user->id; ?></td>
+                            <td class="alt-user-name">
+                                <div style="display: flex; flex-direction: column;">
+                                    <?php
+                                    $displayName = $user->admin_name ?? $user->admin_username ?? 'Sistem';
+                                    ?>
+                                    <span style="font-weight: 600; cursor: pointer;     color: var(--foreground);"
+                                        onclick="openEditAltModal(this)" data-id="<?php echo $user->id; ?>"
+                                        data-name="<?php echo htmlspecialchars($user->adi_soyadi); ?>"
+                                        data-username="<?php echo htmlspecialchars($user->kullanici_adi); ?>"
+                                        data-email="<?php echo htmlspecialchars($user->email); ?>"
+                                        data-admin-id="<?php echo $user->admin_id; ?>"
+                                        data-admin-name="<?php echo htmlspecialchars($displayName); ?>"
+                                        data-yetkiler="<?php echo htmlspecialchars($user->yetkiler ?? ''); ?>">
+                                        <?php echo $user->adi_soyadi ?? '-'; ?>
+                                    </span>
+                                    <span
+                                        style="color: var(--muted-foreground); font-size: 0.75rem;">@<?php echo $user->kullanici_adi; ?></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                                    <?php
                                     $yetkiler = $user->yetkiler ? explode(',', $user->yetkiler) : [];
                                     foreach ($yetkiler as $yetki) {
                                         $label = ($yetki == 'rapor_onay') ? 'Rapor Onay' : (($yetki == 'manuel_bildirim') ? 'Manuel Bildirim' : $yetki);
                                         echo '<span class="badge" style="background: var(--muted); color: var(--foreground); font-size: 0.7rem; border: 1px solid var(--border);">' . $label . '</span>';
                                     }
-                                    if (empty($yetkiler)) echo '<span style="color: #a1a1aa; font-size: 0.75rem;">-</span>';
-                                ?>
-                            </div>
-                        </td>
-                        <td>
-                            <div style="display: flex; flex-direction: column;">
-                                <span style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);"><?php echo $displayName; ?></span>
-                                <span style="font-size: 0.75rem; color: #a1a1aa;">ID: #<?php echo $user->admin_id; ?></span>
-                            </div>
-                        </td>
-                        <td>
-                            <div style="display: flex; flex-direction: column;">
-                                <?php 
+                                    if (empty($yetkiler))
+                                        echo '<span style="color: #a1a1aa; font-size: 0.75rem;">-</span>';
+                                    ?>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span
+                                        style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);"><?php echo $displayName; ?></span>
+                                    <span style="font-size: 0.75rem; color: #a1a1aa;">ID:
+                                        #<?php echo $user->admin_id; ?></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column;">
+                                    <?php
                                     $ekleyenName = (!empty($user->ekleyen_ad) && $user->ekleyen_ad !== '0') ? $user->ekleyen_ad : ($user->ekleyen_id ? 'Admin' : 'Sistem');
-                                ?>
-                                <span style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);"><?php echo $ekleyenName; ?></span>
-                                <?php if ($user->ekleyen_id): ?>
-                                <span style="font-size: 0.75rem; color: #a1a1aa;">@<?php echo $user->ekleyen_username; ?></span>
-                                <?php endif; ?>
-                            </div>
-                        </td>
-                        <td style="color: var(--muted-foreground); font-size: 0.8125rem;"><?php echo date('d.m.Y H:i', strtotime($user->kayit_tarihi)); ?></td>
-                        <td style="text-align: right;">
-                            <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
-                                <button class="btn btn-ghost btn-sm" title="Giriş Yap" style="color: #2563eb;"><i data-lucide="external-link" style="width: 14px;"></i></button>
-                                <button class="btn btn-ghost btn-sm" title="Sil" style="color: #ef4444;"><i data-lucide="trash-2" style="width: 14px;"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                                    ?>
+                                    <span
+                                        style="font-size: 0.875rem; font-weight: 500; color: var(--foreground);"><?php echo $ekleyenName; ?></span>
+                                    <?php if ($user->ekleyen_id): ?>
+                                        <span
+                                            style="font-size: 0.75rem; color: #a1a1aa;">@<?php echo $user->ekleyen_username; ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                            <td style="color: var(--muted-foreground); font-size: 0.8125rem;">
+                                <?php echo date('d.m.Y H:i', strtotime($user->kayit_tarihi)); ?></td>
+                            <td style="text-align: right;">
+                                <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
+                                    <button class="btn btn-sm-icon" title="Giriş Yap" style="color: #2563eb;"><i
+                                            data-lucide="external-link" style="width: 14px;"></i></button>
+                                    <button class="btn btn-sm-icon" title="Sil" style="color: #ef4444;"><i
+                                            data-lucide="trash-2" style="width: 14px;"></i></button>
+                                </div>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                     <?php if (empty($altKullanicilar)): ?>
-                    <tr>
-                        <td colspan="7" style="padding: 3rem; text-align: center; color: var(--text-muted);">Henüz kayıtlı alt kullanıcı bulunmuyor.</td>
-                    </tr>
+                        <tr>
+                            <td colspan="7" style="padding: 3rem; text-align: center; color: var(--text-muted);">Henüz
+                                kayıtlı alt kullanıcı bulunmuyor.</td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -168,14 +176,19 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
 </div>
 
 <!-- Add Alt User Modal -->
-<dialog id="add-alt-user-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="user-plus" style="width: 20px; color: var(--foreground);"></i> Yeni Alt Kullanıcı Ekle
-            </h2>
-        <button onclick="document.getElementById('add-alt-user-modal').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
+<dialog id="add-alt-user-modal" class="card"
+    style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+    <div
+        style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="user-plus" style="width: 20px; color: var(--foreground);"></i> Yeni Alt Kullanıcı Ekle
+        </h2>
+        <button onclick="document.getElementById('add-alt-user-modal').close()"
+            style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x"
+                style="width: 20px;"></i></button>
     </div>
-    <form id="add-alt-user-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitAddAltUser(this);">
+    <form id="add-alt-user-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;"
+        onsubmit="event.preventDefault(); submitAddAltUser(this);">
         <div class="form-group">
             <label class="form-label">Ad Soyad</label>
             <div class="input-icon-wrapper">
@@ -187,7 +200,8 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
             <label class="form-label">Kullanıcı Adı</label>
             <div class="input-icon-wrapper">
                 <i data-lucide="at-sign" class="input-icon"></i>
-                <input type="text" name="kullanici_adi" class="form-input" placeholder="ahmet_yilmaz" required onkeyup="sanitizeUsername(this)">
+                <input type="text" name="kullanici_adi" class="form-input" placeholder="ahmet_yilmaz" required
+                    onkeyup="sanitizeUsername(this)">
             </div>
         </div>
         <div class="form-group">
@@ -211,7 +225,7 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
                 <div class="select-trigger">
                     <i data-lucide="users" style="width: 16px; color: #71717a;"></i>
                     <span class="select-label">
-                        <?php 
+                        <?php
                         if ($adminId > 0) {
                             foreach ($mainUsers as $u) {
                                 if ($u->id == $adminId) {
@@ -233,45 +247,54 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
                     </header>
                     <div class="select-options">
                         <?php foreach ($mainUsers as $u): ?>
-                        <div class="select-option <?php echo ($adminId == $u->id) ? 'selected' : ''; ?>" data-value="<?php echo $u->id; ?>">
-                            <div style="display: flex; flex-direction: column;">
-                                <span style="font-weight: 500;"><?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?></span>
-                                <span style="font-size: 0.7rem; color: #71717a;">@<?php echo $u->kullanici_adi; ?></span>
+                            <div class="select-option <?php echo ($adminId == $u->id) ? 'selected' : ''; ?>"
+                                data-value="<?php echo $u->id; ?>">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span
+                                        style="font-weight: 500;"><?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?></span>
+                                    <span
+                                        style="font-size: 0.7rem; color: #71717a;">@<?php echo $u->kullanici_adi; ?></span>
+                                </div>
                             </div>
-                        </div>
                         <?php endforeach; ?>
                     </div>
+                </div>
             </div>
-        </div>
-        <div class="form-group">
-            <label class="form-label">İşlem Yetkileri</label>
-            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
-                <label class="label gap-3" style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="checkbox" name="yetkiler[]" value="rapor_onay" class="input">
-                    <span style="font-size: 0.875rem;">Rapor Onaylama/Kapatma Yetkisi</span>
-                </label>
-                <label class="label gap-3" style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="checkbox" name="yetkiler[]" value="manuel_bildirim" class="input">
-                    <span style="font-size: 0.875rem;">Manuel Rapor Bildirimi Yetkisi</span>
-                </label>
+            <div class="form-group">
+                <label class="form-label">İşlem Yetkileri</label>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
+                    <label class="label gap-3" style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" name="yetkiler[]" value="rapor_onay" class="input">
+                        <span style="font-size: 0.875rem;">Rapor Onaylama/Kapatma Yetkisi</span>
+                    </label>
+                    <label class="label gap-3" style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" name="yetkiler[]" value="manuel_bildirim" class="input">
+                        <span style="font-size: 0.875rem;">Manuel Rapor Bildirimi Yetkisi</span>
+                    </label>
+                </div>
             </div>
-        </div>
-        <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
-            <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('add-alt-user-modal').close()">Vazgeç</button>
-            <button type="submit" class="btn btn-primary" style="flex: 1;">Alt Kullanıcı Oluştur</button>
-        </div>
+            <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                <button type="button" class="btn btn-outline" style="flex: 1;"
+                    onclick="document.getElementById('add-alt-user-modal').close()">Vazgeç</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Alt Kullanıcı Oluştur</button>
+            </div>
     </form>
 </dialog>
 
 <!-- Edit Alt User Modal -->
-<dialog id="edit-alt-user-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-    <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+<dialog id="edit-alt-user-modal" class="card"
+    style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+    <div
+        style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
         <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
             <i data-lucide="edit-3" style="width: 20px; color: var(--foreground);"></i> Alt Kullanıcı Düzenle
         </h2>
-        <button onclick="document.getElementById('edit-alt-user-modal').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
+        <button onclick="document.getElementById('edit-alt-user-modal').close()"
+            style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x"
+                style="width: 20px;"></i></button>
     </div>
-    <form id="edit-alt-user-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitEditAltUser(this);">
+    <form id="edit-alt-user-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;"
+        onsubmit="event.preventDefault(); submitEditAltUser(this);">
         <input type="hidden" name="id" id="edit-id">
         <div class="form-group">
             <label class="form-label">Ad Soyad</label>
@@ -284,7 +307,8 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
             <label class="form-label">Kullanıcı Adı</label>
             <div class="input-icon-wrapper">
                 <i data-lucide="at-sign" class="input-icon"></i>
-                <input type="text" name="kullanici_adi" id="edit-username" class="form-input" required onkeyup="sanitizeUsername(this)">
+                <input type="text" name="kullanici_adi" id="edit-username" class="form-input" required
+                    onkeyup="sanitizeUsername(this)">
             </div>
         </div>
         <div class="form-group">
@@ -317,12 +341,14 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
                     </header>
                     <div class="select-options">
                         <?php foreach ($mainUsers as $u): ?>
-                        <div class="select-option" data-value="<?php echo $u->id; ?>">
-                            <div style="display: flex; flex-direction: column;">
-                                <span style="font-weight: 500;"><?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?></span>
-                                <span style="font-size: 0.7rem; color: #71717a;">@<?php echo $u->kullanici_adi; ?></span>
+                            <div class="select-option" data-value="<?php echo $u->id; ?>">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span
+                                        style="font-weight: 500;"><?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?></span>
+                                    <span
+                                        style="font-size: 0.7rem; color: #71717a;">@<?php echo $u->kullanici_adi; ?></span>
+                                </div>
                             </div>
-                        </div>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -342,7 +368,8 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
             </div>
         </div>
         <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
-            <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('edit-alt-user-modal').close()">Vazgeç</button>
+            <button type="button" class="btn btn-outline" style="flex: 1;"
+                onclick="document.getElementById('edit-alt-user-modal').close()">Vazgeç</button>
             <button type="submit" class="btn btn-primary" style="flex: 1;">Değişiklikleri Kaydet</button>
         </div>
     </form>
@@ -353,13 +380,13 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
     function sanitizeUsername(input) {
         let val = input.value;
         val = val.toLowerCase()
-                 .replace(/ı/g, 'i')
-                 .replace(/ğ/g, 'g')
-                 .replace(/ü/g, 'u')
-                 .replace(/ş/g, 's')
-                 .replace(/ö/g, 'o')
-                 .replace(/ç/g, 'c')
-                 .replace(/[^a-z0-9_.]/g, '');
+            .replace(/ı/g, 'i')
+            .replace(/ğ/g, 'g')
+            .replace(/ü/g, 'u')
+            .replace(/ş/g, 's')
+            .replace(/ö/g, 'o')
+            .replace(/ç/g, 'c')
+            .replace(/[^a-z0-9_.]/g, '');
         input.value = val;
     }
 
@@ -383,7 +410,7 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
     async function submitAddAltUser(form) {
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        
+
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<div class="spinner"></div> İşleniyor...';
 
@@ -424,7 +451,7 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
         document.getElementById('edit-email').value = data.email;
         document.getElementById('edit-admin-id').value = data.adminId;
         document.getElementById('edit-admin-label').innerText = data.adminName;
-        
+
         // Yetkileri işaretle
         const yetkiler = data.yetkiler ? data.yetkiler.split(',') : [];
         document.querySelectorAll('.edit-yetki').forEach(cb => {
@@ -445,7 +472,7 @@ $mainUsers = $stmtMain->fetchAll(PDO::FETCH_OBJ);
     async function submitEditAltUser(form) {
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        
+
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<div class="spinner"></div> Kaydediliyor...';
 
