@@ -418,18 +418,34 @@ if ($_POST['action'] == "admin-kullanici-guncelle") {
             $firma_hakki = $_POST["firma_hakki"] ?? 30;
             $alt_kullanici_hakki = $_POST["alt_kullanici_hakki"] ?? 3;
             $subscription_id = isset($_POST["subscription_id"]) ? Security::decrypt($_POST["subscription_id"]) : null;
+            $baslangic_tarihi = !empty($_POST["baslangic_tarihi"]) ? $_POST["baslangic_tarihi"] : null;
+            $bitis_tarihi = !empty($_POST["bitis_tarihi"]) ? $_POST["bitis_tarihi"] : null;
 
             if ($subscription_id) {
                 // Spesifik kaydı güncelle
-                $stmt = $db->prepare("UPDATE kullanici_abonelikleri SET paket_id = ?, firma_hakki = ?, alt_kullanici_hakki = ? WHERE id = ?");
-                $stmt->execute([$paket_id, $firma_hakki, $alt_kullanici_hakki, $subscription_id]);
+                // Eğer tarihler gönderilmemişse mevcut değerleri koruyalım
+                if (!$baslangic_tarihi || !$bitis_tarihi) {
+                    $curr_stmt = $db->prepare("SELECT baslangic_tarihi, bitis_tarihi FROM kullanici_abonelikleri WHERE id = ?");
+                    $curr_stmt->execute([$subscription_id]);
+                    $curr_sub = $curr_stmt->fetch(PDO::FETCH_OBJ);
+                    if ($curr_sub) {
+                        if (!$baslangic_tarihi) $baslangic_tarihi = $curr_sub->baslangic_tarihi;
+                        if (!$bitis_tarihi) $bitis_tarihi = $curr_sub->bitis_tarihi;
+                    }
+                }
+
+                $stmt = $db->prepare("UPDATE kullanici_abonelikleri SET paket_id = ?, firma_hakki = ?, alt_kullanici_hakki = ?, baslangic_tarihi = ?, bitis_tarihi = ? WHERE id = ?");
+                $stmt->execute([$paket_id, $firma_hakki, $alt_kullanici_hakki, $baslangic_tarihi, $bitis_tarihi, $subscription_id]);
             } else {
                 // Genel güncelleme: Diğerlerini kapat, yenisini aç
                 $stmt = $db->prepare("UPDATE kullanici_abonelikleri SET durum = 'iptal' WHERE kullanici_id = ?");
                 $stmt->execute([$id]);
 
-                $stmt = $db->prepare("INSERT INTO kullanici_abonelikleri (kullanici_id, paket_id, durum, baslangic_tarihi, firma_hakki, alt_kullanici_hakki) VALUES (?, ?, 'aktif', ?, ?, ?)");
-                $stmt->execute([$id, $paket_id, date('Y-m-d'), $firma_hakki, $alt_kullanici_hakki]);
+                $final_start = $baslangic_tarihi ?: date('Y-m-d');
+                $final_end = $bitis_tarihi ?: date('Y-m-d', strtotime('+1 year'));
+
+                $stmt = $db->prepare("INSERT INTO kullanici_abonelikleri (kullanici_id, paket_id, durum, baslangic_tarihi, bitis_tarihi, firma_hakki, alt_kullanici_hakki) VALUES (?, ?, 'aktif', ?, ?, ?, ?)");
+                $stmt->execute([$id, $paket_id, $final_start, $final_end, $firma_hakki, $alt_kullanici_hakki]);
             }
         }
 

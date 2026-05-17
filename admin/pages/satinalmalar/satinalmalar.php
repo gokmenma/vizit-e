@@ -401,16 +401,26 @@ foreach ($kullanicilar as $user) {
         const startDate = el.dataset.startDate;
         const endDate = el.dataset.endDate;
         
-        if (startDate) {
-            const startInput = document.getElementById('sub-edit-start-date');
+        const startInput = document.getElementById('sub-edit-start-date');
+        if (startDate && startDate !== '0000-00-00') {
             startInput.value = startDate;
             if (startInput._flatpickr) startInput._flatpickr.setDate(startDate);
+        } else {
+            const today = new Date().toISOString().split('T')[0];
+            startInput.value = today;
+            if (startInput._flatpickr) startInput._flatpickr.setDate(today);
         }
         
-        if (endDate) {
-            const endInput = document.getElementById('sub-edit-end-date');
+        const endInput = document.getElementById('sub-edit-end-date');
+        if (endDate && endDate !== '0000-00-00') {
             endInput.value = endDate;
             if (endInput._flatpickr) endInput._flatpickr.setDate(endDate);
+        } else {
+            const refDate = (startDate && startDate !== '0000-00-00') ? new Date(startDate) : new Date();
+            refDate.setFullYear(refDate.getFullYear() + 1);
+            const calculatedEnd = refDate.toISOString().split('T')[0];
+            endInput.value = calculatedEnd;
+            if (endInput._flatpickr) endInput._flatpickr.setDate(calculatedEnd);
         }
 
         document.getElementById('edit-subscriber-modal').showModal();

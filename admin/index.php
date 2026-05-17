@@ -156,16 +156,22 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
                                 <span>Satın Almalar</span>
                             </a>
                         </li>
-                         <li>
-                            <a href="/ayarlar" class="nav-link <?php echo $currentRoute === 'ayarlar' ? 'active' : ''; ?>" data-route="ayarlar">
-                                <i data-lucide="settings"></i>
-                                <span>Ayarlar</span>
-                            </a>
-                        </li>
                         <li>
                             <a href="/kampanyalar" class="nav-link <?php echo $currentRoute === 'kampanyalar' ? 'active' : ''; ?>" data-route="kampanyalar">
                                 <i data-lucide="megaphone"></i>
                                 <span>Kampanya Yönetimi</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div role="group" aria-labelledby="group-label-sistem">
+                    <h3 id="group-label-sistem">Sistem</h3>
+                    <ul>
+                         <li>
+                            <a href="/ayarlar" class="nav-link <?php echo $currentRoute === 'ayarlar' ? 'active' : ''; ?>" data-route="ayarlar">
+                                <i data-lucide="settings"></i>
+                                <span>Ayarlar</span>
                             </a>
                         </li>
                         <?php if ($_SESSION['user_role'] === 'superadmin'): ?>
