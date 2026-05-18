@@ -247,3 +247,9 @@
 18:16:16 - localhost - /sozlesme-4b/index.php
 18:16:29 - localhost - /sozlesme-4b/mobile/
 18:36:01 - localhost - /sozlesme-4b/mobile/
+20:06:59 - vizite.com - /sign-in
+20:07:03 - vizite.com - /sign-in
+20:07:03 - vizite.com - /isyerlerim
+20:07:20 - vizite.com - /logout
+20:07:20 - vizite.com - /sign-in
+20:07:32 - vizite.com - /sign-in

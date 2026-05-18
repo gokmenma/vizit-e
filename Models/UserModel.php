@@ -403,7 +403,7 @@ public function AltKullanicilar($adminId)
         $stmt = $this->db->prepare("SELECT l.*, k.adi_soyadi, k.kullanici_adi 
                                     FROM logs l
                                     LEFT JOIN kullanicilar k ON l.user_id = k.id
-                                    WHERE l.channel IN ('auth', 'admin-auth', 'user-management', 'workplace-management', 'subscription')
+                                    WHERE l.channel IN ('auth', 'sign-in', 'admin-auth', 'user-management', 'workplace-management', 'subscription')
                                     ORDER BY l.created_at DESC
                                     LIMIT :limit");
         $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);

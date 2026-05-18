@@ -31,6 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        
             //Eğer kullanıcı pasif ise giriş yapamasın
             if ($user->durum == "Pasif") {
+                $logger->warning("Pasif kullanıcı giriş denemesi: " . $user->kullanici_adi, [
+                    'user_id' => $user->id,
+                    'identifier' => $kullanici_adi,
+                    'reason' => 'passive_user'
+                ]);
                 $error_message = 'Kullanıcı pasif! Lütfen yöneticiniz ile iletişime geçin.';
             } else {
 
@@ -44,7 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION["user"] = $user; // Tüm kullanıcı bilgileri
 
                 //echo "kullanıcı id: " . $_SESSION['kullanici_id'];
-                $logger->info("Kullanıcı giriş yaptı: " . $user->kullanici_adi);
+                $logger->success("Kullanıcı giriş yaptı: " . $user->kullanici_adi, [
+                    'user_id' => $user->id,
+                    'identifier' => $kullanici_adi
+                ]);
 
                 // Ana sayfaya yönlendir
                 header('Location: ' . $_ENV['BASE_PATH']);
@@ -53,6 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             // Hatalı giriş
+            $logger->warning("Başarısız kullanıcı giriş denemesi: " . $kullanici_adi, [
+                'user_id' => $user->id ?? 0,
+                'identifier' => $kullanici_adi,
+                'reason' => $user ? 'invalid_password' : 'user_not_found'
+            ]);
             $error_message = 'Kullanıcı adı veya şifre yanlış!';
         }
     } else {

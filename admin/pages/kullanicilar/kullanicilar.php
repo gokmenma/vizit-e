@@ -136,7 +136,7 @@ $paketler = $paketModel->all();
                         </td>
                         <td style="text-align: right;">
                             <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
-                                <button class="btn btn-ghost btn-sm" title="Düzenle" 
+                                <button class="btn-icon-outline" title="Düzenle" 
                                         onclick="openSubscriberModal(this)"
                                           data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
                                           data-name="<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>"
@@ -147,7 +147,7 @@ $paketler = $paketModel->all();
                                           data-yetkiler="<?php echo htmlspecialchars($user->yetkiler ?? ''); ?>">
                                     <i data-lucide="edit-3" style="width: 14px;"></i>
                                 </button>
-                                <button class="btn btn-ghost btn-sm" title="Şifre Değiştir"
+                                <button class="btn-icon-outline" title="Şifre Değiştir"
                                         onclick="openSubscriberModal(this)"
                                           data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
                                           data-name="<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>"
@@ -159,12 +159,12 @@ $paketler = $paketModel->all();
                                     <i data-lucide="key" style="width: 14px;"></i>
                                 </button>
                                 <?php if ((int)$user->id !== (int)($_SESSION['user_id'] ?? 0)): ?>
-                                    <button class="btn btn-ghost btn-sm" title="Sil" style="color: #ef4444;" 
+                                    <button class="btn-icon-outline" title="Sil" style="color: #ef4444;" 
                                             onclick="confirmDelete(<?php echo $user->id; ?>, '<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>')">
                                         <i data-lucide="trash-2" style="width: 14px;"></i>
                                     </button>
                                 <?php else: ?>
-                                    <button class="btn btn-ghost btn-sm" title="Kendinizi Silemezsiniz" style="color: var(--muted-foreground); cursor: not-allowed; opacity: 0.4;" disabled>
+                                    <button class="btn-icon-outline" title="Kendinizi Silemezsiniz" style="color: var(--muted-foreground); cursor: not-allowed; opacity: 0.4;" disabled>
                                         <i data-lucide="trash-2" style="width: 14px;"></i>
                                     </button>
                                 <?php endif; ?>

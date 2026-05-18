@@ -43,6 +43,8 @@ class DatabaseLogger extends Model implements LoggerInterface
 
     public function log($level, $message, $context = [])
     {
+        $userId = $context['user_id'] ?? ($_SESSION['kullanici_id'] ?? 0);
+
         $sql = "INSERT INTO logs (
                     ip_address,user_id,
                     browser,
@@ -57,7 +59,7 @@ class DatabaseLogger extends Model implements LoggerInterface
         
         $stmt->execute([
             ':ip_address' => $_SERVER['REMOTE_ADDR'] ?? 0,
-            ':user_id' => $_SESSION['kullanici_id'] ?? 0,
+            ':user_id' => $userId,
             ':level'   => $level,
             ':message' => $message,
             ':context' => !empty($context) ? json_encode($context, JSON_UNESCAPED_UNICODE) : null,
