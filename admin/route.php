@@ -20,6 +20,7 @@ $router->get('sign-in', 'login.php')
     ->post('admin-kullanici-ekle', 'pages/kullanicilar/APIKullanicilar.php')
     ->post('admin-kullanici-guncelle', 'pages/kullanicilar/APIKullanicilar.php')
     ->post('admin-kullanici-satin-al', 'pages/satinalmalar/APISatinalmalar.php')
+    ->post('abonelik-kaydet', 'pages/satinalmalar/APISatinalmalar.php')
     ->post('admin-paket-kaydet', 'pages/paketler/APIPaketler.php')
     ->post('admin-paket-sil', 'pages/paketler/APIPaketler.php')
     ->post('alt-kullanici-kaydet', 'pages/alt_kullanicilar/APIAltKullanicilar.php')
@@ -45,5 +46,4 @@ $router->get('sign-in', 'login.php')
         exit();
     })
     ->resetPrefix();
-
 

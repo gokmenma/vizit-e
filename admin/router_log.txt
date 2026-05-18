@@ -2161,3 +2161,9 @@
 15:03:44 - admin.vizite.com - /favicon.ico
 15:03:47 - admin.vizite.com - /kullanicilar
 15:08:26 - admin.vizite.com - /profil
+19:52:59 - admin.vizite.com - /dashboard
+19:53:01 - admin.vizite.com - /favicon.ico
+19:53:04 - admin.vizite.com - /kampanyalar
+19:53:06 - admin.vizite.com - /satinalmalar
+19:53:15 - admin.vizite.com - /admin-kullanici-satin-al
+19:53:16 - admin.vizite.com - /satinalmalar

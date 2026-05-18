@@ -340,9 +340,9 @@ foreach ($kullanicilar as $user) {
 
         try {
             const formData = new FormData(form);
-            formData.append('action', 'admin-kullanici-satin-al');
+            formData.append('action', 'create');
 
-            const response = await fetch('admin-kullanici-satin-al', {
+            const response = await fetch('abonelik-kaydet', {
                 method: 'POST',
                 body: formData,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
