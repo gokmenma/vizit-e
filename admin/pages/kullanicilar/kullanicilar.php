@@ -16,7 +16,7 @@ $paketler = $paketModel->all();
             <h1 style="font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;">Kullanıcılar</h1>
             <p style="color: var(--muted-foreground); font-size: 0.875rem; margin-top: 0.25rem;">Sisteme kayıtlı ana kullanıcılar ve firma yöneticileri.</p>
         </div>
-        <button class="btn btn-primary" onclick="document.getElementById('add-subscriber-modal').showModal()">
+        <button class="btn btn-primary" onclick="openSubscriberModal()">
             <i data-lucide="user-plus" style="width: 16px;"></i> Yeni Kullanıcı Ekle
         </button>
     </div>
@@ -83,7 +83,7 @@ $paketler = $paketModel->all();
                                 </div>
                                 <div style="display: flex; flex-direction: column;">
                                     <span class="subscriber-name" style="font-weight: 600; color: var(--foreground); cursor: pointer;" 
-                                          onclick="openEditModal(this)"
+                                          onclick="openSubscriberModal(this)"
                                           data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
                                           data-name="<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>"
                                           data-username="<?php echo htmlspecialchars($user->kullanici_adi); ?>"
@@ -137,7 +137,7 @@ $paketler = $paketModel->all();
                         <td style="text-align: right;">
                             <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
                                 <button class="btn btn-ghost btn-sm" title="Düzenle" 
-                                        onclick="openEditModal(this)"
+                                        onclick="openSubscriberModal(this)"
                                           data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
                                           data-name="<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>"
                                           data-username="<?php echo htmlspecialchars($user->kullanici_adi); ?>"
@@ -147,11 +147,27 @@ $paketler = $paketModel->all();
                                           data-yetkiler="<?php echo htmlspecialchars($user->yetkiler ?? ''); ?>">
                                     <i data-lucide="edit-3" style="width: 14px;"></i>
                                 </button>
-                                <button class="btn btn-ghost btn-sm" title="Şifre Değiştir"><i data-lucide="key" style="width: 14px;"></i></button>
-                                <button class="btn btn-ghost btn-sm" title="Sil" style="color: #ef4444;" 
-                                        onclick="confirmDelete(<?php echo $user->id; ?>, '<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>')">
-                                    <i data-lucide="trash-2" style="width: 14px;"></i>
+                                <button class="btn btn-ghost btn-sm" title="Şifre Değiştir"
+                                        onclick="openSubscriberModal(this)"
+                                          data-id="<?php echo \App\Helper\Security::encrypt($user->id); ?>"
+                                          data-name="<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>"
+                                          data-username="<?php echo htmlspecialchars($user->kullanici_adi); ?>"
+                                          data-email="<?php echo htmlspecialchars($user->email); ?>"
+                                          data-role="<?php echo $user->role; ?>"
+                                          data-package="<?php echo $user->current_paket_id; ?>"
+                                          data-yetkiler="<?php echo htmlspecialchars($user->yetkiler ?? ''); ?>">
+                                    <i data-lucide="key" style="width: 14px;"></i>
                                 </button>
+                                <?php if ((int)$user->id !== (int)($_SESSION['user_id'] ?? 0)): ?>
+                                    <button class="btn btn-ghost btn-sm" title="Sil" style="color: #ef4444;" 
+                                            onclick="confirmDelete(<?php echo $user->id; ?>, '<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>')">
+                                        <i data-lucide="trash-2" style="width: 14px;"></i>
+                                    </button>
+                                <?php else: ?>
+                                    <button class="btn btn-ghost btn-sm" title="Kendinizi Silemezsiniz" style="color: var(--muted-foreground); cursor: not-allowed; opacity: 0.4;" disabled>
+                                        <i data-lucide="trash-2" style="width: 14px;"></i>
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
@@ -170,140 +186,59 @@ $paketler = $paketModel->all();
     </div>
     
     <!-- Modals -->
-    <dialog id="add-subscriber-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+    <!-- Unified User Modal -->
+    <dialog id="subscriber-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
         <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="user-plus" style="width: 20px; color: var(--foreground);"></i> Yeni Kullanıcı Ekle
+                <span id="modal-title-icon-container">
+                    <i data-lucide="user-plus" style="width: 20px; color: var(--foreground);"></i>
+                </span>
+                <span id="modal-title-text">Yeni Kullanıcı Ekle</span>
             </h2>
-            <button onclick="document.getElementById('add-subscriber-modal').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
+            <button onclick="document.getElementById('subscriber-modal').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
-        <form id="add-subscriber-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitAddSubscriber(this);">
+        <form id="subscriber-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitSubscriberForm(this);">
+            <input type="hidden" id="subscriber-id" name="id">
+            
             <div class="form-group">
                 <label class="form-label">Ad Soyad / Firma</label>
                 <div class="input-icon-wrapper">
                     <i data-lucide="user" class="input-icon"></i>
-                    <input type="text" name="adi_soyadi" class="form-input" placeholder="Örn: Mehmet Ali Gökmen" required>
+                    <input type="text" id="subscriber-name" name="adi_soyadi" class="form-input" placeholder="Örn: Mehmet Ali Gökmen" required>
                     <span class="form-error">Bu alan zorunludur.</span>
                 </div>
             </div>
+            
             <div class="form-group">
                 <label class="form-label">Kullanıcı Adı</label>
                 <div class="input-icon-wrapper">
                     <i data-lucide="at-sign" class="input-icon"></i>
-                    <input type="text" name="kullanici_adi" class="form-input" placeholder="kullaniciadi" onkeyup="sanitizeUsername(this)" required>
+                    <input type="text" id="subscriber-username" name="kullanici_adi" class="form-input" placeholder="kullaniciadi" onkeyup="sanitizeUsername(this)" required>
                 </div>
             </div>
+            
             <div class="form-group">
                 <label class="form-label">E-posta Adresi</label>
                 <div class="input-icon-wrapper">
                     <i data-lucide="mail" class="input-icon"></i>
-                    <input type="email" name="email" class="form-input" placeholder="ornek@mail.com" required>
+                    <input type="email" id="subscriber-email" name="email" class="form-input" placeholder="ornek@mail.com" required>
                     <span class="form-error">Geçerli bir e-posta adresi giriniz.</span>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Abonelik Paketi</label>
-                <div class="custom-select" id="add-package-select">
-                    <input type="hidden" name="paket_id" required>
-                    <div class="select-trigger">
-                        <i data-lucide="package" style="width: 16px; color: #71717a;"></i>
-                        <span class="select-label">Paket seçin...</span>
-                        <i data-lucide="chevron-down" style="width: 16px; color: #71717a; margin-left: auto;"></i>
-                    </div>
-                    <div class="select-popover" popover="manual">
-                        <header>
-                            <i data-lucide="search" style="width: 14px; color: #a1a1aa;"></i>
-                            <input type="text" class="select-search" placeholder="Paket ara...">
-                        </header>
-                        <div class="select-options">
-                            <?php foreach ($paketler as $paket): ?>
-                            <div class="select-option" data-value="<?php echo $paket->id; ?>">
-                                <div style="display: flex; flex-direction: column;">
-                                    <span style="font-weight: 500;"><?php echo $paket->ad; ?></span>
-                                    <span style="font-size: 0.7rem; color: #71717a;"><?php echo $paket->firma_hakki; ?> Firma / <?php echo $paket->sure; ?> Ay</span>
-                                </div>
-                            </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Kullanıcı Rolü</label>
-                <div class="custom-select" id="add-role-select">
-                    <input type="hidden" name="role" value="admin" required>
-                    <div class="select-trigger">
-                        <i data-lucide="shield" style="width: 16px; color: #71717a;"></i>
-                        <span class="select-label">Kullanıcı (Admin)</span>
-                        <i data-lucide="chevron-down" style="width: 16px; color: #71717a; margin-left: auto;"></i>
-                    </div>
-                    <div class="select-popover" popover="manual">
-                        <div class="select-options">
-                            <div class="select-option selected" data-value="admin">
-                                <div style="display: flex; flex-direction: column;">
-                                    <span style="font-weight: 500;">Kullanıcı (Admin)</span>
-                                    <span style="font-size: 0.7rem; color: #71717a;">Standart ana kullanıcı</span>
-                                </div>
-                            </div>
-                            <div class="select-option" data-value="user">
-                                <div style="display: flex; flex-direction: column;">
-                                    <span style="font-weight: 500;">Standart Kullanıcı</span>
-                                    <span style="font-size: 0.7rem; color: #71717a;">Kısıtlı yetkili kullanıcı</span>
-                                </div>
-                            </div>
-                            <div class="select-option" data-value="superadmin">
-                                <div style="display: flex; flex-direction: column;">
-                                    <span style="font-weight: 500;">Süper Admin</span>
-                                    <span style="font-size: 0.7rem; color: #71717a;">Tüm paneli yönetebilir</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
-                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('add-subscriber-modal').close()">Vazgeç</button>
-                <button type="submit" class="btn btn-primary" style="flex: 1;">Kullanıcı Oluştur</button>
-            </div>
-        </form>
-    </dialog>
 
-    <dialog id="edit-subscriber-modal" class="card" style="width: 480px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
-        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="edit-3" style="width: 20px; color: var(--foreground);"></i> Kullanıcı Düzenle
-            </h2>
-            <button onclick="document.getElementById('edit-subscriber-modal').close()" style="background: none; border: none; cursor: pointer; color: #71717a;"><i data-lucide="x" style="width: 20px;"></i></button>
-        </div>
-        <form id="edit-subscriber-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitEditSubscriber(this);">
-            <input type="hidden" id="edit-id" name="id">
             <div class="form-group">
-                <label class="form-label">Ad Soyad / Firma</label>
+                <label class="form-label">Şifre</label>
                 <div class="input-icon-wrapper">
-                    <i data-lucide="user" class="input-icon"></i>
-                    <input type="text" id="edit-name" name="adi_soyadi" class="form-input" required>
-                    <span class="form-error">Bu alan zorunludur.</span>
+                    <i data-lucide="key-round" class="input-icon"></i>
+                    <input type="password" id="subscriber-password" name="sifre" class="form-input">
+                    <span class="form-error" id="password-error">Şifre alanı zorunludur.</span>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Kullanıcı Adı</label>
-                <div class="input-icon-wrapper">
-                    <i data-lucide="at-sign" class="input-icon"></i>
-                    <input type="text" id="edit-username" name="kullanici_adi" class="form-input" onkeyup="sanitizeUsername(this)" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">E-posta Adresi</label>
-                <div class="input-icon-wrapper">
-                    <i data-lucide="mail" class="input-icon"></i>
-                    <input type="email" id="edit-email" name="email" class="form-input" required>
-                    <span class="form-error">Geçerli bir e-posta adresi giriniz.</span>
-                </div>
-            </div>
+            
             <div class="form-group">
                 <label class="form-label">Abonelik Paketi</label>
                 <div class="custom-select" id="package-select">
-                    <input type="hidden" name="paket_id" id="edit-package">
+                    <input type="hidden" name="paket_id" id="subscriber-package" required>
                     <div class="select-trigger">
                         <i data-lucide="package" style="width: 16px; color: #71717a;"></i>
                         <span class="select-label">Paket seçin...</span>
@@ -327,10 +262,11 @@ $paketler = $paketModel->all();
                     </div>
                 </div>
             </div>
+            
             <div class="form-group">
                 <label class="form-label">Kullanıcı Rolü</label>
-                <div class="custom-select" id="edit-role-select">
-                    <input type="hidden" name="role" required>
+                <div class="custom-select" id="role-select">
+                    <input type="hidden" name="role" id="subscriber-role" value="admin" required>
                     <div class="select-trigger">
                         <i data-lucide="shield" style="width: 16px; color: #71717a;"></i>
                         <span class="select-label">Rol seçin...</span>
@@ -360,9 +296,10 @@ $paketler = $paketModel->all();
                     </div>
                 </div>
             </div>
+            
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
-                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('edit-subscriber-modal').close()">Vazgeç</button>
-                <button type="submit" class="btn btn-primary" style="flex: 1;">Güncelle</button>
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('subscriber-modal').close()">Vazgeç</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;"><span id="submit-btn-text">Kullanıcı Oluştur</span></button>
             </div>
         </form>
     </dialog>
@@ -424,19 +361,22 @@ $paketler = $paketModel->all();
         App.DataTable.sort('subscribers-table', n);
     }
 
-    // Submit Add Subscriber
-    async function submitAddSubscriber(form) {
-        if (!App.validateForm('add-subscriber-form')) return;
+    // Submit Subscriber Form
+    async function submitSubscriberForm(form) {
+        if (!App.validateForm('subscriber-form')) return;
+
+        const id = document.getElementById('subscriber-id').value;
+        const isEdit = id && id.trim() !== '';
 
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
         
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<div class="spinner"></div> İşleniyor...';
+        submitBtn.innerHTML = '<div class="spinner"></div> ' + (isEdit ? 'Güncelleniyor...' : 'İşleniyor...');
 
         try {
             const formData = new FormData(form);
-            formData.append('action', 'admin-kullanici-ekle');
+            formData.append('action', isEdit ? 'admin-kullanici-guncelle' : 'admin-kullanici-ekle');
 
             const apiPath = 'admin-kullanici-ekle';
 
@@ -458,55 +398,8 @@ $paketler = $paketModel->all();
 
             if (result.status === 'success') {
                 App.toast('success', 'Başarılı', result.message);
-                document.getElementById('add-subscriber-modal').close();
+                document.getElementById('subscriber-modal').close();
                 form.reset();
-                setTimeout(() => App.refreshContent(), 500);
-            } else {
-                App.toast('error', 'Hata', result.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            App.toast('error', 'Hata', error.message || 'Bir ağ hatası oluştu.');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        }
-    }
-
-    // Submit Edit Subscriber
-    async function submitEditSubscriber(form) {
-        if (!App.validateForm('edit-subscriber-form')) return;
-
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<div class="spinner"></div> Güncelleniyor...';
-
-        try {
-            const formData = new FormData(form);
-            formData.append('action', 'admin-kullanici-guncelle');
-
-            const apiPath = 'admin-kullanici-ekle'; 
-
-            const response = await fetch(apiPath, {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                body: formData
-            });
-
-            const text = await response.text();
-            let result;
-            try {
-                result = JSON.parse(text);
-            } catch (e) {
-                console.error('Server response was not JSON:', text);
-                throw new Error('Sunucu geçersiz bir yanıt döndürdü.');
-            }
-
-            if (result.status === 'success') {
-                App.toast('success', 'Başarılı', result.message);
-                document.getElementById('edit-subscriber-modal').close();
                 setTimeout(() => App.refreshContent(), 500);
             } else {
                 App.toast('error', 'Hata', result.message);
@@ -535,57 +428,116 @@ $paketler = $paketModel->all();
         });
     }
 
-    // Open Edit Modal with Data
-    function openEditModal(el) {
-        const id = el.getAttribute('data-id');
-        const name = el.getAttribute('data-name');
-        const username = el.getAttribute('data-username');
-        const email = el.getAttribute('data-email');
-        const packageId = el.getAttribute('data-package');
-        const role = el.getAttribute('data-role') || 'admin';
+    // Open Unified Modal
+    function openSubscriberModal(el = null) {
+        const modal = document.getElementById('subscriber-modal');
+        const form = document.getElementById('subscriber-form');
+        form.reset();
 
-        document.getElementById('edit-id').value = id;
-        document.getElementById('edit-name').value = name;
-        document.getElementById('edit-username').value = username;
-        document.getElementById('edit-email').value = email;
-        
-        // Custom Select'i güncelle (Paket)
-        const select = document.getElementById('package-select');
-        if (select) {
+        const modalTitle = document.getElementById('modal-title-text');
+        const iconContainer = document.getElementById('modal-title-icon-container');
+        const submitBtnText = document.getElementById('submit-btn-text');
+        const passwordInput = document.getElementById('subscriber-password');
+        const passwordError = document.getElementById('password-error');
+
+        // Reset custom selects defaults
+        document.querySelectorAll('#subscriber-modal .custom-select').forEach(select => {
             const hiddenInput = select.querySelector('input[type="hidden"]');
             const label = select.querySelector('.select-label');
             const options = select.querySelectorAll('.select-option');
             
-            hiddenInput.value = packageId;
+            hiddenInput.value = '';
+            label.textContent = select.id === 'role-select' ? 'Kullanıcı (Admin)' : 'Paket seçin...';
             options.forEach(opt => {
-                if (opt.dataset.value == packageId) {
-                    label.textContent = opt.querySelector('span').textContent;
+                if (select.id === 'role-select' && opt.dataset.value === 'admin') {
                     opt.classList.add('selected');
+                    hiddenInput.value = 'admin';
                 } else {
                     opt.classList.remove('selected');
                 }
             });
-        }
-        
-        // Role Select'i güncelle
-        const roleSelect = document.getElementById('edit-role-select');
-        if (roleSelect) {
-            const hiddenInput = roleSelect.querySelector('input[type="hidden"]');
-            const label = roleSelect.querySelector('.select-label');
-            const options = roleSelect.querySelectorAll('.select-option');
+        });
+
+        if (!el) {
+            // Ekleme Modu
+            document.getElementById('subscriber-id').value = '';
+            modalTitle.textContent = 'Yeni Kullanıcı Ekle';
+            iconContainer.innerHTML = '<i data-lucide="user-plus" style="width: 20px; color: var(--foreground);"></i>';
+            submitBtnText.textContent = 'Kullanıcı Oluştur';
             
-            hiddenInput.value = role;
-            options.forEach(opt => {
-                if (opt.dataset.value === role) {
-                    label.textContent = opt.querySelector('span').textContent;
-                    opt.classList.add('selected');
-                } else {
-                    opt.classList.remove('selected');
-                }
-            });
+            passwordInput.setAttribute('required', 'required');
+            passwordInput.setAttribute('placeholder', 'Minimum 6 karakter');
+            passwordError.textContent = 'Şifre alanı zorunludur.';
+        } else {
+            // Güncelleme Modu
+            const id = el.getAttribute('data-id');
+            const name = el.getAttribute('data-name');
+            const username = el.getAttribute('data-username');
+            const email = el.getAttribute('data-email');
+            const packageId = el.getAttribute('data-package');
+            const role = el.getAttribute('data-role') || 'admin';
+
+            document.getElementById('subscriber-id').value = id;
+            document.getElementById('subscriber-name').value = name;
+            document.getElementById('subscriber-username').value = username;
+            document.getElementById('subscriber-email').value = email;
+
+            modalTitle.textContent = 'Kullanıcı Düzenle';
+            iconContainer.innerHTML = '<i data-lucide="edit-3" style="width: 20px; color: var(--foreground);"></i>';
+            submitBtnText.textContent = 'Güncelle';
+            
+            passwordInput.removeAttribute('required');
+            passwordInput.setAttribute('placeholder', 'Değiştirmek istemiyorsanız boş bırakın');
+            passwordError.textContent = 'Geçerli bir şifre giriniz.';
+
+            // Custom Select'i güncelle (Paket)
+            const packageSelect = document.getElementById('package-select');
+            if (packageSelect) {
+                const hiddenInput = packageSelect.querySelector('input[type="hidden"]');
+                const label = packageSelect.querySelector('.select-label');
+                const options = packageSelect.querySelectorAll('.select-option');
+                
+                hiddenInput.value = packageId;
+                options.forEach(opt => {
+                    if (opt.dataset.value == packageId) {
+                        label.textContent = opt.querySelector('span').textContent;
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+            }
+            
+            // Role Select'i güncelle
+            const roleSelect = document.getElementById('role-select');
+            if (roleSelect) {
+                const hiddenInput = roleSelect.querySelector('input[type="hidden"]');
+                const label = roleSelect.querySelector('.select-label');
+                const options = roleSelect.querySelectorAll('.select-option');
+                
+                hiddenInput.value = role;
+                options.forEach(opt => {
+                    if (opt.dataset.value === role) {
+                        label.textContent = opt.querySelector('span').textContent;
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+            }
         }
 
-        document.getElementById('edit-subscriber-modal').showModal();
+        // Initialize any newly rendered custom-select components
+        if (App.initCustomSelects) {
+            App.initCustomSelects(modal);
+        }
+
+        // Update Lucide icons
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+
+        modal.showModal();
     }
 
     // Delete Logic

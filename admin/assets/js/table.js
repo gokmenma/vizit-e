@@ -283,7 +283,7 @@ App.TableFilter = {
                 popover.style.position = 'fixed';
                 popover.style.margin = '0';
                 popover.style.top = (rect.bottom + 5) + 'px';
-                popover.style.left = Math.min(rect.right - 240, window.innerWidth - 260) + 'px';
+                popover.style.left = Math.min(rect.left, window.innerWidth - 250) + 'px';
                 popover.showPopover();
                 if (window.lucide) lucide.createIcons();
 

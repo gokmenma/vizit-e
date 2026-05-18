@@ -41,6 +41,9 @@ class KullaniciIsyeriModel extends Model
      */
     public function altKullanicininYetkiliOlduguIsyerleri($isyeri_ids)
     {
+        if (empty($isyeri_ids)) {
+            return [];
+        }
         // SQL sorgusunu dinamik olarak oluştur
         $placeholders = implode(',', array_fill(0, count($isyeri_ids), '?'));
         $sql = "SELECT * FROM $this->table 

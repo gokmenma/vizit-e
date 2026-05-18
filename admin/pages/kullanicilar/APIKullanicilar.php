@@ -33,10 +33,35 @@ if ($action === 'admin-kullanici-ekle' || $action === 'admin-kullanici-guncelle'
             $email = $_POST['email'] ?? '';
             $paket_id = $_POST['paket_id'] ?? '';
             $role = $_POST['role'] ?? 'admin';
+            $sifre = $_POST['sifre'] ?? '';
 
             if (empty($adi_soyadi) || empty($email) || empty($kullanici_adi)) {
                 echo json_encode(["status" => "error", "message" => "Lütfen zorunlu alanları doldurun."]);
                 exit;
+            }
+
+            $kullanici_adi = trim($kullanici_adi);
+            $email = trim($email);
+
+            if ($action === 'admin-kullanici-ekle') {
+                if ($userModel->checkEmailExists($email)) {
+                    echo json_encode(["status" => "error", "message" => "Bu e-posta adresi zaten başka bir abone tarafından kullanılıyor."]);
+                    exit;
+                }
+                if ($userModel->findByUserName($kullanici_adi)) {
+                    echo json_encode(["status" => "error", "message" => "Bu kullanıcı adı zaten alınmış."]);
+                    exit;
+                }
+            } else if ($action === 'admin-kullanici-guncelle') {
+                if ($userModel->checkEmailExists($email, $id)) {
+                    echo json_encode(["status" => "error", "message" => "Bu e-posta adresi zaten başka bir abone tarafından kullanılıyor."]);
+                    exit;
+                }
+                $existingUser = $userModel->findByUserName($kullanici_adi);
+                if ($existingUser && $existingUser->id != $id) {
+                    echo json_encode(["status" => "error", "message" => "Bu kullanıcı adı zaten başka bir kullanıcı tarafından kullanılıyor."]);
+                    exit;
+                }
             }
 
             $data = [
@@ -46,6 +71,26 @@ if ($action === 'admin-kullanici-ekle' || $action === 'admin-kullanici-guncelle'
                 'email' => $email,
                 'role' => $role
             ];
+
+            if ($action === 'admin-kullanici-ekle') {
+                if (empty($sifre)) {
+                    echo json_encode(["status" => "error", "message" => "Şifre alanı zorunludur."]);
+                    exit;
+                }
+                if (strlen($sifre) < 6) {
+                    echo json_encode(["status" => "error", "message" => "Şifre en az 6 karakter olmalıdır."]);
+                    exit;
+                }
+                $data['sifre'] = password_hash($sifre, PASSWORD_DEFAULT);
+            } else if ($action === 'admin-kullanici-guncelle') {
+                if (!empty($sifre)) {
+                    if (strlen($sifre) < 6) {
+                        echo json_encode(["status" => "error", "message" => "Şifre en az 6 karakter olmalıdır."]);
+                        exit;
+                    }
+                    $data['sifre'] = password_hash($sifre, PASSWORD_DEFAULT);
+                }
+            }
             
             $userModel->saveWithAttr($data);
             echo json_encode(["status" => "success", "message" => "Kullanıcı başarıyla kaydedildi."]);
@@ -60,6 +105,11 @@ if ($action === 'delete' || $action === 'kullanici-sil') {
     $id = $_POST['id'] ?? null;
     if (!$id) {
         echo json_encode(['success' => false, 'message' => 'ID eksik.']);
+        exit;
+    }
+
+    if ((int)$id === (int)($_SESSION['user_id'] ?? 0)) {
+        echo json_encode(['success' => false, 'message' => 'Kendi hesabınızı silemezsiniz!']);
         exit;
     }
 

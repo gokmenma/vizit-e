@@ -21,8 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         require_once __DIR__ . '/../Core/Database.php';
         $db = \Core\Database::getInstance()->getConnection();
         
-        // Hem email hem de kullanıcı adı ile kontrol et
-        $stmt = $db->prepare("SELECT * FROM kullanicilar WHERE (email = ? OR kullanici_adi = ?) AND durum = 'Aktif'");
+        // Hem email hem de kullanıcı adı ile kontrol et (silinmemiş olanlar)
+        $stmt = $db->prepare("SELECT * FROM kullanicilar WHERE (email = ? OR kullanici_adi = ?) AND durum = 'Aktif' AND (silinme_tarihi IS NULL OR silinme_tarihi = '')");
         $stmt->execute([$identifier, $identifier]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

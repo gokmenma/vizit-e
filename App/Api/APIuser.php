@@ -335,10 +335,21 @@ if ($_POST['action'] == "admin-kullanici-ekle") {
     $adi_soyadi = $_POST["adi_soyadi"] ?? '';
     $email = $_POST["email"] ?? '';
     $paket_id = $_POST["paket_id"] ?? '';
+    $sifre = $_POST["sifre"] ?? '';
 
     // Validasyonlar
     if (empty($adi_soyadi) || empty($email)) {
         echo json_encode(["status" => "error", "message" => "Ad Soyad ve Email alanları zorunludur."]);
+        exit;
+    }
+
+    if (empty($sifre)) {
+        echo json_encode(["status" => "error", "message" => "Şifre alanı zorunludur."]);
+        exit;
+    }
+
+    if (strlen($sifre) < 6) {
+        echo json_encode(["status" => "error", "message" => "Şifre en az 6 karakter olmalıdır."]);
         exit;
     }
 
@@ -353,15 +364,33 @@ if ($_POST['action'] == "admin-kullanici-ekle") {
         exit;
     }
 
-    // Kullanıcı adı kontrolü
-    if (!empty($_POST["kullanici_adi"]) && $UserModel->findByUserName($_POST["kullanici_adi"])) {
-        echo json_encode(["status" => "error", "message" => "Bu kullanıcı adı zaten alınmış."]);
-        exit;
+    $kullanici_adi = trim($_POST["kullanici_adi"] ?? '');
+    if (empty($kullanici_adi)) {
+        $base_username = strtolower(str_replace(' ', '', $adi_soyadi));
+        // Remove non-alphanumeric characters for clean username
+        $base_username = preg_replace('/[^a-zA-Z0-9]/', '', $base_username);
+        if (empty($base_username)) {
+            $base_username = 'user';
+        }
+        $kullanici_adi = $base_username . rand(10, 99);
+        
+        // Loop to guarantee unique generated username
+        $counter = 1;
+        $temp_username = $kullanici_adi;
+        while ($UserModel->findByUserName($temp_username)) {
+            $temp_username = $kullanici_adi . $counter;
+            $counter++;
+        }
+        $kullanici_adi = $temp_username;
+    } else {
+        // If the user specified a username, check if it's already taken
+        if ($UserModel->findByUserName($kullanici_adi)) {
+            echo json_encode(["status" => "error", "message" => "Bu kullanıcı adı zaten alınmış."]);
+            exit;
+        }
     }
 
     try {
-        $kullanici_adi = $_POST["kullanici_adi"] ?? (strtolower(str_replace(' ', '', $adi_soyadi)) . rand(10, 99));
-        $sifre = '123456'; // Varsayılan şifre
 
         $data = [
             "adi_soyadi" => $adi_soyadi,
@@ -394,6 +423,7 @@ if ($_POST['action'] == "admin-kullanici-guncelle") {
     $adi_soyadi = $_POST["adi_soyadi"] ?? '';
     $email = $_POST["email"] ?? '';
     $paket_id = $_POST["paket_id"] ?? '';
+    $sifre = $_POST["sifre"] ?? '';
 
     if (!$id) {
         echo json_encode(["status" => "error", "message" => "Geçersiz kullanıcı ID."]);
@@ -401,15 +431,44 @@ if ($_POST['action'] == "admin-kullanici-guncelle") {
     }
 
     try {
-        // Kullanıcı temel bilgilerini güncelle (Sadece ad soyad ve email gönderildiyse)
+        // Kullanıcı temel bilgilerini güncelle
         if (!empty($adi_soyadi) && !empty($email)) {
-            $UserModel->saveWithAttr([
+            // Email check on update
+            if ($UserModel->checkEmailExists($email, $id)) {
+                echo json_encode(["status" => "error", "message" => "Bu e-posta adresi zaten başka bir abone tarafından kullanılıyor."]);
+                exit;
+            }
+
+            // Username check on update
+            $kullanici_adi = trim($_POST["kullanici_adi"] ?? '');
+            if (empty($kullanici_adi)) {
+                echo json_encode(["status" => "error", "message" => "Kullanıcı adı alanı boş bırakılamaz."]);
+                exit;
+            }
+
+            $existingUser = $UserModel->findByUserName($kullanici_adi);
+            if ($existingUser && $existingUser->id != $id) {
+                echo json_encode(["status" => "error", "message" => "Bu kullanıcı adı zaten başka bir kullanıcı tarafından kullanılıyor."]);
+                exit;
+            }
+
+            $updateData = [
                 "id" => $id,
                 "adi_soyadi" => $adi_soyadi,
-                "kullanici_adi" => $_POST["kullanici_adi"] ?? '',
+                "kullanici_adi" => $kullanici_adi,
                 "email" => $email,
                 "role" => $_POST["role"] ?? "admin"
-            ]);
+            ];
+
+            if (!empty($sifre)) {
+                if (strlen($sifre) < 6) {
+                    echo json_encode(["status" => "error", "message" => "Şifre en az 6 karakter olmalıdır."]);
+                    exit;
+                }
+                $updateData["sifre"] = password_hash($sifre, PASSWORD_DEFAULT);
+            }
+
+            $UserModel->saveWithAttr($updateData);
         }
 
         // Paket aboneliğini güncelle
