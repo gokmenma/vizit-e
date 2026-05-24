@@ -46,10 +46,10 @@ class SgkViziteService
         }
 
  
-        // 1. Parametreleri ata (boşlukları temizle):
-        $this->kullaniciAdi         = trim($kullaniciAdi);
-        $this->isyeriKodu           = trim($isyeriKodu);
-        $this->wsSifre              = trim($wsSifre);
+        // 1. Parametreleri ata (boşlukları temizle ve null koruması):
+        $this->kullaniciAdi         = trim($kullaniciAdi ?? '');
+        $this->isyeriKodu           = trim($isyeriKodu ?? '');
+        $this->wsSifre              = trim($wsSifre ?? '');
 
         $currentUserKey = $this->kullaniciAdi . '|' . $this->isyeriKodu;
         $cacheFile = __DIR__ . '/../../cache/sgk_token_' . md5($currentUserKey) . '.json';

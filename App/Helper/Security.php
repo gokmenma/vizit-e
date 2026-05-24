@@ -139,11 +139,21 @@ class Security
 
         // 3. Eğer session'da seçili olan işyeri kullanıcının yetkili olduğu işyerleri arasında değilse (silinmiş/yetkisi kalkmışsa)
         $isyeriAuthorized = false;
+        $activeIsyeri = null;
         foreach ($isyerleri as $isyeri) {
             if ((int)$isyeri->id === (int)$_SESSION['isyeri_id']) {
                 $isyeriAuthorized = true;
+                $activeIsyeri = $isyeri;
                 break;
             }
+        }
+
+        if ($isyeriAuthorized && $activeIsyeri) {
+            // Kendi kendini onarma: Session'daki eksik veya uçmuş işyeri bilgilerini otomatik olarak doldur
+            $_SESSION['firma_adi'] = $activeIsyeri->firma_adi;
+            $_SESSION['kullaniciAdi'] = $activeIsyeri->kullanici_kodu;
+            $_SESSION['isyeriKodu'] = $activeIsyeri->isyeri_kodu;
+            $_SESSION['wsSifre'] = $activeIsyeri->isyeri_sifre;
         }
 
         if (!$isyeriAuthorized) {

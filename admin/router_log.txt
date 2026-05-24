@@ -2297,3 +2297,6 @@
 17:42:17 - admin.vizite.com - /kullanicilar
 17:42:24 - admin.vizite.com - /alt-kullanicilar
 17:42:36 - admin.vizite.com - /kullanicilar
+18:30:40 - admin.vizite.com - /kullanicilar
+18:30:41 - admin.vizite.com - /favicon.ico
+18:30:41 - admin.vizite.com - /assets/images/logo.svg
