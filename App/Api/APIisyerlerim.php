@@ -42,6 +42,14 @@ if ($_POST["action"] == "isyeri_kaydet") {
         };
 
 
+        $varsayilan_mi = isset($_POST["varsayilan_mi"]) ? 1 : 0;
+
+        if ($varsayilan_mi == 1) {
+            $db = \Core\Database::getInstance()->getConnection();
+            $stmt = $db->prepare("UPDATE kullanici_isyerleri SET varsayilan_mi = 0 WHERE kullanici_id = ?");
+            $stmt->execute([$_SESSION["kullanici_id"]]);
+        }
+
         $data = [
             "id" => $id, // Eğer id varsa decrypt et, yoksa null
             "kullanici_id"          => $_SESSION["kullanici_id"],
@@ -50,6 +58,7 @@ if ($_POST["action"] == "isyeri_kaydet") {
             "isyeri_kodu"           => Security::escape($_POST["isyeri_kodu"]),
             "otomatik_rapor_onay"   => isset($_POST["otomatik_rapor_onay"]) ? 1 : 0,
             "otomatik_onay_eposta"  => Security::escape($_POST["otomatik_onay_eposta"]),
+            "varsayilan_mi"         => $varsayilan_mi,
             "aktif_mi"              => 1,
 
         ];

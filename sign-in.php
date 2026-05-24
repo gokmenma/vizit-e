@@ -48,6 +48,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION["yetkiler"] = $user->yetkiler ?? ""; // Kullanıcı yetkileri
                 $_SESSION["user"] = $user; // Tüm kullanıcı bilgileri
 
+                // Varsa varsayılan işyerini otomatik olarak seç
+                try {
+                    require_once __DIR__ . '/Models/KullaniciIsyeriModel.php';
+                    $isyeriModelForLogin = new \Models\KullaniciIsyeriModel();
+                    
+                    $defaultIsyeri = null;
+                    if ($user->role === 'user') {
+                        $isyeri_ids = $user->yetkili_oldugu_isyeri_ids ?? '';
+                        if (!empty($isyeri_ids)) {
+                            $db = \Core\Database::getInstance()->getConnection();
+                            $placeholders = implode(',', array_fill(0, count(explode(',', $isyeri_ids)), '?'));
+                            $stmt = $db->prepare("SELECT * FROM kullanici_isyerleri WHERE id IN ($placeholders) AND varsayilan_mi = 1 AND aktif_mi = 1 LIMIT 1");
+                            $stmt->execute(explode(',', $isyeri_ids));
+                            $defaultIsyeri = $stmt->fetch(PDO::FETCH_OBJ);
+                        }
+                    } else {
+                        $defaultIsyeri = $isyeriModelForLogin->whereRaw('kullanici_id = ? AND varsayilan_mi = 1 AND aktif_mi = 1', [$user->id]);
+                        if (!empty($defaultIsyeri)) {
+                            $defaultIsyeri = $defaultIsyeri[0];
+                        }
+                    }
+
+                    if ($defaultIsyeri) {
+                        $_SESSION['isyeri_id'] = $defaultIsyeri->id;
+                        $_SESSION['firma_adi'] = $defaultIsyeri->firma_adi;
+                        $_SESSION['kullaniciAdi'] = $defaultIsyeri->kullanici_kodu;
+                        $_SESSION['isyeriKodu'] = $defaultIsyeri->isyeri_kodu;
+                        $_SESSION['wsSifre'] = $defaultIsyeri->isyeri_sifre;
+                    }
+                } catch (\Exception $loginIsyeriEx) {
+                }
+
                 //echo "kullanıcı id: " . $_SESSION['kullanici_id'];
                 $logger->success("Kullanıcı giriş yaptı: " . $user->kullanici_adi, [
                     'user_id' => $user->id,

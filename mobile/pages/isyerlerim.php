@@ -25,7 +25,7 @@ $kullanilan_firma_hakki = $İsyeriModel->countFirmByUserId($kullaniciId) ?? 0;
 
 // Progres yüzdesi
 if ($firma_hakki == 0) {
-    $progress = 0; 
+    $progress = 0;
     $kalan_firma_hakki = 0;
 } else {
     $kullanilan_firma_hakki = min($kullanilan_firma_hakki, $firma_hakki);
@@ -91,19 +91,24 @@ $hataMesaji = $_SESSION['hata'] ?? '';
     <!-- Workplaces Grid (Flat Cards) -->
     <div class="flex flex-col gap-3">
         <?php if (!empty($isyerleri)): ?>
-            <?php 
-            $i = 0; 
-            foreach ($isyerleri as $isyeri): 
+            <?php
+            $i = 0;
+            foreach ($isyerleri as $isyeri):
                 $i++;
                 $enc_id = Security::encrypt($isyeri->id);
                 $is_selected = ((int)$isyeri->id === (int)$selected_firma_id);
             ?>
                 <div class="mobile-isyeri-card p-4 bg-white dark:bg-zinc-900 border <?php echo $is_selected ? 'border-zinc-900 dark:border-zinc-100 ring-1 ring-zinc-900 dark:ring-zinc-100' : 'border-zinc-200 dark:border-zinc-800'; ?> rounded-2xl flex flex-col gap-3 shadow-xs">
-                    
+
                     <!-- Title & Code -->
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex flex-col text-left min-w-0">
-                            <span class="isyeri-duzenle font-bold text-xs text-zinc-900 dark:text-zinc-50 leading-tight cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors" data-id="<?php echo $enc_id; ?>"><?php echo htmlspecialchars($isyeri->firma_adi); ?></span>
+                            <span class="isyeri-duzenle font-bold text-xs text-zinc-900 dark:text-zinc-50 leading-tight cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors flex items-center gap-1.5" data-id="<?php echo $enc_id; ?>">
+                                <span><?php echo htmlspecialchars($isyeri->firma_adi); ?></span>
+                                <?php if ($isyeri->varsayilan_mi == 1): ?>
+                                    <i data-lucide="star" style="width: 12px; height: 12px; color: #f59e0b; fill: #f59e0b;"></i>
+                                <?php endif; ?>
+                            </span>
                             <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono mt-1">Kod: <?php echo htmlspecialchars($isyeri->isyeri_kodu); ?></span>
                         </div>
                         <?php if ($is_selected): ?>
@@ -125,7 +130,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                             <?php endif; ?>
                         </div>
                         <?php if (!empty($isyeri->otomatik_onay_eposta)): ?>
-                            <?php 
+                            <?php
                             $eposta_adresleri = explode(',', $isyeri->otomatik_onay_eposta);
                             $ilk_eposta = htmlspecialchars(trim($eposta_adresleri[0]));
                             $display_text = $ilk_eposta . (count($eposta_adresleri) > 1 ? ' ...' : '');
@@ -173,7 +178,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
     <div class="relative w-full max-w-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-y-auto">
         <form method="POST" id="isyeri-form" class="w-full">
             <input type="hidden" name="isyeri_id" id="isyeri_id" value="0">
-            
+
             <div class="border-b border-zinc-100 dark:border-zinc-850 px-5 py-3.5 flex items-center justify-between">
                 <div class="flex items-center gap-1.5">
                     <i data-lucide="plus-circle" class="w-4 h-4 text-zinc-900 dark:text-zinc-50"></i>
@@ -193,27 +198,30 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                     <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider" for="firma_adi">Firma Unvanı (Kısa Ad)</label>
                     <input class="h-9 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 text-xs font-semibold" id="firma_adi" name="firma_adi" placeholder="Örn: Merkez Ofis" required type="text">
                 </div>
-                
+
                 <div class="flex flex-col gap-1 text-left">
                     <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider" for="kullanici_adi">SGK TC Kimlik No</label>
                     <input type="password" class="h-9 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 text-xs font-semibold" id="kullanici_adi" name="kullanici_adi" required maxlength="11" pattern="\d{11}" placeholder="SGK TCKN">
                 </div>
-                
+
                 <div class="flex flex-col gap-1 text-left">
                     <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider" for="isyeri_kodu">SGK İşyeri Kodu</label>
                     <input class="h-9 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 text-xs font-semibold" id="isyeri_kodu" name="isyeri_kodu" required type="number" placeholder="SGK İşyeri Kodu" maxlength="4">
                 </div>
-                
+
                 <div class="flex flex-col gap-1 text-left">
                     <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider" for="ws_sifre">SGK İşyeri Şifresi</label>
                     <input class="h-9 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 text-xs font-semibold" id="ws_sifre" name="ws_sifre" required placeholder="Webservis Şifresi" autocomplete="new-password" type="password">
                 </div>
-                
                 <label class="flex items-center gap-2 cursor-pointer py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                    <input id="otomatik_rapor_onay" type="checkbox" name="otomatik_rapor_onay" class="w-4 h-4 rounded text-zinc-900 border-zinc-300 cursor-pointer">
+                    <input id="varsayilan_mi" type="checkbox" name="varsayilan_mi">
+                    <span>Varsayılan İşyeri Yap</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    <input id="otomatik_rapor_onay" type="checkbox" name="otomatik_rapor_onay">
                     <span>Otomatik Rapor Onaylama</span>
                 </label>
-                
+
                 <div class="otomatik-onay-eposta d-none flex flex-col gap-1 text-left">
                     <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider" for="otomatik_onay_eposta">E-posta Adresleri (Virgülle Ayırın)</label>
                     <textarea class="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2 text-xs font-medium min-h-[50px]" id="otomatik_onay_eposta" name="otomatik_onay_eposta" placeholder="ornek1@mail.com, ornek2@mail.com"></textarea>
@@ -230,37 +238,37 @@ $hataMesaji = $_SESSION['hata'] ?? '';
 
 <!-- Modal: Silme Onay Dialog -->
 <dialog id="alert-dialog" aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-  <div>
-    <header>
-      <h2 id="alert-dialog-title">Emin misiniz?</h2>
-      <p id="alert-dialog-description">Bu işlem geri alınamaz. Seçili işyeri kalıcı olarak silinecektir.</p>
-    </header>
+    <div>
+        <header>
+            <h2 id="alert-dialog-title">Emin misiniz?</h2>
+            <p id="alert-dialog-description">Bu işlem geri alınamaz. Seçili işyeri kalıcı olarak silinecektir.</p>
+        </header>
 
-    <footer>
-      <button type="button" class="btn-outline alert-dialog-cancel">İptal</button>
-      <button type="button" class="btn-primary alert-dialog-confirm">Evet, Sil</button>
-    </footer>
-  </div>
+        <footer>
+            <button type="button" class="btn-outline alert-dialog-cancel">İptal</button>
+            <button type="button" class="btn-primary alert-dialog-confirm">Evet, Sil</button>
+        </footer>
+    </div>
 </dialog>
 
 <script>
-// Polyfill bootstrap modal actions for JQuery in dynamic context
-(function() {
-    if (window.jQuery) {
-        const $ = window.jQuery;
-        $.fn.modal = function(action) {
-            if (action === 'show') {
-                this.removeClass('hidden').addClass('flex');
-            } else if (action === 'hide') {
-                this.removeClass('flex').addClass('hidden');
-            }
-            return this;
-        };
-    }
+    // Polyfill bootstrap modal actions for JQuery in dynamic context
+    (function() {
+        if (window.jQuery) {
+            const $ = window.jQuery;
+            $.fn.modal = function(action) {
+                if (action === 'show') {
+                    this.removeClass('hidden').addClass('flex');
+                } else if (action === 'hide') {
+                    this.removeClass('flex').addClass('hidden');
+                }
+                return this;
+            };
+        }
 
-    if (window.lucide) {
-        window.lucide.createIcons();
-    }
-})();
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    })();
 </script>
 <script src="App/Src/isyerlerim.js?v=<?php echo time(); ?>"></script>

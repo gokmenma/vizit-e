@@ -25,7 +25,7 @@ class IsyeriHelper
             $options .= "<option value='{$isyeri->id}' {$selected}>{$isyeri->firma_adi}</option>";
         }
 
-        return "<select name='". $name."' id='". $id ."' class='form-control select2' multiple placeholder='İşyeri Seçiniz' data-placeholder='İşyeri Seçiniz' style='width:100%'>{$options}</select>";
+        return "<select name='". $name."' id='". $id ."' class='form-control select2' multiple style='width:100%'>{$options}</select>";
     }
    
 

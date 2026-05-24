@@ -104,6 +104,10 @@ $(document).off("click.isyeriDuzenle").on("click.isyeriDuzenle", ".isyeri-duzenl
           "checked",
           isyeri.otomatik_rapor_onay == 1
         );
+        $("#varsayilan_mi").prop(
+          "checked",
+          isyeri.varsayilan_mi == 1
+        );
         if (isyeri.otomatik_rapor_onay == 1) {
           $(".otomatik-onay-eposta").removeClass("d-none");
         } else {

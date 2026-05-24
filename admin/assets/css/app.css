@@ -2218,8 +2218,6 @@ dialog {
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 4px !important;
-    width: 100% !important;
-    padding: 2px 0 !important;
 }
 .select2-container--default .select2-selection--multiple .select2-selection__choice {
     background-color: var(--muted) !important;
@@ -2248,6 +2246,62 @@ dialog {
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
     color: var(--destructive) !important;
     background-color: transparent !important;
+}
+
+/* 4b. Multiple Select Search Input & Placeholder Left Alignment + Font Size Fix */
+.select2-container--default .select2-selection--multiple .select2-search--inline {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+    text-align: left !important;
+    font-size: 12px !important;
+    color: var(--foreground) !important;
+    margin: 4px 0 !important;
+    width: 100% !important;
+    min-width: 120px !important;
+    background: transparent !important;
+    border: none !important;
+    box-sizing: border-box !important;
+}
+
+/* Style the placeholder text */
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field::placeholder {
+    text-align: left !important;
+    font-size: 12px !important;
+    color: var(--muted-foreground) !important;
+    opacity: 0.8 !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field::-webkit-input-placeholder {
+    text-align: left !important;
+    font-size: 12px !important;
+    color: var(--muted-foreground) !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field::-moz-placeholder {
+    text-align: left !important;
+    font-size: 12px !important;
+    color: var(--muted-foreground) !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field:-ms-input-placeholder {
+    text-align: left !important;
+    font-size: 12px !important;
+    color: var(--muted-foreground) !important;
+}
+
+/* Fallback placeholder style if Select2 uses selection__placeholder */
+.select2-container--default .select2-selection--multiple .select2-selection__placeholder {
+    text-align: left !important;
+    font-size: 12px !important;
+    color: var(--muted-foreground) !important;
+    margin: 0 !important;
+    padding: 0 4px !important;
+    display: inline-block !important;
 }
 
 /* 5. Dropdown Panel Container */

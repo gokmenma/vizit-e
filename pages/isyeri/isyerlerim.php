@@ -375,7 +375,15 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                             <td class="py-3.5 px-4 text-sm text-center font-medium text-zinc-500 dark:text-zinc-400"><?php echo $i; ?></td>
                             <td class="py-3.5 px-4 text-sm">
                                 <div class="flex flex-col">
-                                    <span class="isyeri-duzenle font-semibold text-zinc-900 dark:text-zinc-100 leading-tight cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors" data-id="<?php echo $enc_id; ?>"><?php echo htmlspecialchars($isyeri->firma_adi); ?></span>
+                                    <span class="isyeri-duzenle font-semibold text-zinc-900 dark:text-zinc-100 leading-tight cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors flex items-center gap-1.5" data-id="<?php echo $enc_id; ?>">
+                                        <span><?php echo htmlspecialchars($isyeri->firma_adi); ?></span>
+                                        <?php if ($isyeri->varsayilan_mi == 1): ?>
+                                            <span class="inline-flex items-center gap-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5 text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700">
+                                                <i data-lucide="star" class="w-3 h-3 text-amber-500 fill-amber-500"></i>
+                                                <span>Varsayılan</span>
+                                            </span>
+                                        <?php endif; ?>
+                                    </span>
                                     <span class="text-xs text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">İşyeri Kodu: <?php echo htmlspecialchars($isyeri->isyeri_kodu); ?></span>
                                 </div>
                             </td>
@@ -496,11 +504,16 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                     </div>
                 </div>
                 
-                <label class="label gap-3 cursor-pointer select-none py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center" title="İşaretlenirse, hafta içi her gün saat 16:00'da raporlar otomatik olarak onaylanır ve e-postayla bildirim gönderilir.">
-                    <input id="otomatik_rapor_onay" type="checkbox" name="otomatik_rapor_onay" class="input w-4 h-4 rounded text-zinc-900 border-zinc-300 focus:ring-zinc-550 cursor-pointer">
-                    <span>Otomatik Rapor Onaylama</span>
+                <label class="label gap-3 cursor-pointer select-none py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center" title="İşaretlenirse, sisteme giriş yaptığınızda bu işyeri otomatik olarak seçilir.">
+                    <input id="varsayilan_mi" type="checkbox" name="varsayilan_mi" >
+                    <span>Varsayılan İşyeri Yap</span>
                 </label>
                 
+                <label class="label gap-3 cursor-pointer select-none py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center" title="İşaretlenirse, hafta içi her gün saat 16:00'da raporlar otomatik olarak onaylanır ve e-postayla bildirim gönderilir.">
+                    <input id="otomatik_rapor_onay" type="checkbox" name="otomatik_rapor_onay" >
+                    <span>Otomatik Rapor Onaylama</span>
+                </label>
+
                 <div class="otomatik-onay-eposta d-none flex flex-col gap-1.5">
                     <label class="text-xs font-bold text-zinc-900 dark:text-zinc-100" for="otomatik_onay_eposta">Bildirim E-posta Adresleri</label>
                     <textarea class="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 min-h-[70px] text-left placeholder-zinc-400" id="otomatik_onay_eposta" name="otomatik_onay_eposta" placeholder="Birden fazla ise aralarına virgül koyun"></textarea>
