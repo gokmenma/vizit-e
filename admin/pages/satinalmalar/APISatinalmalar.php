@@ -98,3 +98,41 @@ if ($action === 'delete') {
     }
     exit;
 }
+
+// 3. Abonelik Onaylama
+if ($action === 'approve') {
+    $id = $_POST['id'] ?? null;
+    if (!$id) {
+        echo json_encode(['success' => false, 'message' => 'ID eksik.']);
+        exit;
+    }
+
+    try {
+        $islem = $purchaseModel->getPurchaseById($id);
+        if (!$islem) {
+            echo json_encode(['success' => false, 'message' => 'İşlem bulunamadı.']);
+            exit;
+        }
+
+        // Kullanıcının diğer aktif aboneliklerini iptal et
+        $purchaseModel->db->prepare("UPDATE kullanici_abonelikleri SET durum = 'iptal' WHERE kullanici_id = ? AND durum = 'aktif'")
+                          ->execute([$islem->kullanici_id]);
+
+        // Bu aboneliği aktif yap
+        $purchaseModel->saveWithAttr([
+            'id' => $id,
+            'durum' => 'aktif'
+        ]);
+
+        if (class_exists('\\Core\\Services\\DatabaseLogger')) {
+            $logger = new \Core\Services\DatabaseLogger('subscription');
+            $userName = !empty($islem->adi_soyadi) ? $islem->adi_soyadi : 'Kullanıcı';
+            $logger->success("Abonelik onaylandı. ID: $id, Kullanıcı: $userName");
+        }
+
+        echo json_encode(['success' => true, 'message' => 'Abonelik başarıyla onaylandı.']);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Bir hata oluştu: ' . $e->getMessage()]);
+    }
+    exit;
+}

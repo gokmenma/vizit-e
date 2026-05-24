@@ -31,6 +31,27 @@ foreach ($kullanicilar as $user) {
 }
 ?>
 
+<style>
+.pulse-dot {
+    position: relative;
+}
+.pulse-dot::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: inherit;
+    animation: pulse-ring 1.4s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+@keyframes pulse-ring {
+    0% { transform: scale(0.6); opacity: 1; }
+    80%, 100% { transform: scale(2.8); opacity: 0; }
+}
+</style>
+
 <div class="animate-in" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
         <div>
@@ -106,12 +127,24 @@ foreach ($kullanicilar as $user) {
                                     <span style="width: 6px; height: 6px; border-radius: 50%; background: #22c55e;"></span>
                                     Aktif
                                 </span>
+                            <?php elseif ($row->durum == 'onay_bekliyor' || $row->durum == 'onay_bekleyen'): ?>
+                                <span class="badge" style="background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.25); display: inline-flex; align-items: center; gap: 0.375rem; font-weight: 600;">
+                                    <span class="pulse-dot" style="width: 6px; height: 6px; border-radius: 50%; background: #d97706; display: inline-block;"></span>
+                                    Onay Bekliyor
+                                </span>
                             <?php else: ?>
                                 <span class="badge badge-secondary" style="background: #f4f4f5; color: #71717a; border: 1px solid #e4e4e7;"><?php echo ucfirst($row->durum); ?></span>
                             <?php endif; ?>
                         </td>
                         <td style="text-align: right;">
                             <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                                <?php if ($row->durum == 'onay_bekliyor' || $row->durum == 'onay_bekleyen'): ?>
+                                    <button class="btn-icon-outline" title="Onayla" 
+                                            onclick="approvePurchase(<?php echo $row->id; ?>)"
+                                            style="border-color: #22c55e; color: #22c55e; background: rgba(34, 197, 94, 0.05);">
+                                        <i data-lucide="check" style="color: #22c55e; width: 16px; height: 16px;"></i>
+                                    </button>
+                                <?php endif; ?>
                                 <button class="btn-icon-outline" title="Düzenle" 
                                         onclick="openEditSubscriberModal(this)"
                                         data-id="<?php echo \App\Helper\Security::encrypt($row->kullanici_id); ?>"
@@ -313,6 +346,20 @@ foreach ($kullanicilar as $user) {
             <button type="button" id="confirm-delete-btn" class="btn" style="flex: 1; background: #ef4444; color: white;">Evet, Sil</button>
         </div>
     </dialog>
+
+    <dialog id="confirm-approve-modal" class="card" style="width: 400px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+        <div style="padding: 1.5rem; text-align: center;">
+            <div style="width: 48px; height: 48px; background: #dcfce7; color: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <i data-lucide="check-circle" style="width: 24px; color: #22c55e;"></i>
+            </div>
+            <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">Aboneliği Onayla?</h2>
+            <p style="color: #71717a; font-size: 0.875rem;">Bu satın alma kaydını onaylayarak aboneliği aktif hale getirmek istediğinize emin misiniz?</p>
+        </div>
+        <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+            <button type="button" class="btn btn-outline" style="flex: 1;" onclick="this.closest('dialog').close()">Vazgeç</button>
+            <button type="button" id="confirm-approve-btn" class="btn" style="flex: 1; background: #22c55e; color: white;">Evet, Onayla</button>
+        </div>
+    </dialog>
 </div>
 
 <script>
@@ -507,6 +554,47 @@ foreach ($kullanicilar as $user) {
                 formData.append('action', 'delete');
 
                 const response = await fetch('satinalma-sil', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    App.toast('success', 'Başarılı', result.message);
+                    modal.close();
+                    setTimeout(() => App.refreshContent(), 500);
+                } else {
+                    App.toast('error', 'Hata', result.message || 'Bir hata oluştu.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                App.toast('error', 'Hata', 'Sunucuya bağlanılamadı.');
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalText;
+            }
+        };
+    }
+
+    function approvePurchase(id) {
+        const modal = document.getElementById('confirm-approve-modal');
+        const confirmBtn = document.getElementById('confirm-approve-btn');
+        
+        modal.showModal();
+        
+        confirmBtn.onclick = async () => {
+            const originalText = confirmBtn.innerHTML;
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px;"></div>';
+
+            try {
+                const formData = new FormData();
+                formData.append('id', id);
+                formData.append('action', 'approve');
+
+                const response = await fetch('satinalma-onayla', {
                     method: 'POST',
                     body: formData,
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }

@@ -2303,3 +2303,4 @@
 21:15:39 - admin.vizite.com - /dashboard
 21:15:39 - admin.vizite.com - /favicon.ico
 21:15:39 - admin.vizite.com - /assets/images/logo.svg
+21:33:47 - admin.vizite.com - /satinalmalar
