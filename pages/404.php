@@ -8,7 +8,8 @@ $basePath = rtrim($config['base_path'] ?? '', '/');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - Sayfa Bulunamadı | SGK Vizite</title>
-    <link rel="icon" href="<?php echo $basePath; ?>/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="<?php echo $basePath; ?>/assets/images/logo.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="<?php echo $basePath; ?>/favicon.ico" type="image/x-icon">
     
     <!-- Basecoat CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
@@ -189,9 +190,7 @@ $basePath = rtrim($config['base_path'] ?? '', '/');
 
     <div class="error-container">
         <div class="logo-area">
-            <div class="logo-box">
-                <i data-lucide="sparkles" style="width: 24px; height: 24px;"></i>
-            </div>
+            <img src="<?php echo $basePath; ?>/assets/images/logo.svg?v=<?php echo filemtime(__DIR__ . '/../assets/images/logo.svg'); ?>" alt="Vizit-e" style="width: 40px; height: 40px; border-radius: 10px;">
             <span class="logo-text">SGK Vizite</span>
         </div>
 

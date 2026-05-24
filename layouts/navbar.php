@@ -1,5 +1,7 @@
 <?php
-
+if (defined('SPA_LAYOUT')) {
+    return;
+}
 use Models\KullaniciAbonelikModel;
 
 $KullaniciAbonelikModel = new KullaniciAbonelikModel();

@@ -1,3 +1,4 @@
+(function() {
 let url = "App/Api/APIuser.php";
 
 $(document).on("click", '[data-bs-target="#defaultModal"]', function() {
@@ -9,6 +10,12 @@ $(document).on("click", '[data-bs-target="#defaultModal"]', function() {
     $("#defaultModalLabel").text("Yeni Alt Kullanıcı Ekle");
   } else {
     $("#defaultModalLabel").text("Alt Kullanıcı Düzenle");
+  }
+});
+
+$(document).on("change", "#isyerleri_ids", function () {
+  if ($.fn.valid && $("#altKullaniciForm").data("validator")) {
+    $(this).valid();
   }
 });
 
@@ -59,14 +66,7 @@ $(document).on("click", "#kaydetButton", function (e) {
     .then((response) => response.json())
     .then((data) => {
       console.log(data);
-      let title = data.status == "success" ? "Başarılı" : "Hata";
-
-      swal.fire({
-        title: title,
-        text: data.message,
-        icon: data.status,
-        confirmButtonText: "Tamam"
-      });
+      showToast(data.message, data.status);
     });
 });
 
@@ -88,14 +88,7 @@ $(document).on("click", "#bildirimKaydetButton", function () {
     .then((response) => response.json())
     .then((data) => {
       console.log(data);
-      let title = data.status == "success" ? "Başarılı" : "Hata";
-
-      swal.fire({
-        title: title,
-        text: data.message,
-        icon: data.status,
-        confirmButtonText: "Tamam"
-      });
+      showToast(data.message, data.status);
     });
 });
 
@@ -130,21 +123,12 @@ $(document).on("click", ".delete-account", function () {
     .then((response) => response.json())
     .then((data) => {
       console.log(data);
-      let title = data.status == "success" ? "Başarılı" : "Hata";
-
-      swal
-        .fire({
-          title: title,
-          text: data.message,
-          icon: data.status,
-          confirmButtonText: "Tamam"
-        })
-        .then((result) => {
-          if (result.isConfirmed && data.status === "success") {
-            // Kullanıcı "Tamam" butonuna tıkladığında ve işlem başarılıysa giriş sayfasına yönlendir
-            window.location.href = "logout"; // Giriş sayfasının URL'sini buraya ekleyin
-          }
-        });
+      showToast(data.message, data.status);
+      if (data.status === "success") {
+        setTimeout(function() {
+          window.location.href = "logout";
+        }, 1500);
+      }
     });
 });
 
@@ -154,6 +138,9 @@ $(document).on("click", ".alt-kullanici-kaydet", function () {
   var $btn = $(this);
 
   form.validate({
+    ignore: ".ignore, :hidden:not(#isyerleri_ids)",
+    errorElement: "span",
+    errorClass: "text-red-600 dark:text-red-400 text-xs mt-1 block font-medium",
     rules: {
       kullanici_adi: {
         required: true
@@ -169,7 +156,7 @@ $(document).on("click", ".alt-kullanici-kaydet", function () {
         },
         minlength: 6
       },
-      isyerleri_ids: {
+      "isyerleri_ids[]": {
         required: true
       }
     },
@@ -186,8 +173,17 @@ $(document).on("click", ".alt-kullanici-kaydet", function () {
         required: "Lütfen alt kullanıcı için kullanıcı şifresini giriniz.",
         minlength: "Şifre en az 6 karakter olmalıdır."
       },
-      isyerleri_ids: {
+      "isyerleri_ids[]": {
         required: "Lütfen en az bir işyeri seçiniz."
+      }
+    },
+    errorPlacement: function (error, element) {
+      if (element.attr('id') === 'isyerleri_ids') {
+        error.insertAfter(element.next('.select2-container'));
+      } else if (element.parent('.relative').length) {
+        error.insertAfter(element.parent('.relative'));
+      } else {
+        error.insertAfter(element);
       }
     }
   });
@@ -214,22 +210,16 @@ $(document).on("click", ".alt-kullanici-kaydet", function () {
     .then((response) => response.json())
     .then((data) => {
       console.log(data);
-      let title = data.status == "success" ? "Başarılı" : "Hata";
-
       $btn.stopLoading();
-      swal
-        .fire({
-          title: title,
-          text: data.message,
-          icon: data.status,
-          confirmButtonText: "Tamam"
-        })
-        .then((result) => {
-          if (result.isConfirmed && data.status === "success") {
-            // Kullanıcı "Tamam" butonuna tıkladığında ve işlem başarılıysa sayfayı yenile
-            location.reload();
-          }
-        });
+      showToast(data.message, data.status);
+      if (data.status === "success") {
+        $("#defaultModal").modal("hide");
+        if (window.App && App.refreshContent) {
+          App.refreshContent();
+        } else {
+          location.reload();
+        }
+      }
     });
 });
 
@@ -272,21 +262,14 @@ $(document).on("click", ".kullanici-durum", function () {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        let title = data.status == "success" ? "Başarılı" : "Hata";
-
-        swal
-          .fire({
-            title: title,
-            text: data.message,
-            icon: data.status,
-            confirmButtonText: "Tamam"
-          })
-          .then((result) => {
-            if (result.isConfirmed && data.status === "success") {
-              // Kullanıcı "Tamam" butonuna tıkladığında ve işlem başarılıysa sayfayı yenile
-              location.reload();
-            }
-          });
+        showToast(data.message, data.status);
+        if (data.status === "success") {
+          if (window.App && App.refreshContent) {
+            App.refreshContent();
+          } else {
+            location.reload();
+          }
+        }
       });
   }
 });
@@ -334,12 +317,7 @@ $(document).on("click", ".kullanici-duzenle", function () {
         $("#defaultModal").modal("show");
       } else {
         // Hata durumunda kullanıcıya mesaj göster
-        swal.fire({
-          title: "Hata",
-          text: data.message,
-          icon: "error",
-          confirmButtonText: "Tamam"
-        });
+        showToast(data.message, "error");
       }
     });
 });
@@ -376,21 +354,15 @@ $(document).on("click", ".alt-kullanici-sil", function () {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        let title = data.status == "success" ? "Başarılı" : "Hata";
-
-        swal
-          .fire({
-            title: title,
-            text: data.message,
-            icon: data.status,
-            confirmButtonText: "Tamam"
-          })
-          .then((result) => {
-            if (result.isConfirmed && data.status === "success") {
-              // Kullanıcı "Tamam" butonuna tıkladığında ve işlem başarılıysa sayfayı yenile
-              location.reload();
-            }
-          });
+        showToast(data.message, data.status);
+        if (data.status === "success") {
+          if (window.App && App.refreshContent) {
+            App.refreshContent();
+          } else {
+            location.reload();
+          }
+        }
       });
   }
 });
+})();

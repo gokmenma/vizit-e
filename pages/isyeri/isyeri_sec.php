@@ -37,6 +37,16 @@ unset($_SESSION['hata']);
 unset($_SESSION['wsToken']);
 unset($_SESSION['tokenExpiresAt']);
 
+// AJAX Kontrolü (Sayfa yenilemeden geçiş için JSON döner)
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'İşyeri başarıyla değiştirildi.',
+        'firma_adi' => $isyeri->firma_adi
+    ]);
+    exit();
+}
 
 header('Location: ' . $page);
 

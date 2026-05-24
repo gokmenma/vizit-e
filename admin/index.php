@@ -61,6 +61,8 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base href="<?php echo $adminBase; ?>">
     <title>Admin Panel | SGK Vizite</title>
+    <link rel="icon" href="<?php echo rtrim($basePath, '/'); ?>/assets/images/logo.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="<?php echo rtrim($basePath, '/'); ?>/favicon.ico" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Basecoat CSS (BaseUI) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
@@ -99,6 +101,19 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     </script>
 </head>
 <body class="theme-light">
+    <!-- Modern Top Loading Progress Bar (GitHub / Vercel style) -->
+    <div id="top-loading-bar" style="position: fixed; top: 0; left: 0; height: 3px; width: 0%; z-index: 999999; transition: width 0.4s ease, opacity 0.3s ease;"></div>
+    <style>
+        #top-loading-bar {
+            background-color: #000000;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+        }
+        .dark #top-loading-bar {
+            background-color: #ffffff;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+    </style>
+
     <!-- Toaster Container for Basecoat (Moved to top for better accessibility by scripts) -->
     <div id="toaster" class="toaster" data-align="end" popover="manual"></div>
 
@@ -106,9 +121,7 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
         <nav aria-label="Sidebar navigation">
             <header class="sidebar-header">
                 <div class="sidebar-logo">
-                    <div class="logo-box">
-                        <i data-lucide="sparkles"></i>
-                    </div>
+                    <img src="<?php echo rtrim($basePath, '/'); ?>/assets/images/logo.svg?v=<?php echo filemtime(__DIR__ . '/../assets/images/logo.svg'); ?>" alt="Vizit-e" style="width: 28px; height: 28px; border-radius: 6px;">
                     <div class="logo-text">
                         <span class="logo-title">Vizit-e</span>
                         <span class="logo-subtitle">Admin v1.0</span>

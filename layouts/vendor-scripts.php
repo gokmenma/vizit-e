@@ -1,3 +1,8 @@
+<?php
+if (defined('SPA_LAYOUT')) {
+    return;
+}
+?>
 <script src="assets/bundles/libscripts.bundle.js"></script>
 
 

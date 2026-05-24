@@ -12,7 +12,6 @@
 <!-- Navbarı dahil ediyoruz -->
 <?php include 'layouts/navbar.php'; ?>
 
-
 <?php
 
 use App\Helper\Security;
@@ -21,9 +20,6 @@ use Models\KullaniciAbonelikModel;
 
 
 Security::checkLogin();
-
-
-
 
 $İsyeriModel = new KullaniciIsyeriModel();
 $KulllaniciAbonelik = new KullaniciAbonelikModel();
@@ -35,7 +31,6 @@ if($userRole == "user"){
     $kullaniciId = $_SESSION['user']->admin_id;
 }
 
-
 // Kullanıcının aktif aboneliğini al
 $firma_hakki = $KulllaniciAbonelik->getSubscriptionByUserId($kullaniciId)->firma_hakki ?? 0;
 
@@ -43,405 +38,498 @@ $firma_hakki = $KulllaniciAbonelik->getSubscriptionByUserId($kullaniciId)->firma
 $kullanilan_firma_hakki = $İsyeriModel->countFirmByUserId($kullaniciId) ?? 0;
 //Progres yüzdesi
 if ($firma_hakki == 0) {
-    $progress = 0; // Eğer firma hakkı 0 ise, ilerleme yüzdesi de 0 olur
+    $progress = 0; 
     $kalan_firma_hakki = 0;
 } else {
-    // Kullanılan firma hakkı, firma hakkının %100'ü olarak kabul edilir
     $kullanilan_firma_hakki = min($kullanilan_firma_hakki, $firma_hakki);
     $progress = ($kullanilan_firma_hakki / $firma_hakki) * 100;
     $kalan_firma_hakki = $firma_hakki - $kullanilan_firma_hakki;
-
 }
 
 // Kullanıcının işyerlerini al
-
 if($userRole == "user"){
     $isyeri_ids = $user->yetkili_oldugu_isyeri_ids;
     $isyerleri = $İsyeriModel->AltKullaniciİsyerleri($isyeri_ids);
-
 }else{
     $isyerleri = $İsyeriModel->whereRaw('kullanici_id = ? AND aktif_mi = ?', [$kullaniciId, 1]);
 }
 $selected_firma_id = $_SESSION['isyeri_id'] ?? null;
-
 $hataMesaji = $_SESSION['hata'] ?? '';
-
-
 ?>
 
-
-
-
-
-<!-- ANA İÇERİK BÖLÜMÜ -->
-<section class="content">
-    <div class="container">
-        <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
-        <div class="row clearfix">
-            <div class="col-lg-12 col-md-12 col-sm-12">
-                <div class="card">
-                    <!-- firma hakkı yoksa bu alanı gösterme -->
-                    <?php if ($firma_hakki == 0) : ?>
-                        <div class="alert alert-warning" role="alert">
-                            <strong>Uyarı!</strong> Aktif bir firma hakkınız bulunmamaktadır.
-                            SGK işlemlerini yapmak için <a href="abonelik-paketleri"> aktif bir aboneliğiniz</a>
-                            olması gerekmektedir.
-                        </div>
-
-                    <?php else : ?>
-                        <div class="header">
-                            <h2><strong>Firma</strong> Aktivasyon Durumu
-                                <small>Firma aktivasyon durumunu ve kalan kullanım hakkınızı görüntüleyin</small>
-                            </h2>
-                        </div>
-                        <div class="body">
-                            <small>Kullanılan : <?php echo $kullanilan_firma_hakki; ?> / <?php echo $firma_hakki; ?></small>
-                            <div class="progress m-b-5">
-                                <div class="progress-bar progress-bar-success" role="progressbar"
-                                    aria-valuenow="<?php echo $progress; ?>" aria-valuemin="0" aria-valuemax="100"
-                                    style="width: <?php echo $progress; ?>%"> <span
-                                        class="sr-only"><?php echo $progress; ?>% Complete (success)</span> </div>
-                            </div>
-                        </div>
-
-                    <?php endif  ?>
-
-
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
-
-        
-        <div class="row clearfix">
-            <!-- Hata mesajlarını göstermek için alert -->
-            <div class="col-lg-12 col-md-12 col-sm-12 mt-3">
-                <?php if (!empty($hataMesaji && $firma_hakki > 0)): ?>
-                    <div class="alert alert-danger" role="alert">
-                        <?php echo $hataMesaji; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <div class="col-lg-12 col-md-12 col-sm-12">
-                <div class="card">
-                    <div class="header row d-flex justify-content-between align-items-center">
-                        <div class="col-lg-9">
-                            <h2><strong>İşyeri Listesi</strong></h2>
-                            <small>İşyerlerinizden birini seçerek o işyerinin raporlarında işlem yapabilirsiniz</small>
-
-                        </div>
-                        <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
-
-                            <!-- Firma ekleme hakkı hala varsa -->
-                            <?php if ($kullanilan_firma_hakki < $firma_hakki && ($userRole == "admin" || $userRole == "superadmin")): ?>
-                                <a href="#defaultModal" data-bs-toggle="modal" data-bs-target="#defaultModal"
-                                    class="btn btn-raised btn-primary waves-effect"><i
-                                        class="zmdi zmdi-arrow-plus"></i>Yeni Ekle</a>
-
-                                <a href="excelden-yukle" class="btn btn-raised btn-primary btn-simple waves-effect">Excel'den Yükle</a>
-
-                            <?php endif; ?>
-                        </div>
-
-                    </div>
-                    <div class="body">
-                        <div class="form-container">
-
-                            <div class="table-responsive d-none d-md-block">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Sıra</th>
-                                            <th>Firma Adı</th>
-                                            <th>Otomatik Onay</th>
-                                            <th>Otomatik Onay E-posta</th>
-                                            <th style="width: 220px;" class="text-center">İşlem</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $i = 0;
-                                        foreach ($isyerleri as $isyeri) {
-                                            $i++;
-                                            $enc_id = Security::encrypt($isyeri->id);
-                                            // Seçili firma ile id eşitse seçili
-                                            if ($isyeri->id === $selected_firma_id) {
-                                                $selected = 'Seçili';
-                                                $selected_btn = 'btn-success disabled';
-                                            } else {
-                                                $selected = 'Seç';
-                                                $selected_btn = 'btn-primary';
-                                            }
-                                        ?>
-                                            <tr>
-                                                <td style="width:7%"><?php echo $i; ?></td>
-
-                                                <td>
-                                                    <div
-                                                        class="d-flex flex-column justify-content-center align-items-start">
-
-                                                        <span class="list-name"><?php echo $isyeri->firma_adi; ?></span>
-                                                        <small>İşyeri Kodu : <?php echo $isyeri->isyeri_kodu; ?></small>
-
-
-                                                    </div>
-
-                                                </td>
-
-                                                <td>
-                                                    <?php
-                                                    if ($isyeri->otomatik_rapor_onay == "1") {
-                                                        echo '<span class="badge bg-success">Açık</span>';
-                                                    } else {
-                                                        echo '<span class="badge bg-danger">Kapalı</span>';
-                                                    }
-
-                                                    ?>
-                                                </td>
-
-                                                <td>
-                                                    <?php
-                                                    if (!empty($isyeri->otomatik_onay_eposta)) {
-                                                        $eposta_adresleri = explode(',', $isyeri->otomatik_onay_eposta);
-                                                        foreach ($eposta_adresleri as $eposta) {
-                                                            echo $eposta . '<br>';
-                                                        }
-                                                    } else {
-                                                        echo '-';
-                                                    }
-
-                                                    ?>
-                                                </td>
-
-                                                <td style="width: 10%;">
-                                                    <div class="d-flex flex-wrap flex-md-nowrap w-100">
-
-                                                        <form action="<?php if ($firma_hakki > 0) {
-                                                                            echo 'isyeri-sec';
-                                                                        } ?>"
-                                                            method="POST">
-
-
-                                                            <input type="hidden" name="isyeri_id"
-                                                                value="<?php echo $isyeri->id; ?>">
-                                                            <!-- bir önceki sayfa (bu sayfaya gelmeden önceki) -->
-                                                            <input type="hidden" name="previous_page" value="<?php echo $_SERVER['HTTP_REFERER'] ?? ''; ?>">
-
-
-                                                            <!-- seçim yap butonu -->
-                                                            <button type="submit" class="btn <?php echo $selected_btn; ?> waves-effect me-2"
-                                                                <?php if ($firma_hakki == 0) {echo 'disabled';} ?>>
-                                                                <?php echo $selected; ?>
-                                                            </button>
-                                                        </form>
-                                                        <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
-                                                        <!-- Düzenle Butonu -->
-                                                        <button type="button" data-id="<?php echo $enc_id; ?>"
-                                                            class="btn btn-primary btn-simple waves-effect isyeri-duzenle">
-                                                            Düzenle
-                                                        </button>
-
-                                                        <!-- Kaldır Butonu -->
-                                                        <button type="button"
-                                                            data-isyeri-id="<?php echo Security::encrypt($isyeri->id); ?>"
-                                                            class="btn btn-danger btn-simple isyeri-sil">
-
-                                                            Kaldır
-                                                        </button>
-                                                        <?php endif; ?>
-
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        <?php } ?>
-
-                                        <!-- Eğer kayıt yoksa yeni ekle butonu koy -->
-                                        <?php if (count($isyerleri) == 0 && $kalan_firma_hakki > 0) : ?>
-                                            <tr>
-                                                <td colspan="5" class="text-center">
-                                                    <p>İşyeriniz bulunmamaktadır. Lütfen yeni işyeri ekleyin.</p>
-                                                    <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
-                                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                                        data-bs-target="#defaultModal">Yeni Ekle</button>
-                                                    <?php endif; ?>
-                                                    </td>
-                                            </tr>
-                                        <?php endif; ?>
-
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- MOBİL GÖRÜNÜM (Kart Yapısı) -->
-                            <div class="mobile-isyeri-container d-md-none d-block">
-                                <?php
-                                if (count($isyerleri) == 0 && $kalan_firma_hakki > 0) {
-                                    echo '<div class="alert alert-info text-center py-4">
-                                            <p class="mb-3">Kayıtlı işyeriniz bulunmamaktadır.</p>
-                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#defaultModal">Yeni Ekle</button>
-                                          </div>';
-                                }
-                                
-                                foreach ($isyerleri as $isyeri) {
-                                    $enc_id = Security::encrypt($isyeri->id);
-                                    $is_selected = ($isyeri->id === $selected_firma_id);
-                                    $sel_btn_class = $is_selected ? 'btn-success disabled' : 'btn-primary';
-                                    $sel_text = $is_selected ? 'Seçili' : 'Seç';
-                                ?>
-                                    <div class="mobile-isyeri-card <?php echo $is_selected ? 'selected' : ''; ?> mb-3 p-3 shadow-sm border-radius-10 bg-white">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <h5 class="mb-0 fw-bold text-primary"><?php echo $isyeri->firma_adi; ?></h5>
-                                                <small class="text-muted">Kodu: <?php echo $isyeri->isyeri_kodu; ?></small>
-                                            </div>
-                                            <div>
-                                                <?php if ($isyeri->otomatik_rapor_onay == "1"): ?>
-                                                    <span class="badge bg-success shadow-none">Oto Onay: Açık</span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-light text-dark border shadow-none">Oto Onay: Kapalı</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-
-                                        <?php if (!empty($isyeri->otomatik_onay_eposta)): ?>
-                                        <div class="mb-3">
-                                            <small class="text-muted d-block mb-1"><i class="zmdi zmdi-email me-1"></i> Bildirim E-postaları:</small>
-                                            <div class="ps-3 border-start">
-                                                <?php 
-                                                $epostalar = explode(',', $isyeri->otomatik_onay_eposta);
-                                                foreach($epostalar as $mail) echo '<small class="d-block text-dark">' . trim($mail) . '</small>';
-                                                ?>
-                                            </div>
-                                        </div>
-                                        <?php endif; ?>
-
-                                        <div class="d-flex gap-2 mt-3 pt-2 border-top">
-                                            <form action="<?php echo ($firma_hakki > 0) ? 'isyeri-sec' : '#'; ?>" method="POST" class="flex-grow-1">
-                                                <input type="hidden" name="isyeri_id" value="<?php echo $isyeri->id; ?>">
-                                                <input type="hidden" name="previous_page" value="<?php echo $_SERVER['HTTP_REFERER'] ?? ''; ?>">
-                                                <button type="submit" class="btn <?php echo $sel_btn_class; ?> w-100 py-2 waves-effect" <?php if ($firma_hakki == 0) echo 'disabled'; ?>>
-                                                    <i class="zmdi zmdi-check-circle me-1"></i> <?php echo $sel_text; ?>
-                                                </button>
-                                            </form>
-                                            
-                                            <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
-                                                <button type="button" data-id="<?php echo $enc_id; ?>" class="btn btn-outline-primary py-2 px-3 waves-effect isyeri-duzenle" title="Düzenle">
-                                                    <i class="zmdi zmdi-edit"></i>
-                                                </button>
-                                                <button type="button" data-isyeri-id="<?php echo Security::encrypt($isyeri->id); ?>" class="btn btn-outline-danger py-2 px-3 isyeri-sil" title="Sil">
-                                                    <i class="zmdi zmdi-delete"></i>
-                                                </button>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                <?php } ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-</section>
 <style>
-    textarea.form-control {
-        text-align: left;
-    }
-    .mobile-isyeri-card {
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        border: 1px solid rgba(0,0,0,0.05);
-    }
-    .mobile-isyeri-card.selected {
-        border-left: 4px solid #28a745;
-        background-color: #f8fff9 !important;
-    }
-    .mobile-isyeri-card .btn {
-        border-radius: 8px;
-        font-weight: 500;
-    }
-    .mobile-isyeri-card .badge {
-        font-weight: 500;
-        padding: 5px 10px;
-        border-radius: 6px;
-    }
+/* Premium Modals, Inputs & Checkboxes Styling */
+.d-none {
+    display: none !important;
+}
+.modal-backdrop {
+    background-color: rgba(9, 9, 11, 0.45) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
+.modal-backdrop.show {
+    opacity: 1 !important;
+}
+.modal {
+    background-color: rgba(9, 9, 11, 0.45) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
+.modal.fade {
+    transition: opacity 0.15s linear;
+}
+.modal.show {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+.modal input:not([type="checkbox"]):focus, 
+.modal textarea:focus {
+    border-color: #18181b !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(24, 24, 27, 0.08) !important;
+}
+.dark .modal input:not([type="checkbox"]):focus, 
+.dark .modal textarea:focus {
+    border-color: #f4f4f5 !important;
+    box-shadow: 0 0 0 2px rgba(244, 244, 245, 0.08) !important;
+}
+
+/* Custom Checkbox Design matching Shadcn styling */
+.modal input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #d4d4d8;
+    border-radius: 4px;
+    background-color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+.dark .modal input[type="checkbox"] {
+    border-color: #3f3f46;
+    background-color: #09090b;
+}
+.modal input[type="checkbox"]:checked {
+    background-color: #18181b;
+    border-color: #18181b;
+}
+.dark .modal input[type="checkbox"]:checked {
+    background-color: #f4f4f5;
+    border-color: #f4f4f5;
+}
+.modal input[type="checkbox"]:checked::after {
+    content: "";
+    width: 4px;
+    height: 8px;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    position: absolute;
+    top: 2px;
+}
+.dark .modal input[type="checkbox"]:checked::after {
+    border-color: #09090b;
+}
+
+/* Premium HTML5 Delete Confirmation Dialog Styling */
+#alert-dialog {
+    border: 1px solid #e4e4e7;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 400px;
+    width: calc(100% - 2rem);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    position: fixed;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: 99999 !important;
+}
+
+#alert-dialog[open] {
+    display: flex !important;
+    flex-direction: column;
+}
+
+.dark #alert-dialog {
+    background: #09090b;
+    border-color: #27272a;
+    color: #f4f4f5;
+}
+
+#alert-dialog::backdrop {
+    background-color: rgba(9, 9, 11, 0.45) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
+
+#alert-dialog div {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+#alert-dialog header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+#alert-dialog header h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #09090b;
+    margin: 0;
+    text-align: left;
+}
+
+.dark #alert-dialog header h2 {
+    color: #f4f4f5;
+}
+
+#alert-dialog header p {
+    font-size: 0.875rem;
+    color: #71717a;
+    margin: 0;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.dark #alert-dialog header p {
+    color: #a1a1aa;
+}
+
+#alert-dialog footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+#alert-dialog .btn-outline {
+    height: 2.25rem;
+    padding: 0 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    cursor: pointer;
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    color: #09090b;
+}
+
+#alert-dialog .btn-outline:hover {
+    background: #f4f4f5;
+}
+
+.dark #alert-dialog .btn-outline {
+    background: transparent;
+    border-color: #27272a;
+    color: #f4f4f5;
+}
+
+.dark #alert-dialog .btn-outline:hover {
+    background: #27272a;
+}
+
+#alert-dialog .btn-primary {
+    height: 2.25rem;
+    padding: 0 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    cursor: pointer;
+    background: #ef4444 !important; /* Destructive red */
+    border: 1px solid #ef4444 !important;
+    color: #ffffff !important;
+}
+
+#alert-dialog .btn-primary:hover {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+}
+
+.dark #alert-dialog .btn-primary {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+}
+
+.dark #alert-dialog .btn-primary:hover {
+    background: #b91c1c !important;
+    border-color: #b91c1c !important;
+}
 </style>
+
+<div class="flex flex-col gap-6 w-full py-2 px-1">
+    <!-- Header Bölümü -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800/80 pb-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">İşyerlerim</h1>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                İşyerlerinizden birini seçerek o işyerine ait raporlarda ve vizite işlemlerinde işlem yürütebilirsiniz.
+            </p>
+        </div>
+        
+        <div class="flex items-center gap-2 text-nowrap self-start md:self-auto flex-shrink-0">
+            <!-- Firma ekleme hakkı hala varsa -->
+            <?php if ($kullanilan_firma_hakki < $firma_hakki && ($userRole == "admin" || $userRole == "superadmin")): ?>
+                <a href="excelden-yukle" class="inline-flex items-center gap-1.5 h-9 px-3 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-md text-xs font-semibold shadow-sm transition-all">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                    <span>Excel'den Yükle</span>
+                </a>
+                <button type="button" data-bs-toggle="modal" data-bs-target="#defaultModal" class="h-9 px-3 bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 shadow cursor-pointer">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Yeni Ekle</span>
+                </button>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Aktivasyon Limiti Göstergesi -->
+    <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
+        <?php if ($firma_hakki == 0) : ?>
+            <div class="border border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/30 dark:bg-amber-950/20 dark:text-amber-300 rounded-xl p-4 flex gap-3 shadow-sm">
+                <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <h4 class="font-bold text-sm">Abonelik Uyarısı!</h4>
+                    <p class="text-xs mt-1 leading-relaxed opacity-95">
+                        Aktif bir firma hakkınız bulunmamaktadır. SGK işlemlerini yürütmek için lütfen <a href="abonelik-paketleri" class="underline font-semibold">aktif bir abonelik paketi</a> satın alınız.
+                    </p>
+                </div>
+            </div>
+        <?php else : ?>
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm">
+                <div class="flex justify-between items-center mb-2">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Firma Aktivasyon Limiti</span>
+                        <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 block mt-1">Kullanılan: <?php echo $kullanilan_firma_hakki; ?> / <?php echo $firma_hakki; ?></span>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-1 rounded-full"><?php echo round($progress); ?>% Dolu</span>
+                </div>
+                <div class="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2">
+                    <div class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: <?php echo $progress; ?>%"></div>
+                </div>
+            </div>
+        <?php endif; ?>
+    <?php endif; ?>
+
+    <!-- Hata Mesajları -->
+    <?php if (!empty($hataMesaji && $firma_hakki > 0)): ?>
+        <div class="border border-red-200 bg-red-50 text-red-800 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-300 rounded-xl p-4 flex gap-3 shadow-sm">
+            <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+            <div>
+                <h4 class="font-bold text-sm">Hata</h4>
+                <p class="text-xs mt-1 opacity-90"><?php echo htmlspecialchars($hataMesaji); ?></p>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Tablo Alanı -->
+    <div class="overflow-x-auto w-full border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900 shadow-sm">
+        <table class="w-full border-collapse text-left" id="isyerleri-table">
+            <thead>
+                <tr class="bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800">
+                    <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider w-[60px] text-center">Sıra</th>
+                    <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Firma Bilgileri</th>
+                    <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-center w-[120px]">Otomatik Onay</th>
+                    <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Otomatik Onay E-posta</th>
+                    <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-right pr-6 w-[240px]">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                <?php if (!empty($isyerleri)): ?>
+                    <?php
+                    $i = 0;
+                    foreach ($isyerleri as $isyeri) {
+                        $i++;
+                        $enc_id = Security::encrypt($isyeri->id);
+                        if ((int)$isyeri->id === (int)$selected_firma_id) {
+                            $selected = 'Seçili';
+                            $selected_btn = 'bg-emerald-600 dark:bg-emerald-500 text-white cursor-default opacity-90';
+                            $is_active_firm = true;
+                        } else {
+                            $selected = 'Seç';
+                            $selected_btn = 'bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900 cursor-pointer shadow';
+                            $is_active_firm = false;
+                        }
+                    ?>
+                        <tr class="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="py-3.5 px-4 text-sm text-center font-medium text-zinc-500 dark:text-zinc-400"><?php echo $i; ?></td>
+                            <td class="py-3.5 px-4 text-sm">
+                                <div class="flex flex-col">
+                                    <span class="font-semibold text-zinc-900 dark:text-zinc-100 leading-tight"><?php echo htmlspecialchars($isyeri->firma_adi); ?></span>
+                                    <span class="text-xs text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">İşyeri Kodu: <?php echo htmlspecialchars($isyeri->isyeri_kodu); ?></span>
+                                </div>
+                            </td>
+                            <td class="py-3.5 px-4 text-sm text-center">
+                                <?php if ($isyeri->otomatik_rapor_onay == "1"): ?>
+                                    <span class="inline-flex items-center rounded-full border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">Açık</span>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center rounded-full border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-950/20 px-2 py-0.5 text-xs font-semibold text-red-700 dark:text-red-300">Kapalı</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="py-3.5 px-4 text-sm text-zinc-650 dark:text-zinc-350 font-medium">
+                                <?php
+                                if (!empty($isyeri->otomatik_onay_eposta)) {
+                                    $eposta_adresleri = explode(',', $isyeri->otomatik_onay_eposta);
+                                    foreach ($eposta_adresleri as $eposta) {
+                                        echo htmlspecialchars(trim($eposta)) . '<br>';
+                                    }
+                                } else {
+                                    echo '<span class="text-zinc-400 dark:text-zinc-600">-</span>';
+                                }
+                                ?>
+                            </td>
+                            <td class="py-3.5 px-4 text-sm pr-6">
+                                <div class="flex items-center justify-end gap-2">
+                                    <form action="<?php echo ($firma_hakki > 0) ? 'isyeri-sec' : '#'; ?>" method="POST" class="inline-flex isyeri-sec-form" data-bypass>
+                                        <input type="hidden" name="isyeri_id" value="<?php echo $isyeri->id; ?>">
+                                        <input type="hidden" name="previous_page" value="<?php echo $_SERVER['HTTP_REFERER'] ?? ''; ?>">
+                                        <button type="submit" class="h-8 px-3 rounded-md text-xs font-semibold transition-all flex items-center gap-1 <?php echo $selected_btn; ?>" <?php if ($firma_hakki == 0 || $is_active_firm) { echo 'disabled'; } ?>>
+                                            <?php if ($is_active_firm): ?><i data-lucide="check" class="w-3.5 h-3.5"></i><?php endif; ?>
+                                            <span><?php echo $selected; ?></span>
+                                        </button>
+                                    </form>
+
+                                    <?php if($userRole == "admin" || $userRole == "superadmin"): ?>
+                                        <button type="button" data-id="<?php echo $enc_id; ?>" class="isyeri-duzenle w-8 h-8 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 flex items-center justify-center transition-colors shadow-sm cursor-pointer" title="Düzenle">
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        </button>
+                                        <button type="button" data-isyeri-id="<?php echo Security::encrypt($isyeri->id); ?>" class="isyeri-sil w-8 h-8 rounded-md border border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-950/10 text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-700 dark:hover:text-red-400 flex items-center justify-center transition-colors shadow-sm cursor-pointer" title="Kaldır">
+                                            <i data-lucide="trash-2" class="w-4 h-4 text-rose-600"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="5" class="text-center py-10 text-zinc-400 dark:text-zinc-500 font-medium">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <i data-lucide="inbox" class="w-8 h-8 opacity-40"></i>
+                                <span>İşyeriniz bulunmamaktadır. Lütfen yeni işyeri ekleyin.</span>
+                                <?php if(($userRole == "admin" || $userRole == "superadmin") && $kalan_firma_hakki > 0): ?>
+                                    <button type="button" data-bs-toggle="modal" data-bs-target="#defaultModal" class="mt-2 h-8 px-3 bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900 rounded-md text-xs font-semibold shadow cursor-pointer">Yeni Ekle</button>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <!-- Modal Dialogs ========= -->
 <!-- Default Size -->
-<div class="modal fade" id="defaultModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form method="POST" id="isyeri-form">
-                <input type="hidden" class="d-none" name="isyeri_id" id="isyeri_id" value="0">
-                <div class="modal-header">
-                    <h4 class="title" id="defaultModalLabel">Sgk İşyerleri</h4>
+<div class="modal fixed inset-0 z-50 hidden items-center justify-center p-4 bg-zinc-950/45 backdrop-blur-sm animate-fade-in" id="defaultModal" tabindex="-1" role="dialog">
+    <div class="relative w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto" role="document">
+        <form method="POST" id="isyeri-form">
+            <input type="hidden" class="hidden" name="isyeri_id" id="isyeri_id" value="0">
+            <div class="modal-header border-b border-zinc-100 dark:border-zinc-850 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-zinc-900 dark:text-zinc-50"></i>
+                    <h4 class="title font-bold text-sm text-zinc-900 dark:text-zinc-50" id="defaultModalLabel">Sgk İşyeri Bilgileri</h4>
                 </div>
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <strong>Bilgi!</strong> Şifreleriniz uçtan uca şifrelenmiş olup sizden başka kimse
-                        erişememektedir!
+                <button type="button" class="text-zinc-400 dark:text-zinc-500 hover:text-zinc-650 dark:hover:text-zinc-350 cursor-pointer" data-bs-dismiss="modal">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="modal-body p-6 flex flex-col gap-4">
+                <div class="border border-blue-200 bg-blue-50/50 text-blue-800 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-300 rounded-lg p-3 text-xs leading-relaxed font-medium">
+                    <strong>Uçtan Uca Şifreleme!</strong> Şifreleriniz veri tabanında güçlü algoritmalarla şifrelenmiş olup sizden başka kimse erişemez.
+                </div>
+                <input id="csrf_token" name="csrf_token" type="hidden" class="hidden" value="">
+                
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-zinc-900 dark:text-zinc-100" for="firma_adi">Firma Unvanı (Hatırlatıcı Ad)</label>
+                    <div class="relative">
+                        <i data-lucide="building-2" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"></i>
+                        <input class="h-10 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-9 pr-3 py-1 text-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 placeholder-zinc-400" id="firma_adi" name="firma_adi" placeholder="Örn: Hastane İşçiler" required="" type="text">
                     </div>
-                    <input id="csrf_token" name="csrf_token" type="hidden" value="">
-                    <fieldset>
-                        <div class="mb-3">
-                            <label class="form-label" for="firma_adi">Firma Unvanı (Kolay hatırlamak için)</label>
-                            <input class="form-control" id="firma_adi" name="firma_adi"
-                                placeholder="Örn: Hastane İşçiler" required="" type="text" value="">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="kullanici_adi">SGK Kullanıcı Adı</label>
-                            <input type="password" class="form-control" id="kullanici_adi" name="kullanici_adi" required
-                                type="number" value="" maxlength="11" pattern="\d{1,11}"
-                                placeholder="Tc Kimlik numarası" title="Lütfen sayı girin!">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="isyeri_kodu">SGK İşyeri Kodu</label>
-                            <input class="form-control" id="isyeri_kodu" name="isyeri_kodu" required="" type="number"
-                                placeholder="-'den sonraki kod Örn: 2" value="" maxlength="4" autocomplete="off">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="ws_sifre">SGK İşyeri Şifresi</label>
-                            <input class="form-control" id="ws_sifre" name="ws_sifre" required=""
-                                placeholder="İşyeri şifresi" autocomplete="new-password" value="" type="password"
-                                value="">
-                        </div>
-                        <div class="checkbox text-left">
-
-                            <input id="otomatik_rapor_onay" type="checkbox" name="otomatik_rapor_onay" >
-                            <label for="otomatik_rapor_onay"
-                             data-toggle="tooltip"
-                                data-placement="top"
-                                title="Eğer bu seçenek işaretlenirse,hafta içi her gün saat 16:00'da bu işyerine ait raporlar otomatik olarak onaylanır ve belirtilen e-posta adreslerine bildirim gönderilir."
-                            >Otomatik Rapor Onaylama</label>
-                        </div>
-                        <div class="mb-3 otomatik-onay-eposta d-none">
-                            <textarea class="form-control" id="otomatik_onay_eposta" name="otomatik_onay_eposta"
-                                placeholder="E-posta adresleri"></textarea>
-                            <small class="form-text text-muted">Birden fazla e-posta adresi varsa aralarına virgül
-                                koyun</small>
-                        </div>
-
-                    </fieldset>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger btn-simple waves-effect"
-                        data-bs-dismiss="modal">KAPAT</button>
-                    <button type="button" class="btn btn-primary waves-effect isyeri-kaydet text-nowrap"
-                     data-loading-text="Kaydediliyor..." >KAYDET</button>
+                
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-zinc-900 dark:text-zinc-100" for="kullanici_adi">SGK Kullanıcı Adı (TC Kimlik No)</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"></i>
+                        <input type="password" class="h-10 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-9 pr-3 py-1 text-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 placeholder-zinc-400" id="kullanici_adi" name="kullanici_adi" required maxlength="11" pattern="\d{1,11}" placeholder="TC Kimlik numarası">
+                    </div>
                 </div>
-        </div>
+                
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-zinc-900 dark:text-zinc-100" for="isyeri_kodu">SGK İşyeri Kodu</label>
+                    <div class="relative">
+                        <i data-lucide="hash" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"></i>
+                        <input class="h-10 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-9 pr-3 py-1 text-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 placeholder-zinc-400" id="isyeri_kodu" name="isyeri_kodu" required="" type="number" placeholder="-'den sonraki kod Örn: 2" maxlength="4" autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-zinc-900 dark:text-zinc-100" for="ws_sifre">SGK İşyeri Şifresi</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"></i>
+                        <input class="h-10 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-9 pr-3 py-1 text-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 placeholder-zinc-400" id="ws_sifre" name="ws_sifre" required="" placeholder="İşyeri şifresi" autocomplete="new-password" type="password">
+                    </div>
+                </div>
+                
+                <label class="label gap-3 cursor-pointer select-none py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center" title="İşaretlenirse, hafta içi her gün saat 16:00'da raporlar otomatik olarak onaylanır ve e-postayla bildirim gönderilir.">
+                    <input id="otomatik_rapor_onay" type="checkbox" name="otomatik_rapor_onay" class="input w-4 h-4 rounded text-zinc-900 border-zinc-300 focus:ring-zinc-550 cursor-pointer">
+                    <span>Otomatik Rapor Onaylama</span>
+                </label>
+                
+                <div class="otomatik-onay-eposta d-none flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-zinc-900 dark:text-zinc-100" for="otomatik_onay_eposta">Bildirim E-posta Adresleri</label>
+                    <textarea class="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 min-h-[70px] text-left placeholder-zinc-400" id="otomatik_onay_eposta" name="otomatik_onay_eposta" placeholder="Birden fazla ise aralarına virgül koyun"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-t border-zinc-100 dark:border-zinc-850 px-6 py-4 flex items-center justify-end gap-2.5">
+                <button type="button" class="h-10 px-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center cursor-pointer" data-bs-dismiss="modal">KAPAT</button>
+                <button type="button" class="h-10 px-6 bg-zinc-950 dark:bg-zinc-50 hover:bg-zinc-850 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-950 rounded-lg text-xs font-bold shadow transition-all flex items-center justify-center cursor-pointer isyeri-kaydet text-nowrap" data-loading-text="Kaydediliyor...">KAYDET</button>
+            </div>
         </form>
     </div>
 </div>
 
+<!-- Deletion Confirmation Dialog -->
+<dialog id="alert-dialog" aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+  <div>
+    <header>
+      <h2 id="alert-dialog-title">Emin misiniz?</h2>
+      <p id="alert-dialog-description">Bu işlem geri alınamaz. Seçili firma kalıcı olarak silinecektir.</p>
+    </header>
+
+    <footer>
+      <button type="button" class="btn-outline alert-dialog-cancel">İptal</button>
+      <button type="button" class="btn-primary alert-dialog-confirm">Evet, Sil</button>
+    </footer>
+  </div>
+</dialog>
 
 <!-- Vendor Js -->
 <?php include 'layouts/vendor-scripts.php'; ?>
 
 <!-- sayfanın js kodu -->
 <script src="App/Src/isyerlerim.js?v=<?php echo filemtime('App/Src/isyerlerim.js'); ?>"></script>
-
 
 <!-- Body ve Html kapatmayı dahil ediyoruz -->
 <?php include 'layouts/foot.php'; ?>

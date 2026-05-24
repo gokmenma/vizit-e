@@ -1,5 +1,7 @@
 <?php
-
+if (defined('SPA_LAYOUT')) {
+    return;
+}
 use Models\KullaniciIsyeriModel;
 use App\Helper\Security;
 
@@ -127,8 +129,7 @@ $aktif_isyeri = $_SESSION['isyeri_id'] ?? null;
     </div>
     <ul class="popup-menu__list">
         <?php foreach ($isyerleri as $isyeri) {
-            $active_color = ($isyeri->id == $aktif_isyeri) ? '#d1e7dd' : 'transparent'; // Aktif işyeri için renk belirleme
-
+            $active_color = ((int)$isyeri->id === (int)$aktif_isyeri) ? '#d1e7dd' : 'transparent'; // Aktif işyeri için renk belirleme
         ?>
             <li style="background-color:<?php echo $active_color ?>;"><a href="isyeri-sec?isyeri_id=<?php echo Security::encrypt($isyeri->id); ?>">
 

@@ -217,6 +217,40 @@ App.refreshContent = async () => {
     await App.loadPage(currentRoute, false);
 };
 
+// Dynamic Top Loading Bar Controls (GitHub/Vercel style)
+App.startLoadingBar = () => {
+    const bar = document.getElementById('top-loading-bar');
+    if (bar) {
+        bar.style.transition = 'width 0.4s ease, opacity 0.3s ease';
+        bar.style.opacity = '1';
+        bar.style.width = '0%';
+        setTimeout(() => { bar.style.width = '35%'; }, 10);
+        
+        if (App._loadingBarInterval) clearInterval(App._loadingBarInterval);
+        App._loadingBarInterval = setInterval(() => {
+            const width = parseFloat(bar.style.width);
+            if (width < 85) {
+                bar.style.width = (width + (90 - width) * 0.15) + '%';
+            }
+        }, 200);
+    }
+};
+
+App.stopLoadingBar = () => {
+    if (App._loadingBarInterval) {
+        clearInterval(App._loadingBarInterval);
+        App._loadingBarInterval = null;
+    }
+    const bar = document.getElementById('top-loading-bar');
+    if (bar) {
+        bar.style.width = '100%';
+        setTimeout(() => {
+            bar.style.opacity = '0';
+            setTimeout(() => { bar.style.width = '0%'; }, 300);
+        }, 250);
+    }
+};
+
 // SPA Page Loader
 App.loadPage = async (rawRoute, pushState = true) => {
     const appContent = document.getElementById('app-content');
@@ -233,11 +267,8 @@ App.loadPage = async (rawRoute, pushState = true) => {
 
     const route = normalizeRoute(rawRoute);
     
-    // Show Loader
-    const loader = document.querySelector('.page-loader');
-    const overlay = document.querySelector('.page-loader-overlay');
-    if (loader) loader.classList.add('active');
-    if (overlay) overlay.classList.add('active');
+    // Show Modern Top Loading Progress Bar
+    App.startLoadingBar();
     
     appContent.style.opacity = '0.5';
     
@@ -286,9 +317,8 @@ App.loadPage = async (rawRoute, pushState = true) => {
         
         setTimeout(() => appContent.classList.remove('animate-fade-in'), 400);
 
-        // Hide Loader
-        if (loader) loader.classList.remove('active');
-        if (overlay) overlay.classList.remove('active');
+        // Hide Modern Top Loading Progress Bar
+        App.stopLoadingBar();
 
         if (pushState) {
             window.history.pushState({ route: rawRoute }, title, rawRoute);
@@ -313,11 +343,8 @@ App.loadPage = async (rawRoute, pushState = true) => {
         });
 
     } catch (error) {
-        // Hide Loader on error
-        const loader = document.querySelector('.page-loader');
-        const overlay = document.querySelector('.page-loader-overlay');
-        if (loader) loader.classList.remove('active');
-        if (overlay) overlay.classList.remove('active');
+        // Hide Modern Top Loading Progress Bar on error
+        App.stopLoadingBar();
 
         console.error('Error loading page:', error);
         appContent.innerHTML = `<div class="card"><h2>Error</h2><p>${error.message}</p></div>`;
@@ -336,21 +363,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('online', () => {
         App.recoverMissingAssets();
     });
-
-    // Inject Loader HTML if missing
-    if (!document.querySelector('.page-loader')) {
-        const appMain = document.querySelector('.app-main');
-        if (appMain) {
-            const loaderHtml = `
-                <div class="page-loader-overlay"></div>
-                <div class="page-loader">
-                    <div class="spinner"></div>
-                    <span style="font-size: 0.8125rem; font-weight: 500; color: #71717a;">Yükleniyor...</span>
-                </div>
-            `;
-            appMain.insertAdjacentHTML('beforeend', loaderHtml);
-        }
-    }
 
     const appContent = document.getElementById('app-content');
 

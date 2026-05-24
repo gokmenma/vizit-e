@@ -1438,14 +1438,17 @@ dialog:not([open]) {
 
 dialog[open] {
     display: flex !important;
-    flex-direction: column;
+    /* flex-direction: column;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     margin: 0;
-    border: 1px solid #e4e4e7;
-    animation: dialogShow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid #e4e4e7;*/
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    animation: dialogShow 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
 }
 
 .dark dialog[open] {
@@ -2142,5 +2145,218 @@ dialog::backdrop {
 dialog {
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
 }
+
+/* ==========================================================================
+   Shadcn Combobox Style Overrides for Select2 (Single & Multiple)
+   ========================================================================== */
+
+/* 1. Trigger Base Container */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    background-color: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 2px 8px !important;
+    transition: all 0.15s ease !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Hover & Focus state */
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default .select2-selection--single:hover,
+.select2-container--default .select2-selection--multiple:hover {
+    border-color: var(--ring) !important;
+}
+
+/* 2. Text value and placeholder inside trigger */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--foreground) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding-left: 4px !important;
+    width: 100% !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--muted-foreground) !important;
+}
+
+/* 3. Double Caret Icon on the right (Single Select) */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100% !important;
+    right: 8px !important;
+    width: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border: none !important;
+    position: static !important;
+    margin: 0 !important;
+    width: 14px !important;
+    height: 14px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 15 5 5 5-5'/%3E%3Cpath d='m7 9 5-5 5 5'/%3E%3C/svg%3E") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    opacity: 0.5 !important;
+    transition: opacity 0.15s ease !important;
+}
+.dark .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    filter: invert(1) !important;
+}
+.select2-container--default:hover .select2-selection__arrow b {
+    opacity: 0.8 !important;
+}
+
+/* 4. Multiple Select Badges / Tags */
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    width: 100% !important;
+    padding: 2px 0 !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--muted) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    color: var(--foreground) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 2px 6px !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    border: none !important;
+    background: transparent !important;
+    color: var(--muted-foreground) !important;
+    font-size: 11px !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-weight: bold !important;
+    order: 2 !important; /* Move close icon to the right */
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: var(--destructive) !important;
+    background-color: transparent !important;
+}
+
+/* 5. Dropdown Panel Container */
+.select2-dropdown {
+    background-color: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    margin-top: 4px !important;
+    overflow: hidden !important;
+    z-index: 999999 !important;
+}
+
+/* 6. Option Search Box inside Dropdown */
+.select2-search--dropdown {
+    position: relative !important;
+    padding: 8px 10px !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+.select2-search--dropdown::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 18px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 14px !important;
+    height: 14px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    opacity: 0.4 !important;
+}
+.dark .select2-search--dropdown::before {
+    filter: invert(1) !important;
+}
+.select2-search--dropdown .select2-search__field {
+    padding: 6px 8px 6px 26px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    font-size: 13px !important;
+    outline: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 7. Results Options List */
+.select2-results {
+    padding: 4px !important;
+}
+.select2-results__options {
+    max-height: 240px !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+
+/* 8. Each Option Item */
+.select2-results__option {
+    padding: 6px 32px 6px 10px !important; /* Keep padding-right for checkmark */
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+    color: var(--foreground) !important;
+    cursor: pointer !important;
+    position: relative !important;
+    user-select: none !important;
+    background-color: transparent !important;
+    transition: all 0.1s ease !important;
+}
+
+/* Highlighted/Hover Option */
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--accent) !important;
+    color: var(--accent-foreground) !important;
+}
+
+/* Selected Option State (Adds dynamic checkmark SVG on the right) */
+.select2-results__option[aria-selected="true"] {
+    background-color: var(--muted) !important;
+    color: var(--foreground) !important;
+}
+.select2-results__option[aria-selected="true"]::after {
+    content: "" !important;
+    position: absolute !important;
+    right: 10px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 12px !important;
+    height: 12px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    opacity: 0.8 !important;
+}
+.dark .select2-results__option[aria-selected="true"]::after {
+    filter: invert(1) !important;
+}
+
+/* No results message */
+.select2-results__option--no-results {
+    color: var(--muted-foreground) !important;
+    font-style: italic !important;
+    text-align: center !important;
+    padding: 12px 10px !important;
+}
+
 
 

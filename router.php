@@ -184,6 +184,13 @@ $router->get('index', function () {
     require __DIR__ . '/index.php';
 });
 
+$router->get('dashboard', function () {
+    require __DIR__ . '/pages/dashboard.php';
+});
+$router->get('', function () {
+    require __DIR__ . '/pages/dashboard.php';
+});
+
 $router->get('isyeri-sec', function () {
     require __DIR__ . '/pages/isyeri/isyeri_sec.php';
 })->post('isyeri-sec', function () {
@@ -218,9 +225,13 @@ $router->get('mahsuplastirilacak-raporlar', function () {
 
 $router->get('mahsuplastirilan-raporlar', function () {
     require __DIR__ . '/pages/mahsuplastirma/mahsuplastirilan_raporlar.php';
+})->post('mahsuplastirilan-raporlar', function () {
+    require __DIR__ . '/pages/mahsuplastirma/mahsuplastirilan_raporlar.php';
 });
 
 $router->get('prim-borcuna-mahsup-edilen-odemeler', function () {
+    require __DIR__ . '/pages/mahsuplastirma/prim-borcuna-mahsup-edilen-odemeler.php';
+})->post('prim-borcuna-mahsup-edilen-odemeler', function () {
     require __DIR__ . '/pages/mahsuplastirma/prim-borcuna-mahsup-edilen-odemeler.php';
 });
 

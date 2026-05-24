@@ -1,4 +1,5 @@
 <?php
+define('SPA_LAYOUT', true);
 
 require_once "vendor/autoload.php";
 if (session_status() === PHP_SESSION_NONE) {
@@ -27,197 +28,695 @@ try {
 use App\Helper\Security;
 use App\Helper\Date;
 use Models\KullaniciAbonelikModel;
+use Models\KullaniciIsyeriModel;
 
+$currentRoute = $_GET['url'] ?? 'dashboard';
+
+// Misafir (Giriş gerektirmeyen) rotaları bypass et
+$guestRoutes = ['sign-in', 'sign-up', 'forgot-password', 'reset-password', 'logout', 'temizle'];
+$isGuestRoute = false;
+foreach ($guestRoutes as $route) {
+    if ($currentRoute === $route || str_starts_with($currentRoute, $route . '/')) {
+        $isGuestRoute = true;
+        break;
+    }
+}
+
+if ($isGuestRoute) {
+    require_once __DIR__ . '/router.php';
+    exit();
+}
+
+// ==========================================
+// MOBİL YÖNLENDİRME (PWA Mobil Uygulaması İçin)
+// ==========================================
+$is_mobile = false;
+if (isset($_SERVER['HTTP_USER_AGENT'])) {
+    $user_agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+    $mobile_agents = ['mobile', 'android', 'iphone', 'ipad', 'ipod', 'blackberry', 'opera mini', 'windows phone'];
+    foreach ($mobile_agents as $agent) {
+        if (strpos($user_agent, $agent) !== false) {
+            $is_mobile = true;
+            break;
+        }
+    }
+}
+
+// Masaüstü modu istek kontrolü
+$wants_desktop = isset($_GET['desktop']) || (isset($_SESSION['desktop_mode']) && $_SESSION['desktop_mode']);
+if (isset($_GET['desktop'])) {
+    $_SESSION['desktop_mode'] = true;
+} elseif (isset($_GET['mobile'])) {
+    $_SESSION['desktop_mode'] = false;
+}
+
+if ($is_mobile && !$wants_desktop && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] !== 'XMLHttpRequest')) {
+    $config_redirect = require __DIR__ . '/config.php';
+    $basePath_redirect = $config_redirect['base_path'] ?? '/';
+    header("Location: " . rtrim($basePath_redirect, '/') . "/mobile/");
+    exit();
+}
 
 Security::checkLogin();
-Security::checkFirma();
+
+// Firma seçimi zorunlu olmayan rotaları bypass et
+$firmaBypassRoutes = ['isyerlerim', 'isyeri-sec', 'profile', 'logout', 'abonelik-paketleri'];
+$isFirmaBypass = false;
+foreach ($firmaBypassRoutes as $route) {
+    if ($currentRoute === $route || str_starts_with($currentRoute, $route . '/')) {
+        $isFirmaBypass = true;
+        break;
+    }
+}
+
+if (!$isFirmaBypass) {
+    Security::checkFirma();
+}
+
+$isyeriModel = new KullaniciIsyeriModel();
+$isyeriKullaniciId = $_SESSION['kullanici_id'] ?? 0;
+$header_isyerleri = [];
+
+if (isset($_SESSION['kullanici_id'])) {
+    $userRole = $_SESSION["role"] ?? "user";
+    if ($userRole === 'user') {
+        $isyeri_ids = '';
+        if (isset($_SESSION['user']) && is_object($_SESSION['user'])) {
+            $isyeri_ids = $_SESSION['user']->yetkili_oldugu_isyeri_ids ?? '';
+        } else {
+            try {
+                $db = \Core\Database::getInstance()->getConnection();
+                $stmt = $db->prepare("SELECT yetkili_oldugu_isyeri_ids FROM kullanicilar WHERE id = ?");
+                $stmt->execute([$_SESSION['kullanici_id']]);
+                $isyeri_ids = $stmt->fetchColumn() ?: '';
+            } catch (\Exception $e) {
+            }
+        }
+        $header_isyerleri = $isyeriModel->AltKullaniciİsyerleri($isyeri_ids);
+    } else {
+        $header_isyerleri = $isyeriModel->whereRaw('kullanici_id = ? AND aktif_mi = ?', [$isyeriKullaniciId, 1]);
+    }
+}
 
 $KullaniciAbonelikModel = new KullaniciAbonelikModel();
-
-$aktif_abonelik  = $KullaniciAbonelikModel->getSubscriptionByUserId($_SESSION['kullanici_id']);
-
+$aktif_abonelik = $KullaniciAbonelikModel->getSubscriptionByUserId($_SESSION['kullanici_id'] ?? 0);
+$abonelik_varmi = $KullaniciAbonelikModel->hasActiveSubscription($_SESSION['kullanici_id'] ?? 0);
 $abonelik_bitis_tarihi = $aktif_abonelik->bitis_tarihi ?? null;
 
+$config = require __DIR__ . '/config.php';
+$basePath = $config['base_path'] ?? '/';
+$userRole = $_SESSION["role"] ?? "user";
 
+// Kullanıcı Bilgilerini Alalım
+$userAd = $_SESSION['user_ad'] ?? $_SESSION['kullanici_adi'] ?? 'Kullanıcı';
+$userEmail = '';
+if (isset($_SESSION['kullanici_id'])) {
+    require_once __DIR__ . '/Core/Database.php';
+    try {
+        $db = \Core\Database::getInstance()->getConnection();
+        $stmt = $db->prepare("SELECT adi_soyadi, email FROM kullanicilar WHERE id = ?");
+        $stmt->execute([$_SESSION['kullanici_id']]);
+        $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($currentUser) {
+            $userAd = !empty($currentUser['adi_soyadi']) ? $currentUser['adi_soyadi'] : $userAd;
+            $userEmail = $currentUser['email'] ?? '';
+        }
+    } catch (\Exception $e) {
+        // Database connection failed
+    }
+}
+
+// Eğer bir AJAX isteği ise raw içeriği döndür ve çık
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+    require_once __DIR__ . '/router.php';
+    exit();
+}
+
+// Doğrudan sayfa isteği ise (browser üzerinden), içeriği yakala ve layout içinde göster
+$pageContent = '';
+$currentRoute = $_GET['url'] ?? 'dashboard';
+if ($currentRoute === '' || $currentRoute === 'index' || $currentRoute === 'index.php') {
+    $currentRoute = 'dashboard';
+}
+
+if ($currentRoute !== 'dashboard') {
+    ob_start();
+    require_once __DIR__ . '/router.php';
+    $pageContent = ob_get_clean();
+}
 ?>
 
-<?php include 'layouts/head.php'; ?>
-<?php include 'layouts/preloader.php'; ?>
-<?php include 'layouts/topbar.php'; ?>
-<?php include 'layouts/navbar.php'; ?>
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="<?php echo htmlspecialchars($basePath); ?>">
+    <title>Kullanıcı Paneli | SGK Vizite</title>
+    <link rel="icon" href="<?php echo rtrim($basePath, '/'); ?>/assets/images/logo.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="<?php echo rtrim($basePath, '/'); ?>/favicon.ico" type="image/x-icon">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Basecoat CSS (BaseUI) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
+
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@latest/dist/fonts/geist/style.css">
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.4/dist/sweetalert2.min.css" />
+
+    <!-- Custom Admin Styles & Custom Overrides -->
+    <link rel="stylesheet" href="admin/assets/css/app.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="admin/assets/css/datatable.custom.css?v=<?php echo time(); ?>">
+
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="admin/assets/css/flatpickr.custom.css">
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- jQuery & SweetAlert2 JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 
-<!-- ANA İÇERİK BÖLÜMÜ -->
-<section class="content">
-    <div class="container">
-        <div class="block-header">
-            <div class="row clearfix">
-                <div class="col-lg-12">
-                    <h2>Kontrol Paneli; </h2>
+    </script>
+    <script>
+    // Theme initialization to prevent flash
+    (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    })();
+    </script>
 
-                    <p class="text-muted">Hoş geldiniz, <strong><?php echo $_SESSION['firma_adi']; ?></strong> (İşyeri
-                        Kodu: <?php echo $_SESSION['isyeriKodu']; ?>).<br>Aşağıdaki
+    <style>
+    /* Details Dropdown styling for Sidebar */
+    .sidebar-dropdown {
+        margin: 0;
+        padding: 0;
+    }
 
+    .sidebar-dropdown summary {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        color: var(--muted-foreground);
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 6px;
+        cursor: pointer;
+        list-style: none;
+        transition: background-color 0.2s, color 0.2s;
+        position: relative;
+    }
 
-                        kartları kullanarak işlemleri hızlıca gerçekleştirebilirsiniz.</p>
-                    <p><small>
-                            Abonelik bitiş tarihiniz :
-                            <strong>
-                                <?php
-                                if ($abonelik_bitis_tarihi == null) {
-                                    echo "<span class='text-danger'>Aktif aboneliğiniz bulunmamaktadır!</span> ";
-                                } else {
-                                    echo Date::dmY($aktif_abonelik->bitis_tarihi, "d.m.Y");
-                                } ?>
+    .sidebar-dropdown summary::-webkit-details-marker {
+        display: none;
+    }
 
-                            </strong>
+    .sidebar-dropdown summary:hover {
+        background-color: var(--sidebar-accent);
+        color: var(--sidebar-accent-foreground);
+    }
 
-                        </small></p>
-                </div>
-            </div>
-        </div>
+    .sidebar-dropdown summary i:first-child {
+        margin-right: 0.75rem;
+        width: 18px;
+        height: 18px;
+    }
 
-        <?php
-        // Kart verilerini bir dizi içinde tanımlayalım
-        $cards = [
-            [
-                'title' => 'Tarihe Göre Rapor Ara',
-                'description' => 'Henüz onaylanmamış raporları görüntüleyin ve onaylayın.',
-                'icon' => 'zmdi-time',
-                'button_text' => 'Ara',
-                'button_class' => 'btn-warning',
-                'border_class' => 'border-warning',
-                'link' => 'onay-bekleyen-raporlar'
-            ],
-            [
-                'title' => 'Onaylanmış Raporlar',
-                'description' => 'Geçmişte onayladığınız tüm raporları tarih aralığına göre listeleyin.',
-                'icon' => 'zmdi-check-circle',
-                'button_text' => 'Sorgula',
-                'button_class' => 'btn-success',
-                'border_class' => 'border-success',
-                'link' => 'onayli-rapor-ara'
-            ],
-            [
-                'title' => 'Mahsuplaşma İşlemleri',
-                'description' => 'Personele ödediğiniz rapor parasını, SGK prim borcunuzdan düşün.',
-                'icon' => 'zmdi-refresh-sync',
-                'button_text' => 'Yönet',
-                'button_class' => 'btn-success',
-                'border_class' => 'border-success',
-                'link' => 'mahsuplastirilacak-raporlar'
-            ],
-            [
-                'title' => 'Manuel Rapor Bildirimi',
-                'description' => 'Sisteme otomatik düşmeyen bildirimleri manuel olarak oluşturun.',
-                'icon' => 'zmdi-edit',
-                'button_text' => 'İşlem Yap',
-                'button_class' => 'btn-info',
-                'border_class' => 'border-info',
-                'link' => 'manuel-rapor-bildirimi',
+    .sidebar-dropdown summary .dropdown-arrow {
+        margin-left: auto;
+        width: 14px;
+        height: 14px;
+        transition: transform 0.2s;
+    }
 
-            ],
-            [
-                'title' => 'İptal Edilen Raporlar',
-                'description' => 'Onayını iptal ettiğiniz ve tekrar işlem bekleyen raporları yönetin.',
-                'icon' => 'zmdi-undo',
-                'button_text' => 'Yönet',
-                'button_class' => 'btn-primary',
-                'border_class' => 'border-primary',
-                'link' => '#',
-                'disabled' => true // Bu kartı devre dışı bırakıyoruz
-            ],
-            [
-                'title' => 'Arşive Alınan Raporlar',
-                'description' => 'Arşive alınan raporları görüntüleyin ve işleyin.',
-                'icon' => 'zmdi-archive',
-                'button_text' => 'Ara',
-                'button_class' => 'btn-primary bg-cyan',
-                'border_class' => 'border-primary',
-                'link' => 'arsivlenmis-raporlar'
-            ],
-            [
-                'title' => 'İş Kazası Bildirimleri',
-                'description' => 'İş kazası nedeniyle hastaneden alınan provizyonları takip edin.',
-                'icon' => 'zmdi-hospital',
-                'button_text' => 'Sorgula',
-                'button_class' => 'btn-danger',
-                'border_class' => 'border-danger',
-                'link' => 'is-kazasi-bildirimi',
+    .sidebar-dropdown[open] summary .dropdown-arrow {
+        transform: rotate(180deg);
+    }
 
-            ],
-            [
-                'title' => 'İletişim Bilgileri',
-                'description' => 'SGK sisteminde kayıtlı e-posta ve telefon bilgilerinizi yönetin.',
-                'icon' => 'zmdi-phone',
-                'button_text' => 'Yönet',
-                'button_class' => 'btn-secondary',
-                'border_class' => 'border-secondary',
-                'link' => 'iletisim-bilgileri'
-            ],
+    .sidebar-dropdown ul {
+        padding-left: 1.5rem;
+        margin-top: 0.25rem;
+        list-style: none;
+    }
 
-        ];
-        ?>
-        <div class="row clearfix mobile-card">
-        <div class="card shadow-sm sgk-card">
-                         <!-- Card Body -->
-                <ul class="list-group list-group-flush">
-                    <?php foreach ($cards as $card): ?>
-                        <!-- Item -->
-                        <a href="<?php echo $card['link']; ?>" class="nav-link">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center">
-                                <div class="icon-box <?php echo $card['border_class']; ?>">
-                                    <i class="zmdi <?php echo $card['icon']; ?>"></i>
-                                </div>
+    .sidebar-dropdown ul li a {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+        color: var(--muted-foreground);
+        border-radius: 6px;
+        transition: background-color 0.2s, color 0.2s;
+        text-decoration: none;
+    }
 
-                                <div>
-                                    <div class="fw-semibold"><?php echo $card['title']; ?></div>
-                                    <small class="text-muted"><i class="bi bi-camera-video"></i> <?php echo $card['description']; ?></small>
-                                </div>
-                            </div>
-                           
-                        </li>
-                        </a>
-                    <?php endforeach; ?>
+    .sidebar-dropdown ul li a:hover,
+    .sidebar-dropdown ul li a.active {
+        background-color: var(--sidebar-accent);
+        color: var(--sidebar-accent-foreground);
+    }
 
+    /* Workplace Dropdown Styling */
+    .isyeri-dropdown {
+        margin: 0;
+        padding: 0;
+        display: inline-block;
+    }
 
-                </ul>
-            </div>
-        </div>
-      
-        <div class="row clearfix desktop-card">
+    .isyeri-dropdown summary::-webkit-details-marker {
+        display: none;
+    }
 
+    .isyeri-dropdown[open] .dropdown-arrow {
+        transform: rotate(180deg);
+    }
 
-          
+    .isyeri-dropdown .isyeri-item:hover {
+        background: rgba(37, 99, 235, 0.04);
+    }
 
-            <?php foreach ($cards as $card): ?>
-                <div class="col-lg-3 col-md-6 col-sm-12">
-                    <div
-                        class="card sgk-card "
-                        data-toggle="tooltip" data-placement="top" title="<?php echo $card['description']; ?>
-                        <?php echo isset($card['disabled']) && $card['disabled'] ? 'disabled-card' : ''; ?>">
-                        <div class="body text-center">
-                            <div class="icon-box <?php echo $card['border_class']; ?>">
-                                <i class="zmdi <?php echo $card['icon']; ?>"></i>
-                            </div>
-                            <h5 class="card-title m-b-0"><?php echo $card['title']; ?></h5>
-                            <a href="<?php echo $card['link']; ?>" class="btn <?php echo $card['button_class']; ?>"
-                                <?php if (isset($card['disabled']) && $card['disabled']): ?> disabled <?php endif; ?>>
-                                <?php echo $card['button_text']; ?>
-                            </a>
-                        </div>
+    .dark .isyeri-dropdown .isyeri-item:hover {
+        background: rgba(255, 255, 255, 0.04);
+    }
+    </style>
+</head>
+
+<body class="theme-light">
+    <!-- Modern Top Loading Progress Bar (GitHub / Vercel style) -->
+    <div id="top-loading-bar"
+        style="position: fixed; top: 0; left: 0; height: 3px; width: 0%; z-index: 999999; transition: width 0.4s ease, opacity 0.3s ease;">
+    </div>
+    <style>
+    #top-loading-bar {
+        background-color: #000000;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .dark #top-loading-bar {
+        background-color: #ffffff;
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    }
+    </style>
+
+    <!-- Toaster Container for Basecoat -->
+    <div id="toaster" class="toaster"></div>
+
+    <aside class="sidebar" data-side="left" aria-hidden="false">
+        <nav aria-label="Sidebar navigation">
+            <header class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="<?php echo rtrim($basePath, '/'); ?>/assets/images/logo.svg?v=<?php echo filemtime(__DIR__ . '/assets/images/logo.svg'); ?>"
+                        alt="Vizit-e" style="width: 28px; height: 28px; border-radius: 6px;">
+                    <div class="logo-text">
+                        <span class="logo-title">Vizit-e</span>
+                        <span class="logo-subtitle">Kullanıcı Paneli</span>
                     </div>
                 </div>
-            <?php endforeach; ?>
+            </header>
+            <section class="scrollbar">
+                <!-- Grup 1: Menü -->
+                <div role="group" aria-labelledby="group-label-menu">
+                    <h3 id="group-label-menu">Menü</h3>
+                    <ul>
+                        <li>
+                            <a href="dashboard"
+                                class="nav-link <?php echo $currentRoute === 'dashboard' ? 'active' : ''; ?>"
+                                data-route="dashboard">
+                                <i data-lucide="layout-dashboard"></i>
+                                <span>Ana Sayfa</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="isyerlerim"
+                                class="nav-link <?php echo $currentRoute === 'isyerlerim' ? 'active' : ''; ?>"
+                                data-route="isyerlerim">
+                                <i data-lucide="building-2"></i>
+                                <span>İşyerlerim</span>
+                            </a>
+                        </li>
+                        <?php if ($userRole === 'admin' || $userRole === 'superadmin'): ?>
+                        <li>
+                            <a href="kullanicilar"
+                                class="nav-link <?php echo $currentRoute === 'kullanicilar' ? 'active' : ''; ?>"
+                                data-route="kullanicilar">
+                                <i data-lucide="users"></i>
+                                <span>Kullanıcılar</span>
+                            </a>
+                        </li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+
+                <!-- Grup 2: Rapor İşlemleri -->
+                <?php if ($abonelik_varmi): ?>
+                <div role="group" aria-labelledby="group-label-rapor">
+                    <h3 id="group-label-rapor">Rapor İşlemleri</h3>
+                    <ul>
+                        <li>
+                            <a href="onay-bekleyen-raporlar"
+                                class="nav-link <?php echo $currentRoute === 'onay-bekleyen-raporlar' ? 'active' : ''; ?>"
+                                data-route="onay-bekleyen-raporlar">
+                                <i data-lucide="clock"></i>
+                                <span>Onay Bekleyen Raporlar</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="onayli-raporlar"
+                                class="nav-link <?php echo $currentRoute === 'onayli-raporlar' ? 'active' : ''; ?>"
+                                data-route="onayli-raporlar">
+                                <i data-lucide="check-circle-2"></i>
+                                <span>Onaylı Raporlar</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="manuel-rapor-bildirimi"
+                                class="nav-link <?php echo $currentRoute === 'manuel-rapor-bildirimi' ? 'active' : ''; ?>"
+                                data-route="manuel-rapor-bildirimi">
+                                <i data-lucide="edit-3"></i>
+                                <span>Manuel Rapor Bildirimi</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);"
+                                class="nav-link text-zinc-400 dark:text-zinc-500 cursor-not-allowed"
+                                style="opacity: 0.6;">
+                                <i data-lucide="x-circle"></i>
+                                <span>İptal Edilen Raporlar</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="arsivlenmis-raporlar"
+                                class="nav-link <?php echo $currentRoute === 'arsivlenmis-raporlar' ? 'active' : ''; ?>"
+                                data-route="arsivlenmis-raporlar">
+                                <i data-lucide="archive"></i>
+                                <span>Arşive Alınan Raporlar</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="is-kazasi-bildirimi"
+                                class="nav-link <?php echo $currentRoute === 'is-kazasi-bildirimi' ? 'active' : ''; ?>"
+                                data-route="is-kazasi-bildirimi">
+                                <i data-lucide="shield-alert"></i>
+                                <span>İş Kazası bildirimleri</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Grup 3: Mahsuplaşma İşlemleri -->
+                <div role="group" aria-labelledby="group-label-mahsup">
+                    <h3 id="group-label-mahsup">Mahsuplaşma İşlemleri</h3>
+                    <ul>
+                        <li>
+                            <a href="mahsuplastirilacak-raporlar"
+                                class="nav-link <?php echo $currentRoute === 'mahsuplastirilacak-raporlar' ? 'active' : ''; ?>"
+                                data-route="mahsuplastirilacak-raporlar">
+                                <i data-lucide="file-text"></i>
+                                <span>Mahsuplaştırılacak Raporlar</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="mahsuplastirilan-raporlar"
+                                class="nav-link <?php echo $currentRoute === 'mahsuplastirilan-raporlar' ? 'active' : ''; ?>"
+                                data-route="mahsuplastirilan-raporlar">
+                                <i data-lucide="check-square"></i>
+                                <span>Onaylanan Ödeme Listesi</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="prim-borcuna-mahsup-edilen-odemeler"
+                                class="nav-link <?php echo $currentRoute === 'prim-borcuna-mahsup-edilen-odemeler' ? 'active' : ''; ?>"
+                                data-route="prim-borcuna-mahsup-edilen-odemeler">
+                                <i data-lucide="coins"></i>
+                                <span>Prim Borcuna Mahsup Edilenler</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <?php endif; ?>
+            </section>
+            <footer class="sidebar-footer">
+                <details class="user-dropdown">
+                    <summary>
+                        <div class="user-avatar" style="background: hsl(var(--primary)); color: #fff;">
+                            <?php 
+                            $nameParts = explode(' ', $userAd);
+                            $initials = '';
+                            foreach ($nameParts as $part) { $initials .= mb_substr($part, 0, 1, 'UTF-8'); }
+                            echo mb_strtoupper(mb_substr($initials, 0, 2, 'UTF-8'), 'UTF-8');
+                            ?>
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name"><?php echo htmlspecialchars($userAd); ?></span>
+                            <span class="user-email"><?php echo htmlspecialchars($userEmail); ?></span>
+                        </div>
+                        <i data-lucide="chevrons-up-down" class="dropdown-icon"></i>
+                    </summary>
+                    <div class="dropdown-content">
+                        <div class="dropdown-header">
+                            <p class="dropdown-label">Hesabım</p>
+                            <p class="dropdown-email"><?php echo htmlspecialchars($userEmail); ?></p>
+                        </div>
+                        <a href="profile" class="dropdown-item nav-link" data-route="profile">
+                            <i data-lucide="user"></i>
+                            <span>Profil</span>
+                        </a>
+                        <a href="iletisim-bilgileri"
+                            class="dropdown-item nav-link <?php echo $currentRoute === 'iletisim-bilgileri' ? 'active' : ''; ?>"
+                            data-route="iletisim-bilgileri">
+                            <i data-lucide="info"></i>
+                            <span>İşyeri Bilgileri</span>
+                        </a>
+                        <hr>
+                        <a href="logout" class="dropdown-item logout text-rose-500">
+                            <i data-lucide="log-out"></i>
+                            <span>Çıkış yap</span>
+                        </a>
+                    </div>
+                </details>
+            </footer>
+        </nav>
+    </aside>
+
+
+    <main class="app-main">
+        <header class="app-topbar">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button type="button" class="topbar-btn"
+                    onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                        <path d="M9 3v18"></path>
+                    </svg>
+                </button>
+                <div id="breadcrumb" class="breadcrumb">
+                    <span class="breadcrumb-item">SGK Vizite</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-active"><?php echo ucfirst($currentRoute); ?></span>
+                </div>
+            </div>
+
+            <!-- Sağ Üst Panel Bilgileri -->
+            <div style="display: flex; align-items: center; gap: 1rem;">
+
+                <!-- Isyeri Selector Dropdown -->
+                <?php if (isset($header_isyerleri) && count($header_isyerleri) > 0): ?>
+                <details class="isyeri-dropdown" style="position: relative;">
+                    <summary
+                        style="display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; font-weight: 600; color: var(--foreground); cursor: pointer; list-style: none; padding: 0.375rem 0.5rem; border-radius: 6px; border: none; background: transparent; transition: all 0.2s;">
+                        <i data-lucide="building-2" style="width: 14px; height: 14px; color: hsl(var(--primary));"></i>
+                        <span style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <?php echo htmlspecialchars($_SESSION['firma_adi'] ?? 'İşyeri Seçin'); ?>
+                        </span>
+                        <i data-lucide="chevron-down" class="dropdown-arrow"
+                            style="width: 12px; height: 12px; margin-left: 0.25rem;"></i>
+                    </summary>
+                    <div class="dropdown-content"
+                        style="position: absolute; top: calc(100% + 6px); right: 0; left: auto; width: 320px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); padding: 0.75rem; z-index: 999;">
+                        <div
+                            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; width: 100%;">
+                            <span
+                                style="font-size: 0.7rem; font-weight: 700; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.05em;">İŞYERLERİM</span>
+                            <button type="button" id="isyeri-search-toggle"
+                                style="background: transparent; border: none; padding: 2px; color: var(--muted-foreground); cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s;"
+                                title="İşyeri Ara">
+                                <i data-lucide="search" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </div>
+
+                        <div id="isyeri-search-container"
+                            style="position: relative; margin-bottom: 0.625rem; display: none; transition: all 0.2s;">
+                            <i data-lucide="search"
+                                style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; color: var(--muted-foreground);"></i>
+                            <input type="text" id="isyeri-search" placeholder="İşyeri ara..." autocomplete="off"
+                                style="width: 100%; padding: 0.375rem 0.5rem 0.375rem 1.875rem; font-size: 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: var(--background); color: var(--foreground); outline: none;">
+                        </div>
+
+                        <div class="isyeri-list-scroll"
+                            style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.25rem; padding-right: 0.25rem;">
+                            <?php foreach ($header_isyerleri as $isyeri): 
+                                    $is_selected = ((int)$isyeri->id === (int)($_SESSION['isyeri_id'] ?? 0));
+                                    $enc_id = \App\Helper\Security::encrypt($isyeri->id);
+                                ?>
+                            <a href="isyeri-sec?isyeri_id=<?php echo $enc_id; ?>" class="isyeri-item"
+                                data-name="<?php echo htmlspecialchars(mb_strtolower($isyeri->firma_adi, 'UTF-8')); ?>"
+                                style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.625rem; border-radius: 6px; text-decoration: none; color: var(--foreground); transition: background 0.2s; <?php echo $is_selected ? 'background: rgba(37, 37, 37, 0.08); font-weight: 600;' : ''; ?>">
+                                <div
+                                    style="display: flex; flex-direction: column; gap: 0.125rem; text-align: left; min-width: 0; flex: 1;">
+                                    <span
+                                        style="font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: <?php echo $is_selected ? 'hsl(var(--primary))' : 'var(--foreground)'; ?>;">
+                                        <?php echo htmlspecialchars($isyeri->firma_adi); ?>
+                                    </span>
+                                    <span
+                                        style="font-size: 0.65rem; color: var(--muted-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        Kod: <?php echo htmlspecialchars($isyeri->isyeri_kodu); ?>
+                                    </span>
+                                </div>
+                                <?php if ($is_selected): ?>
+                                <i data-lucide="check"
+                                    style="width: 14px; height: 14px; color: hsl(var(--primary)); flex-shrink: 0; margin-left: 0.5rem;"></i>
+                                <?php endif; ?>
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </details>
+                <?php endif; ?>
+
+                <button id="theme-toggle" class="topbar-btn" title="Tema Değiştir">
+                    <i data-lucide="sun" class="sun-icon" style="width: 18px;"></i>
+                    <i data-lucide="moon" class="moon-icon" style="width: 18px; display: none;"></i>
+                </button>
+                <a href="https://api.whatsapp.com/send?phone=905079432723" target="_blank" class="topbar-btn"
+                    title="Destek"><i data-lucide="phone-call" style="width: 18px;"></i></a>
+            </div>
+        </header>
+
+        <div id="app-content" class="content-area"
+            style="display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 1.5rem 2rem; overflow-y: auto;">
+            <?php if ($pageContent): ?>
+            <?php echo $pageContent; ?>
+            <?php else: ?>
+            <!-- Default loader to run dynamic fetch -->
+            <div
+                style="display: flex; align-items: center; justify-content: center; height: 200px; color: var(--muted-foreground);">
+                <div class="spinner" style="margin-right: 0.75rem;"></div> Yükleniyor...
+            </div>
+            <?php endif; ?>
         </div>
-    </div>
-</section>
+    </main>
 
+    <!-- Basecoat JS -->
+    <script src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/js/basecoat.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/js/all.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/js/toast.min.js" defer></script>
 
+    <!-- jQuery Core & Vendor Plugins (Loaded globally for SPA sub-pages) -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="App/Src/button-loading.js"></script>
 
-<!-- Vendor Js -->
-<?php include 'layouts/vendor-scripts.php'; ?>
+    <!-- User Panel Scripts -->
+    <script src="assets/js/app.js?v=<?php echo time(); ?>"></script>
 
-<!-- Body ve Html kapatmayı dahil ediyoruz -->
-<?php include 'layouts/foot.php'; ?>
+    <script>
+    lucide.createIcons();
+
+    // Workplace search filtering and dropdown click-outside closing
+    document.addEventListener('DOMContentLoaded', () => {
+        const isyeriSearch = document.getElementById('isyeri-search');
+        const isyeriSearchToggle = document.getElementById('isyeri-search-toggle');
+        const isyeriSearchContainer = document.getElementById('isyeri-search-container');
+        const isyeriDropdown = document.querySelector('.isyeri-dropdown');
+
+        if (isyeriSearch) {
+            isyeriSearch.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                const items = document.querySelectorAll('.isyeri-item');
+                items.forEach(item => {
+                    const name = item.getAttribute('data-name') || '';
+                    if (name.includes(query)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        if (isyeriSearchToggle && isyeriSearchContainer) {
+            isyeriSearchToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isyeriSearchContainer.style.display === 'none') {
+                    isyeriSearchContainer.style.display = 'block';
+                    if (isyeriSearch) {
+                        isyeriSearch.focus();
+                    }
+                } else {
+                    isyeriSearchContainer.style.display = 'none';
+                    if (isyeriSearch) {
+                        isyeriSearch.value = '';
+                        isyeriSearch.dispatchEvent(new Event('input'));
+                    }
+                }
+            });
+        }
+
+        if (isyeriDropdown) {
+            isyeriDropdown.addEventListener('toggle', () => {
+                if (!isyeriDropdown.open) {
+                    if (isyeriSearchContainer) isyeriSearchContainer.style.display = 'none';
+                    if (isyeriSearch) {
+                        isyeriSearch.value = '';
+                        isyeriSearch.dispatchEvent(new Event('input'));
+                    }
+                }
+            });
+        }
+
+        // Close the details dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            const isyeriDropdown = document.querySelector('.isyeri-dropdown');
+            if (isyeriDropdown && isyeriDropdown.hasAttribute('open') && !isyeriDropdown.contains(e
+                    .target)) {
+                isyeriDropdown.removeAttribute('open');
+            }
+
+            const userDropdown = document.querySelector('.user-dropdown');
+            if (userDropdown && userDropdown.hasAttribute('open') && !userDropdown.contains(e.target)) {
+                userDropdown.removeAttribute('open');
+            }
+        });
+
+        // Close dropdowns when a link inside is clicked
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('.isyeri-dropdown a, .user-dropdown a');
+            if (link) {
+                const details = link.closest('details');
+                if (details) {
+                    details.removeAttribute('open');
+                }
+            }
+        });
+    });
+    </script>
+</body>
+
+</html>

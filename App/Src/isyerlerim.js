@@ -1,9 +1,11 @@
+(function() {
 let url = "App/Api/APIisyerlerim.php";
 
-$(document).on("click", ".isyeri-kaydet", function () {
+// Kaydet Butonuna Tıklama (Namespaced off/on ile event çoğalmasını engelledik)
+$(document).off("click.isyeriKaydet").on("click.isyeriKaydet", ".isyeri-kaydet", function () {
   var form = $(this).closest("form");
   var $btn = $(this);
-const isyeriId = $("#isyeri_id").val();
+  const isyeriId = $("#isyeri_id").val();
 
   var formData = new FormData(form[0]);
   formData.append("action", "isyeri_kaydet");
@@ -57,30 +59,26 @@ const isyeriId = $("#isyeri_id").val();
       }
     })
     .then((data) => {
-      //console.log(data);
-      var title = data.status == "success" ? "Başarılı" : "Hata";
       $btn.stopLoading();
-      swal
-        .fire({
-          title: title,
-          text: data.message,
-          icon: data.status,
-          confirmButtonText: "Tamam",
-          allowOutsideClick: false
-        })
-        .then(() => {
-          if (data.status == "success") {
-            location.reload();
-          }
-        });
+      showToast(data.message, data.status);
+      if (data.status === "success") {
+        $("#defaultModal").modal("hide");
+        if (window.App && App.refreshContent) {
+          App.refreshContent();
+        } else {
+          location.reload();
+        }
+      }
     })
     .catch((error) => {
+      $btn.stopLoading();
       console.error("Fetch error:", error);
+      showToast("Bir hata oluştu", "error");
     });
 });
 
-//İsyeri Düzenleme
-$(document).on("click", ".isyeri-duzenle", function () {
+// İşyeri Düzenleme (Namespaced off/on ile event çoğalmasını engelledik)
+$(document).off("click.isyeriDuzenle").on("click.isyeriDuzenle", ".isyeri-duzenle", function () {
   var id = $(this).data("id");
   var modal = $("#defaultModal");
   $("#isyeri_id").val(id); // Düzenleme için isyeri_id'yi ayarla
@@ -117,67 +115,187 @@ $(document).on("click", ".isyeri-duzenle", function () {
         //Modali göster
         modal.modal("show");
       } else {
-        swal.fire({
-          title: "Hata",
-          text: data.message,
-          icon: "error",
-          confirmButtonText: "Tamam"
-        });
+        showToast(data.message, "error");
       }
     })
     .catch((error) => console.error("Fetch error:", error));
 });
 
-//İşyerini silme işlemi
-$(document).on("click", ".isyeri-sil", function () {
+// İşyerini Silme Dialog Tetikleyici
+$(document).off("click.isyeriSil").on("click.isyeriSil", ".isyeri-sil", function (e) {
+  e.preventDefault();
   var isyeriId = $(this).data("isyeri-id");
   var satir = $(this).closest("tr, .mobile-isyeri-card");
 
-  Swal.fire({
-    title: "Emin misiniz?",
-    text: "Seçili firma silinecektir!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    cancelButtonText: "Hayır, iptal et!",
-    confirmButtonText: "Evet, sil!"
-  }).then((result) => {
-    if (result.isConfirmed) {
-      var formData = new FormData();
-      formData.append("action", "isyeri_sil");
-      formData.append("isyeri_id", isyeriId);
+  //console.log("isyeri-sil clicked. ID:", isyeriId);
 
-      fetch(url, {
-        method: "POST",
-        body: formData
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-
-          if (data.status === true || data.status === "success") {
-            satir.fadeOut(400, function () {
-              $(this).remove();
-            });
-            // Silme başarılı ise sayfayı yenile
-            Swal.fire({
-              title: "Başarılı!",
-              text: data.message,
-              icon: "success"
-            });
-          }
-        })
-        .catch((error) => console.error("Fetch error:", error));
+  var dialog = document.getElementById("alert-dialog");
+  if (dialog) {
+    // console.log("Dialog element found:", dialog);
+    dialog.dataset.isyeriId = isyeriId;
+    dialog._satir = satir;
+    try {
+      if (typeof dialog.showModal === "function") {
+        dialog.showModal();
+        console.log("dialog.showModal() called successfully.");
+      } else {
+        console.warn("showModal is not a function, falling back to confirmDialog.");
+        fallbackConfirm(isyeriId, satir);
+      }
+    } catch (err) {
+      console.error("Error opening dialog:", err);
+      fallbackConfirm(isyeriId, satir);
     }
-  });
+  } else {
+    console.error("Dialog element #alert-dialog not found in DOM!");
+    fallbackConfirm(isyeriId, satir);
+  }
 });
 
-//Otomatik Rapor Onaya basınca email adresi textarea gizle-göster
-$(document).on("change", "#otomatik_rapor_onay", function () {
+// Silme İptal Butonu
+$(document).off("click.dialogCancel").on("click.dialogCancel", ".alert-dialog-cancel", function () {
+  var dialog = document.getElementById("alert-dialog");
+  if (dialog) {
+    dialog.close();
+  }
+});
+
+// Silme Onay Butonu
+$(document).off("click.dialogConfirm").on("click.dialogConfirm", ".alert-dialog-confirm", function () {
+  var dialog = document.getElementById("alert-dialog");
+  if (!dialog) return;
+
+  var isyeriId = dialog.dataset.isyeriId;
+  var satir = dialog._satir;
+
+  executeDelete(isyeriId, satir);
+  dialog.close();
+});
+
+// İşyeri Seçme İşlemi (Yenilenmeden / SPA - Namespaced)
+$(document).off("submit.isyeriSec").on("submit.isyeriSec", ".isyeri-sec-form", function (e) {
+  e.preventDefault();
+  var form = $(this);
+  var formData = new FormData(form[0]);
+  var isyeriId = form.find("input[name='isyeri_id']").val();
+  var submitBtn = form.find("button[type='submit']");
+  
+  // Bulunduğu satırdan seçilen firmanın adını alalım
+  var row = form.closest("tr");
+  var firmaAdi = row.find("span.font-semibold").first().text().trim();
+
+  submitBtn.startLoading();
+
+  fetch("isyeri-sec", {
+    method: "POST",
+    body: formData,
+    headers: {
+      "X-Requested-With": "XMLHttpRequest"
+    }
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      submitBtn.stopLoading();
+      if (data.status === "success") {
+        showToast(data.message || "İşyeri başarıyla değiştirildi.", "success");
+        
+        // 1. Üst bardaki seçili firma adını yenilemeden güncelle
+        $(".isyeri-dropdown summary span").text(firmaAdi);
+        
+        // 2. Üst bardaki dropdown listesinde aktif işareti taşı
+        $(".isyeri-dropdown .isyeri-item").each(function() {
+            var item = $(this);
+            // Doğrudan isim eşleşmesi kontrolü ile eşleştiriyoruz (şifrelenmiş çakışmaları engellemek için)
+            if (item.find("span").first().text().trim() === firmaAdi) {
+                item.css("background", "rgba(37, 99, 235, 0.08)");
+                item.css("font-weight", "600");
+                if (item.find("[data-lucide='check']").length === 0) {
+                    item.append('<i data-lucide="check" style="width: 14px; height: 14px; color: hsl(var(--primary)); flex-shrink: 0; margin-left: 0.5rem;"></i>');
+                }
+            } else {
+                item.css("background", "");
+                item.css("font-weight", "");
+                item.find("[data-lucide='check']").remove();
+            }
+        });
+        
+        // 3. Lucide ikonlarını yeniden oluştur
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+
+        // 4. Ana sayfaya (dashboard) yönlendir
+        if (window.App && App.loadPage) {
+            App.loadPage('dashboard', true);
+        } else {
+            window.location.href = "dashboard";
+        }
+      } else {
+        showToast(data.message || "İşyeri değiştirilemedi.", "error");
+      }
+    })
+    .catch((error) => {
+      submitBtn.stopLoading();
+      console.error("Fetch error:", error);
+      showToast("Bir hata oluştu.", "error");
+    });
+});
+
+// Fallback Confirmation Engine
+function fallbackConfirm(isyeriId, satir) {
+  if (window.confirmDialog) {
+    window.confirmDialog({
+      title: "Emin misiniz?",
+      text: "Seçili firma kalıcı olarak silinecektir.",
+      confirmButtonText: "Evet, Sil",
+      cancelButtonText: "İptal"
+    }).then((confirmed) => {
+      if (confirmed) {
+        executeDelete(isyeriId, satir);
+      }
+    });
+  } else {
+    if (confirm("Seçili firmayı silmek istediğinize emin misiniz?")) {
+      executeDelete(isyeriId, satir);
+    }
+  }
+}
+
+// Global Delete Executor
+function executeDelete(isyeriId, satir) {
+  var formData = new FormData();
+  formData.append("action", "isyeri_sil");
+  formData.append("isyeri_id", isyeriId);
+
+  fetch(url, {
+    method: "POST",
+    body: formData
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === true || data.status === "success") {
+        if (satir) {
+          satir.fadeOut(400, function () {
+            $(this).remove();
+          });
+        }
+        showToast(data.message, "success");
+      } else {
+        showToast(data.message || "İşyeri silinirken bir hata oluştu.", "error");
+      }
+    })
+    .catch((error) => {
+      console.error("Fetch error:", error);
+      showToast("Bir ağ hatası oluştu.", "error");
+    });
+}
+
+// Otomatik Rapor Onaya basınca email adresi textarea gizle-göster (Namespaced)
+$(document).off("change.raporOnay", "#otomatik_rapor_onay").on("change.raporOnay", "#otomatik_rapor_onay", function () {
   if ($(this).is(":checked")) {
     $(".otomatik-onay-eposta").removeClass("d-none");
   } else {
     $(".otomatik-onay-eposta").addClass("d-none");
   }
 });
+})();

@@ -86,10 +86,15 @@ $(document).ready(function () {
 //Okundu Olarak işaretler
 $(document).on("click", ".btn-kapat", function () {
   let satirElement = $(this).closest("tr, .mobile-rapor-card"); // Butonun bulunduğu satırı/kartı al
-  let raporData = satirElement.data("rapor"); // Satırdaki rapor verisini al
+  let raporId = $(this).data("id"); // Buton üzerindeki data-id'yi al
+  
+  if (!raporId && satirElement.data("rapor")) {
+    raporId = satirElement.data("rapor").MEDULARAPORID;
+  }
+
   // API'ye gönderilecek payload
   let payload = {
-    MEDULARAPORID: raporData.MEDULARAPORID
+    MEDULARAPORID: raporId
   };
 
   swal.fire({
