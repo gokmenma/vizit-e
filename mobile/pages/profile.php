@@ -5,6 +5,8 @@ use App\Helper\Security;
 use Models\UserModel;
 use Models\KullaniciAyarModel;
 use Models\KvkkRizaModel;
+use Models\KullaniciAbonelikModel;
+use App\Helper\Date;
 
 Security::checkLogin();
 
@@ -19,10 +21,30 @@ $giris_kayitlari = $UserModel->getLoginRecords($_SESSION['kullanici_id'], 5); //
 
 $userRole = $_SESSION["role"] ?? "user";
 
-$initials = '';
-$nameParts = explode(' ', $user->adi_soyadi ?? 'K');
-foreach ($nameParts as $part) { $initials .= mb_substr($part, 0, 1, 'UTF-8'); }
-$initials = mb_strtoupper(mb_substr($initials, 0, 2, 'UTF-8'), 'UTF-8');
+$db = \Core\Database::getInstance()->getConnection();
+$bugun = date('Y-m-d');
+
+// Aktif Abonelik
+$aktif_stmt = $db->prepare("SELECT ka.*, ap.ad as paket_adi, ap.fiyat as paket_fiyat, ap.sure as paket_sure
+                            FROM kullanici_abonelikleri ka 
+                            LEFT JOIN abonelik_paketleri ap ON ka.paket_id = ap.id 
+                            WHERE ka.kullanici_id = ? AND ka.durum = 'aktif' AND ka.baslangic_tarihi <= ? AND ka.bitis_tarihi >= ? 
+                            ORDER BY ka.id DESC LIMIT 1");
+$aktif_stmt->execute([$_SESSION['kullanici_id'] ?? 0, $bugun, $bugun]);
+$aktif_abonelik = $aktif_stmt->fetch(PDO::FETCH_OBJ);
+
+// Satın Alma Geçmişi (Tüm Abonelikleri)
+$gecmis_stmt = $db->prepare("SELECT ka.*, ap.ad as paket_adi, ap.fiyat as paket_fiyat, ap.sure as paket_sure 
+                             FROM kullanici_abonelikleri ka 
+                             LEFT JOIN abonelik_paketleri ap ON ka.paket_id = ap.id 
+                             WHERE ka.kullanici_id = ? 
+                             ORDER BY ka.id DESC");
+$gecmis_stmt->execute([$_SESSION['kullanici_id'] ?? 0]);
+$abonelik_gecmisi = $gecmis_stmt->fetchAll(PDO::FETCH_OBJ);
+
+$aydinlatma_metni = $KvkkRizaModel->getKvkkRizaByUserId($_SESSION['kullanici_id'] ?? 0, 'aydinlatma_metni');
+$gizlilik_sozlesmesi = $KvkkRizaModel->getKvkkRizaByUserId($_SESSION['kullanici_id'] ?? 0, 'gizlilik_sozlesmesi');
+$acik_riza_beyani = $KvkkRizaModel->getKvkkRizaByUserId($_SESSION['kullanici_id'] ?? 0, 'acik_riza_beyani');
 ?>
 
 <div class="animate-in flex flex-col gap-4">
@@ -39,18 +61,24 @@ $initials = mb_strtoupper(mb_substr($initials, 0, 2, 'UTF-8'), 'UTF-8');
 
     <!-- Tab chips -->
     <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
-        <button type="button" id="tab-btn-personal" onclick="switchProfileTab('personal')" class="profile-tab-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950 shadow-sm border border-transparent">
+        <button type="button" id="tab-btn-personal" onclick="switchProfileTab('personal')" class="profile-tab-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950 shadow-sm border border-transparent flex-shrink-0">
             Bilgiler
         </button>
-        <button type="button" id="tab-btn-password" onclick="switchProfileTab('password')" class="profile-tab-chip px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-950 transition-all">
+        <button type="button" id="tab-btn-password" onclick="switchProfileTab('password')" class="profile-tab-chip px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-950 transition-all flex-shrink-0">
             Şifre
         </button>
         <?php if ($userRole == "admin" || $userRole == "superadmin") : ?>
-        <button type="button" id="tab-btn-notifications" onclick="switchProfileTab('notifications')" class="profile-tab-chip px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-950 transition-all">
+        <button type="button" id="tab-btn-notifications" onclick="switchProfileTab('notifications')" class="profile-tab-chip px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-950 transition-all flex-shrink-0">
             Bildirimler
         </button>
+        <button type="button" id="tab-btn-kvkk" onclick="switchProfileTab('kvkk')" class="profile-tab-chip px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-950 transition-all flex-shrink-0">
+            KVKK
+        </button>
+        <button type="button" id="tab-btn-account" onclick="switchProfileTab('account')" class="profile-tab-chip px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-950 transition-all flex-shrink-0">
+            Hesap & Satın Alma
+        </button>
         <?php endif; ?>
-        <button type="button" id="tab-btn-logins" onclick="switchProfileTab('logins')" class="profile-tab-chip px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-950 transition-all">
+        <button type="button" id="tab-btn-logins" onclick="switchProfileTab('logins')" class="profile-tab-chip px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-950 transition-all flex-shrink-0">
             Girişler
         </button>
     </div>
@@ -194,6 +222,155 @@ $initials = mb_strtoupper(mb_substr($initials, 0, 2, 'UTF-8'), 'UTF-8');
             </div>
             <?php endif; ?>
         </div>
+
+        <!-- SECTION 5: KVKK Bilgileri -->
+        <?php if ($userRole == "admin" || $userRole == "superadmin") : ?>
+        <div id="section-kvkk" class="profile-section flex flex-col gap-4 hidden">
+            <div class="p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col gap-3 shadow-xs">
+                <div class="flex items-center gap-1.5 border-b border-zinc-100 dark:border-zinc-800 pb-2 mb-1">
+                    <i data-lucide="file-text" class="w-4 h-4 text-zinc-500"></i>
+                    <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">KVKK Bilgileri</span>
+                </div>
+                <div class="flex flex-col gap-3 text-left">
+                    <details class="group border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 [&_summary::-webkit-details-marker]:hidden cursor-pointer bg-zinc-50/50 dark:bg-zinc-950/20">
+                        <summary class="flex items-center justify-between font-semibold text-xs text-zinc-800 dark:text-zinc-200 select-none">
+                            <span>Aydınlatma Metni</span>
+                            <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></span>
+                        </summary>
+                        <div class="mt-2.5 text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-2 max-h-[200px] overflow-y-auto pr-1">
+                            <?php echo $aydinlatma_metni->icerik ?? 'Aydınlatma metni tanımlanmamış.'; ?>
+                        </div>
+                    </details>
+
+                    <details class="group border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 [&_summary::-webkit-details-marker]:hidden cursor-pointer bg-zinc-50/50 dark:bg-zinc-950/20">
+                        <summary class="flex items-center justify-between font-semibold text-xs text-zinc-800 dark:text-zinc-200 select-none">
+                            <span>Gizlilik Sözleşmesi</span>
+                            <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></span>
+                        </summary>
+                        <div class="mt-2.5 text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-2 max-h-[200px] overflow-y-auto pr-1">
+                            <?php echo $gizlilik_sozlesmesi->icerik ?? 'Gizlilik sözleşmesi tanımlanmamış.'; ?>
+                        </div>
+                    </details>
+
+                    <details class="group border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 [&_summary::-webkit-details-marker]:hidden cursor-pointer bg-zinc-50/50 dark:bg-zinc-950/20">
+                        <summary class="flex items-center justify-between font-semibold text-xs text-zinc-800 dark:text-zinc-200 select-none">
+                            <span>Açık Rıza Metni</span>
+                            <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></span>
+                        </summary>
+                        <div class="mt-2.5 text-[11px] leading-relaxed text-zinc-650 dark:text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-2 max-h-[200px] overflow-y-auto pr-1">
+                            <?php echo $acik_riza_beyani->icerik ?? 'Açık rıza metni tanımlanmamış.'; ?>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- SECTION 6: Hesap & Satın Alma -->
+        <?php if ($userRole == "admin" || $userRole == "superadmin") : ?>
+        <div id="section-account" class="profile-section flex flex-col gap-4 hidden">
+            <!-- Aktif Abonelik Bilgileri -->
+            <div class="p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col gap-3 shadow-xs">
+                <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-2 mb-1">
+                    <div class="flex items-center gap-1.5">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
+                        <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">Aktif Abonelik Bilgileri</span>
+                    </div>
+                    <a href="#abonelik-paketleri" class="text-[10px] font-bold text-zinc-900 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-lg hover:opacity-90 transition-all flex items-center gap-1" style="text-decoration: none;">
+                        <i data-lucide="shopping-bag" style="width: 10px; height: 10px;"></i>
+                        <span>Satın Al</span>
+                    </a>
+                </div>
+
+                <?php if ($aktif_abonelik): ?>
+                    <?php 
+                        $kalan_gun = \App\Helper\Date::getRemainingDays($aktif_abonelik->bitis_tarihi); 
+                        $is_expired = $kalan_gun < 0;
+                    ?>
+                    <div class="grid grid-cols-2 gap-2 text-left">
+                        <div class="p-2.5 rounded-lg bg-zinc-50/50 dark:bg-zinc-950/20 border border-zinc-100 dark:border-zinc-800/80 flex flex-col gap-0.5">
+                            <span class="text-[8px] uppercase font-bold text-zinc-400">Aktif Paket</span>
+                            <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200 truncate"><?php echo htmlspecialchars($aktif_abonelik->paket_adi); ?></span>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-zinc-50/50 dark:bg-zinc-950/20 border border-zinc-100 dark:border-zinc-800/80 flex flex-col gap-0.5">
+                            <span class="text-[8px] uppercase font-bold text-zinc-400">Kalan Süre</span>
+                            <div class="flex mt-0.5">
+                                <?php if ($is_expired): ?>
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400">Süresi Doldu</span>
+                                <?php else: ?>
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400"><?php echo $kalan_gun; ?> Gün</span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-zinc-50/50 dark:bg-zinc-950/20 border border-zinc-100 dark:border-zinc-800/80 flex flex-col gap-0.5">
+                            <span class="text-[8px] uppercase font-bold text-zinc-400">Başlangıç</span>
+                            <span class="text-[10px] font-semibold text-zinc-700 dark:text-zinc-300"><?php echo \App\Helper\Date::dmY($aktif_abonelik->baslangic_tarihi); ?></span>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-zinc-50/50 dark:bg-zinc-950/20 border border-zinc-100 dark:border-zinc-800/80 flex flex-col gap-0.5">
+                            <span class="text-[8px] uppercase font-bold text-zinc-400">Bitiş</span>
+                            <span class="text-[10px] font-semibold text-zinc-700 dark:text-zinc-300"><?php echo \App\Helper\Date::dmY($aktif_abonelik->bitis_tarihi); ?></span>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="flex flex-col items-center justify-center gap-2 py-4 px-3 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/20 dark:bg-zinc-900/10">
+                        <i data-lucide="shield-alert" class="w-6 h-6 text-zinc-400"></i>
+                        <span class="text-[10px] font-bold text-zinc-900 dark:text-zinc-50">Aktif Aboneliğiniz Bulunmuyor</span>
+                        <p class="text-[9px] text-zinc-500 dark:text-zinc-400 max-w-[280px] leading-relaxed">
+                            Vizite onaylama, anlık bildirimler gibi özellikleri kullanabilmek için aktif bir paket satın almalısınız.
+                        </p>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Satın Alma Geçmişi -->
+            <div class="p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col gap-3 shadow-xs">
+                <div class="flex items-center gap-1.5 border-b border-zinc-100 dark:border-zinc-800 pb-2 mb-1">
+                    <i data-lucide="receipt" class="w-4 h-4 text-zinc-500"></i>
+                    <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">Satın Alma Geçmişi</span>
+                </div>
+
+                <?php if (count($abonelik_gecmisi) > 0): ?>
+                    <div class="flex flex-col gap-2 divide-y divide-zinc-100 dark:divide-zinc-800/80">
+                        <?php foreach ($abonelik_gecmisi as $abonelik): ?>
+                            <div class="flex flex-col text-left gap-1 pt-2 first:pt-0">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-bold text-zinc-800 dark:text-zinc-200 truncate max-w-[180px]"><?php echo htmlspecialchars($abonelik->paket_adi); ?></span>
+                                    <span class="text-[10px] font-bold font-mono text-zinc-900 dark:text-zinc-50">
+                                        <?php echo isset($abonelik->paket_fiyat) ? number_format($abonelik->paket_fiyat, 2, ',', '.') . ' ₺' : '0,00 ₺'; ?>
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between text-[9px] text-zinc-400 mt-0.5">
+                                    <span><?php echo \App\Helper\Date::dmY($abonelik->baslangic_tarihi); ?> ➔ <?php echo \App\Helper\Date::dmY($abonelik->bitis_tarihi); ?></span>
+                                    <div>
+                                        <?php 
+                                            switch ($abonelik->durum) {
+                                                case 'aktif':
+                                                    echo '<span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400">Aktif</span>';
+                                                    break;
+                                                case 'sona_erdi':
+                                                    echo '<span class="px-1.5 py-0.5 rounded text-[8px] font-semibold bg-zinc-50 text-zinc-650 dark:bg-zinc-800/40 dark:text-zinc-400">Süresi Doldu</span>';
+                                                    break;
+                                                case 'iptal':
+                                                    echo '<span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400">İptal</span>';
+                                                    break;
+                                                case 'onay_bekliyor':
+                                                    echo '<span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400">Onay Bekliyor</span>';
+                                                    break;
+                                                default:
+                                                    echo '<span class="px-1.5 py-0.5 rounded text-[8px] font-semibold bg-zinc-50 text-zinc-650 dark:bg-zinc-800/40 dark:text-zinc-400">' . htmlspecialchars($abonelik->durum) . '</span>';
+                                            }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p class="text-center text-xs text-zinc-400 py-2">Kayıtlı satın alma verisi bulunmamaktadır.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -201,12 +378,12 @@ $initials = mb_strtoupper(mb_substr($initials, 0, 2, 'UTF-8'), 'UTF-8');
 function switchProfileTab(tabName) {
     // Reset and select active tabs style
     document.querySelectorAll('.profile-tab-chip').forEach(btn => {
-        btn.className = "profile-tab-chip px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-950 transition-all";
+        btn.className = "profile-tab-chip px-3 py-1.5 rounded-full text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-950 transition-all flex-shrink-0";
     });
     
     const activeBtn = document.getElementById('tab-btn-' + tabName);
     if (activeBtn) {
-        activeBtn.className = "profile-tab-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950 shadow-sm border border-transparent";
+        activeBtn.className = "profile-tab-chip px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950 shadow-sm border border-transparent flex-shrink-0";
     }
 
     // Hide all sections
@@ -216,6 +393,12 @@ function switchProfileTab(tabName) {
     const notifSection = document.getElementById('section-notifications');
     if (notifSection) notifSection.classList.add('hidden');
     
+    const kvkkSection = document.getElementById('section-kvkk');
+    if (kvkkSection) kvkkSection.classList.add('hidden');
+    
+    const accountSection = document.getElementById('section-account');
+    if (accountSection) accountSection.classList.add('hidden');
+    
     document.getElementById('section-logins').classList.add('hidden');
     
     // Save button display toggle (Show save button only for Personal and Password forms)
@@ -223,16 +406,22 @@ function switchProfileTab(tabName) {
 
     if (tabName === 'personal') {
         document.getElementById('section-personal').classList.remove('hidden');
-        saveContainer.classList.remove('hidden');
+        if (saveContainer) saveContainer.classList.remove('hidden');
     } else if (tabName === 'password') {
         document.getElementById('section-password').classList.remove('hidden');
-        saveContainer.classList.remove('hidden');
+        if (saveContainer) saveContainer.classList.remove('hidden');
     } else if (tabName === 'notifications') {
         if (notifSection) notifSection.classList.remove('hidden');
-        saveContainer.classList.add('hidden');
+        if (saveContainer) saveContainer.classList.add('hidden');
+    } else if (tabName === 'kvkk') {
+        if (kvkkSection) kvkkSection.classList.remove('hidden');
+        if (saveContainer) saveContainer.classList.add('hidden');
+    } else if (tabName === 'account') {
+        if (accountSection) accountSection.classList.remove('hidden');
+        if (saveContainer) saveContainer.classList.add('hidden');
     } else if (tabName === 'logins') {
         document.getElementById('section-logins').classList.remove('hidden');
-        saveContainer.classList.add('hidden');
+        if (saveContainer) saveContainer.classList.add('hidden');
     }
 }
 

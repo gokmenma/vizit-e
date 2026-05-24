@@ -60,9 +60,12 @@ class Security
     *Login Kontrolü yapılır,api sayfalarına erişim kontrolü için kullanılır
     */
     public static function checkLogin($redirect = "sign-in")
-
     {
         if (!isset($_SESSION['kullanici_id'])) {
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                http_response_code(401);
+                exit('SESSION_EXPIRED');
+            }
             header('Location: ' . $redirect);
             exit;
         }
