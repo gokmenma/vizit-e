@@ -172,6 +172,10 @@ if (isset($_SESSION['kullanici_id'])) {
     <link rel="icon" href="assets/images/logo.svg" type="image/svg+xml">
 
     <!-- Styling Frameworks -->
+    <!-- Force Tailwind v4 dark: variant to use .dark class instead of OS media query -->
+    <style type="text/tailwindcss">
+        @custom-variant dark (&:where(.dark, .dark *));
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@latest/dist/fonts/geist/style.css">

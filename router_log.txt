@@ -1003,3 +1003,8 @@
 15:23:34 - vizite.com - /isyerlerim
 15:35:30 - vizite.com - /isyeri-sec?isyeri_id=GCZ3dVlHYzwf-k0UCxqqnMAYVdba42jZ3sFub84%2A
 15:35:37 - vizite.com - /
+15:39:46 - vizite.com - /
+15:44:14 - vizite.com - /logout
+15:44:14 - vizite.com - /sign-in
+15:46:07 - vizite.com - /sign-in
+15:46:07 - vizite.com - /isyerlerim
