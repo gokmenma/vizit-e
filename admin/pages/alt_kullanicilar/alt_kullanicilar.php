@@ -89,7 +89,7 @@ $mainUsers = $userModel->getMainUsers();
                 </thead>
                 <tbody>
                     <?php foreach ($altKullanicilar as $user): ?>
-                        <tr class="alt-user-row">
+                        <tr class="alt-user-row" data-id="<?php echo $user->id; ?>">
                             <td style="color: var(--muted-foreground); font-family: monospace; font-size: 0.75rem;">
                                 #<?php echo $user->id; ?></td>
                             <td class="alt-user-name">
@@ -151,7 +151,7 @@ $mainUsers = $userModel->getMainUsers();
                                 <div style="display: flex; justify-content: flex-end; gap: 0.25rem;">
                                     <button class="btn btn-sm-icon" title="Giriş Yap" style="color: #2563eb;"><i
                                             data-lucide="external-link" style="width: 14px;"></i></button>
-                                    <button class="btn btn-sm-icon" title="Sil" style="color: #ef4444;"><i
+                                    <button class="btn btn-sm-icon" title="Sil" style="color: #ef4444;" onclick="confirmDelete(<?php echo $user->id; ?>, '<?php echo htmlspecialchars($user->adi_soyadi ?: $user->kullanici_adi); ?>')"><i
                                             data-lucide="trash-2" style="width: 14px;"></i></button>
                                 </div>
                             </td>
@@ -375,6 +375,28 @@ $mainUsers = $userModel->getMainUsers();
     </form>
 </dialog>
 
+<!-- Delete Confirmation Modal -->
+<dialog id="alert-dialog" class="card" style="width: 400px; padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+    <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+        <header>
+            <h2 id="alert-dialog-title" style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--destructive);">
+                <i data-lucide="alert-triangle" style="width: 20px;"></i> Emin misiniz?
+            </h2>
+            <p id="alert-dialog-description" style="font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.5;">
+                <b id="delete-user-name"></b> isimli alt kullanıcıyı silmek istediğinize emin misiniz? <br><br>
+                Bu işlem geri alınamaz. Alt kullanıcının tüm yetkileri ve tanımları kalıcı olarak silinecektir.
+            </p>
+        </header>
+
+        <footer style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+            <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('alert-dialog').close()">Vazgeç</button>
+            <button class="btn btn-destructive" id="confirm-delete-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                Silmeyi Onayla
+            </button>
+        </footer>
+    </div>
+</dialog>
+
 <script>
     // Username Sanitization
     function sanitizeUsername(input) {
@@ -502,5 +524,67 @@ $mainUsers = $userModel->getMainUsers();
             submitBtn.innerHTML = originalText;
         }
     }
+
+    // Delete Logic
+    var userIdToDelete = null;
+
+    function confirmDelete(id, name) {
+        userIdToDelete = id;
+        document.getElementById('delete-user-name').innerText = name;
+        document.getElementById('alert-dialog').showModal();
+    }
+
+    document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
+        if (!userIdToDelete) return;
+
+        const btn = this;
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px;"></div> İşleniyor...';
+
+        try {
+            const formData = new FormData();
+            formData.append('id', userIdToDelete);
+            formData.append('action', 'delete');
+
+            const response = await fetch('alt-kullanici-kaydet', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                App.toast('success', 'Başarılı', result.message);
+                document.getElementById('alert-dialog').close();
+                const row = document.querySelector(`.alt-user-row[data-id="${userIdToDelete}"]`);
+                if (row) {
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        row.remove();
+                        const tabCounts = document.querySelectorAll('.dt-tab-count');
+                        tabCounts.forEach(tab => {
+                            const currentVal = parseInt(tab.textContent) || 0;
+                            tab.textContent = Math.max(0, currentVal - 1);
+                        });
+                    }, 300);
+                } else {
+                    setTimeout(() => App.refreshContent(), 500);
+                }
+            } else {
+                App.toast('error', 'Hata', result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            App.toast('error', 'Hata', 'Bir hata oluştu.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            userIdToDelete = null;
+        }
+    });
 
 </script>

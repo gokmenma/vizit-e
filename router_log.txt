@@ -1026,3 +1026,11 @@
 16:17:05 - vizite.com - /mahsuplastirilan-raporlar
 16:17:12 - vizite.com - /onayli-raporlar
 16:17:15 - vizite.com - /kullanicilar
+16:24:49 - vizite.com - /logout
+16:24:49 - vizite.com - /sign-in
+16:24:51 - vizite.com - /sign-up
+16:28:43 - vizite.com - /sign-up
+16:28:43 - vizite.com - /sign-in
+16:28:43 - vizite.com - /sign-in
+16:28:47 - vizite.com - /sign-up
+16:32:05 - vizite.com - /sign-in

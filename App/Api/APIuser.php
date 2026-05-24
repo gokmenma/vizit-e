@@ -133,6 +133,47 @@ if ($_POST['action'] == "register") {
         $logger = new \Core\Services\DatabaseLogger('auth');
         $logger->info("Yeni kullanıcı kayıt oldu: " . $_POST["kullanici_adi"]);
 
+        // 15 Günlük Deneme Paketi ekleme mantığı
+        try {
+            $db = \Core\Database::getInstance()->getConnection();
+            $stmt = $db->prepare("SELECT * FROM abonelik_paketleri WHERE id = 7 OR ad LIKE '%Deneme%' ORDER BY id DESC LIMIT 1");
+            $stmt->execute();
+            $trialPackage = $stmt->fetch(PDO::FETCH_OBJ);
+            
+            if ($trialPackage) {
+                $trialPackageId = $trialPackage->id;
+                $firma_hakki = $trialPackage->firma_hakki;
+                $alt_kullanici_hakki = $trialPackage->alt_kullanici_hakki;
+                $sure = $trialPackage->sure;
+            } else {
+                $trialPackageId = 7;
+                $firma_hakki = 1;
+                $alt_kullanici_hakki = 0;
+                $sure = 15;
+            }
+
+            $baslangic = date('Y-m-d');
+            $bitis = date('Y-m-d', strtotime("+$sure days"));
+            $kullanici_id = Security::decrypt($lastInsertId);
+
+            $subStmt = $db->prepare("INSERT INTO kullanici_abonelikleri 
+                (kullanici_id, paket_id, durum, baslangic_tarihi, bitis_tarihi, firma_hakki, alt_kullanici_hakki, olusturma_tarihi) 
+                VALUES (?, ?, 'aktif', ?, ?, ?, ?, ?)");
+            $subStmt->execute([
+                $kullanici_id,
+                $trialPackageId,
+                $baslangic,
+                $bitis,
+                $firma_hakki,
+                $alt_kullanici_hakki,
+                date('Y-m-d H:i:s')
+            ]);
+
+            $logger->success("Kullanıcıya 15 günlük deneme paketi tanımlandı. Kullanıcı ID: $kullanici_id");
+        } catch (\Exception $subEx) {
+            $logger->error("Deneme paketi tanımlanırken hata oluştu: " . $subEx->getMessage());
+        }
+
         $data = [
             "id" => 0,
             "kullanici_id" => Security::decrypt($lastInsertId),
@@ -179,144 +220,35 @@ if ($_POST['action'] == "register") {
         $data = [
             "saat_9_mail_bildirimi" => 1,
             "rapor_otomatik_onay_bildirim" => 1,
-
-
         ];
         $KullaniciAyarModel->updateSettings($lastInsertId, $data);
 
-        //Kayıt başarılı, admin'e bildirim maili gönder        
-        $mail_icerik = '<!DOCTYPE html>
-                <html lang="tr">
-                <head>
-                <meta charset="UTF-8">
-                <title>Yeni Kullanıcı Kaydı</title>
-                </head>
-                <body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;">
-                <table align="center" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-                    <tr>
-                    <td style="background:#007bff; color:#fff; padding:20px; border-radius:8px 8px 0 0; text-align:center;">
-                        <h2 style="margin:0;">Yeni Kullanıcı Kaydı</h2>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td style="padding:20px; color:#333;">
-                        <p>Merhaba <strong>Admin</strong>,</p>
-                        <p>Sisteme yeni bir kullanıcı kayıt oldu. Kullanıcı bilgileri aşağıdadır:</p>
-                        <table cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;">
-                        <tr>
-                            <td style="border-bottom:1px solid #ddd; width:150px;"><strong>Ad Soyad</strong></td>
-                            <td style="border-bottom:1px solid #ddd;">' . $kullanici_adi . '</td>
-
-                        </tr>
-                        <tr>
-                            <td style="border-bottom:1px solid #ddd;"><strong>E-posta</strong></td>
-                            <td style="border-bottom:1px solid #ddd;">' . $email . '</td>
-
-                        </tr>
-                        <tr>
-                            <td style="border-bottom:1px solid #ddd;"><strong>Kayıt Tarihi</strong></td>
-                            <td style="border-bottom:1px solid #ddd;">' . date('d-m-Y H:i:s') . '</td>
-
-                        </tr>
-                        </table>
-                        <p style="margin-top:20px;">Kullanıcıyı incelemek için yönetim paneline giriş yapabilirsiniz.</p>
-                        <p style="margin-top:30px;">Saygılarımızla,<br><strong>Sistem Bildirim Botu</strong></p>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td style="background:#f4f4f4; text-align:center; padding:10px; font-size:12px; color:#777; border-radius:0 0 8px 8px;">
-                        Bu mesaj otomatik olarak gönderilmiştir, lütfen yanıtlamayınız.
-                    </td>
-                    </tr>
-                </table>
-                </body>
-                </html>
-                ';
-
-
-        //admine bildirim gönder
-        MailGonderService::gonder(
-
-            "beyzade83@gmail.com",
-            "Yeni Kullanıcı Kaydı",
-            $mail_icerik,
-
-        );
-
-// mail_templates/user_welcome.html dosyası
-$mail_icerik = file_get_contents (dirname(__DIR__,2) . '/user_welcome.php');
-
-// Variables'ı replace et
-$mail_icerik = str_replace(
-    ['{{kullanici_adi}}'], 
-    [$kullanici_adi], 
-    $mail_icerik
-);
-        // $mail_icerik = '
-        // <!DOCTYPE html>
-        //         <html lang="tr">
-        //         <head>
-        //         <meta charset="UTF-8">
-        //         <title>Hoş Geldiniz</title>
-        //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        //         </head>
-        //         <body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;">
-        //         <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#f4f4f4">
-        //             <tr>
-        //             <td align="center">
-        //                 <table width="600" border="0" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="margin:20px; border-radius:10px; overflow:hidden;">
-        //                 <tr>
-        //                     <td align="center" bgcolor="#007bff" style="padding:20px; color:#fff; font-size:24px; font-weight:bold;">
-        //                     🎉 Vizit-e.com’a Hoş Geldiniz!
-        //                     </td>
-        //                 </tr>
-        //                 <tr>
-        //                     <td style="padding:30px; color:#333; font-size:16px; line-height:1.6;">
-        //                     Merhaba <b>' . $kullanici_adi . '</b>, <br><br>
-        //                     Vizit-e.com ailesine katıldığınız için teşekkür ederiz. Artık sağlık raporlarını, bildirimleri ve onay süreçlerini çok daha hızlı ve zahmetsiz şekilde yönetebilirsiniz. 🚀
-        //                     <br><br>
-        //                     <b>Sizi bekleyen avantajlar:</b><br>
-        //                     ✅ Zaman kaybı olmadan otomatik onay<br>
-        //                     ✅ İnsan hatasını en aza indiren akıllı sistem<br>
-        //                     ✅ SMS doğrulamasına gerek kalmadan kolay kullanım<br>
-        //                     ✅ Bekleyen raporları otomatik onaylama<br>
-
-        //                     </td>
-        //                 </tr>
-        //                 <tr>
-        //                     <td align="center" style="padding:20px;">
-        //                     <a href="https://vizit-e.com" 
-        //                         style="background-color:#007bff; color:#ffffff; text-decoration:none; padding:15px 30px; border-radius:5px; font-size:16px; display:inline-block;">
-        //                         Hesabınıza Giriş Yapın
-        //                     </a>
-        //                     </td>
-        //                 </tr>
-        //                 <tr>
-        //                     <td style="padding:20px; font-size:14px; color:#666; text-align:center; border-top:1px solid #ddd;">
-        //                     Herhangi bir sorunuz olursa <a href="mailto:bilgi@vizit-e.com" style="color:#007bff; text-decoration:none;">destek ekibimizle</a> iletişime geçebilirsiniz. <br><br>
-        //                     Sevgiler,<br>
-        //                     <b>Vizit-e.com Ekibi</b>
-        //                     </td>
-        //                 </tr>
-        //                 </table>
-        //             </td>
-        //             </tr>
-        //         </table>
-        //         </body>
-        //         </html>
-        //         ';
-
-        //kullanıcıya hoş geldin maili gönder
-        MailGonderService::gonder(
-
-            $email,
-            "Vizit-e.com'a Hoş Geldiniz!",
-            $mail_icerik,
-
-        );
-
         $status = "success";
         $message = "Kayıt işlemi başarılı.";
+
+        // Windows and Linux compatible background script execution
+        try {
+            $scriptPath = dirname(__DIR__, 2) . '/scratch/send_signup_emails.php';
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                $cmd = "start /B php " . escapeshellarg($scriptPath) . " " . escapeshellarg($email) . " " . escapeshellarg($kullanici_adi);
+                pclose(popen($cmd, "r"));
+            } else {
+                $cmd = "php " . escapeshellarg($scriptPath) . " " . escapeshellarg($email) . " " . escapeshellarg($kullanici_adi) . " > /dev/null 2>&1 &";
+                exec($cmd);
+            }
+        } catch (\Exception $bgEx) {
+            // Log background execution failures silently
+            if (isset($logger)) {
+                $logger->error("Arka plan e-posta tetikleme hatası: " . $bgEx->getMessage());
+            }
+        }
+
+        $response = [
+            "status" => $status,
+            "message" => $message
+        ];
+        echo json_encode($response);
+        exit;
     } catch (PDOException $ex) {
         $status = "error";
         $message = $ex->getMessage();
