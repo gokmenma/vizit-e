@@ -127,6 +127,13 @@ $config = require __DIR__ . '/config.php';
 $basePath = $config['base_path'] ?? '/';
 $userRole = $_SESSION["role"] ?? "user";
 
+// Logo SVG inline gömme
+$logoSvgContent = @file_get_contents(__DIR__ . '/assets/images/logo.svg') ?: '';
+if ($logoSvgContent) {
+    $logoSvgContent = preg_replace('/(<svg[^>]*)\swidth="[^"]*"/', '$1 width="100%"', $logoSvgContent);
+    $logoSvgContent = preg_replace('/(<svg[^>]*)\sheight="[^"]*"/', '$1 height="100%"', $logoSvgContent);
+}
+
 // Kullanıcı Bilgilerini Alalım
 $userAd = $_SESSION['user_ad'] ?? $_SESSION['kullanici_adi'] ?? 'Kullanıcı';
 $userEmail = '';
@@ -178,6 +185,9 @@ if ($currentRoute !== 'dashboard') {
     <link rel="shortcut icon" href="<?php echo rtrim($basePath, '/'); ?>/favicon.ico" type="image/x-icon">
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @custom-variant dark (&:where(.dark, .dark *));
+    </style>
     <!-- Basecoat CSS (BaseUI) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
 
@@ -338,8 +348,7 @@ if ($currentRoute !== 'dashboard') {
         <nav aria-label="Sidebar navigation">
             <header class="sidebar-header">
                 <div class="sidebar-logo">
-                    <img src="<?php echo rtrim($basePath, '/'); ?>/assets/images/logo.svg?v=<?php echo filemtime(__DIR__ . '/assets/images/logo.svg'); ?>"
-                        alt="Vizit-e" style="width: 28px; height: 28px; border-radius: 6px;">
+                    <div style="width: 28px; height: 28px; border-radius: 6px; overflow: hidden; flex-shrink: 0;"><?php echo $logoSvgContent; ?></div>
                     <div class="logo-text">
                         <span class="logo-title">Vizit-e</span>
                         <span class="logo-subtitle">Kullanıcı Paneli</span>
@@ -411,9 +420,9 @@ if ($currentRoute !== 'dashboard') {
                             </a>
                         </li>
                         <li>
-                            <a href="javascript:void(0);"
-                                class="nav-link text-zinc-400 dark:text-zinc-500 cursor-not-allowed"
-                                style="opacity: 0.6;">
+                            <a href="iptal-edilen-raporlar"
+                                class="nav-link <?php echo $currentRoute === 'iptal-edilen-raporlar' ? 'active' : ''; ?>"
+                                data-route="iptal-edilen-raporlar">
                                 <i data-lucide="x-circle"></i>
                                 <span>İptal Edilen Raporlar</span>
                             </a>
@@ -472,7 +481,7 @@ if ($currentRoute !== 'dashboard') {
             <footer class="sidebar-footer">
                 <details class="user-dropdown">
                     <summary>
-                        <div class="user-avatar" style="background: hsl(var(--primary)); color: #fff;">
+                        <div class="user-avatar" style="background: #f4f4f5; color: #18181b; border: 1px solid #e4e4e7; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;">
                             <?php 
                             $nameParts = explode(' ', $userAd);
                             $initials = '';

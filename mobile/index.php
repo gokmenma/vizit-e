@@ -35,7 +35,8 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
         'arsivlenmis-raporlar',
         'mahsuplastirilacak-raporlar',
         'mahsuplastirilan-raporlar',
-        'prim-borcuna-mahsup-edilen-odemeler'
+        'prim-borcuna-mahsup-edilen-odemeler',
+        'iptal-edilen-raporlar'
     ];
 
     if (!isset($_SESSION['firma_adi']) && in_array($route, $workplaceDependentRoutes)) {
@@ -297,11 +298,10 @@ if (isset($_SESSION['kullanici_id'])) {
                     <i data-lucide="archive"></i>
                     <span>Arşive Alınan Raporlar</span>
                 </a>
-                <button type="button" class="bottom-sheet-menu-item text-zinc-400 cursor-not-allowed"
-                    style="opacity: 0.5;">
+                <a href="#iptal-edilen-raporlar" class="bottom-sheet-menu-item">
                     <i data-lucide="x-circle"></i>
                     <span>İptal Edilen Raporlar</span>
-                </button>
+                </a>
                 <a href="#manuel-rapor-bildirimi" class="bottom-sheet-menu-item">
                     <i data-lucide="edit-3"></i>
                     <span>Manuel Rapor Bildirimi</span>

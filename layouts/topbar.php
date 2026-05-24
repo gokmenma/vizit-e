@@ -112,7 +112,7 @@ $aktif_isyeri = $_SESSION['isyeri_id'] ?? null;
             <li><a href="mahsuplastirilacak-raporlar">Mahsuplaşma İşlemleri</a></li>
             <li><a href="manuel-rapor-bildirimi">Manuel Rapor Bildirimi</a></li>
         <?php endif; ?>
-        <li><a href="#">İptal Edilen Raporlar</a></li>
+        <li><a href="iptal-edilen-raporlar">İptal Edilen Raporlar</a></li>
         <li><a href="arsivlenmis-raporlar">Arşive Alınan Raporlar</a></li>
         <li><a href="is-kazasi-bildirimi">İş Kazası Bildirimleri</a></li>
         <li><a href="iletisim-bilgileri">İletişim Bilgileri</a></li>

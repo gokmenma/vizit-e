@@ -77,6 +77,9 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     <link rel="icon" href="<?php echo $scriptRoot; ?>/assets/images/logo.svg" type="image/svg+xml">
     <link rel="shortcut icon" href="<?php echo $scriptRoot; ?>/favicon.ico" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @custom-variant dark (&:where(.dark, .dark *));
+    </style>
     <!-- Basecoat CSS (BaseUI) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
     

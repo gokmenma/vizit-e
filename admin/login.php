@@ -13,6 +13,13 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 
 $error = '';
 
+// Logo SVG inline gömme
+$logoSvgContent = @file_get_contents(__DIR__ . '/../assets/images/logo.svg') ?: '';
+if ($logoSvgContent) {
+    $logoSvgContent = preg_replace('/(<svg[^>]*)\swidth="[^"]*"/', '$1 width="100%"', $logoSvgContent);
+    $logoSvgContent = preg_replace('/(<svg[^>]*)\sheight="[^"]*"/', '$1 height="100%"', $logoSvgContent);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier = $_POST['identifier'] ?? ''; // Email veya Kullanıcı Adı
     $password = $_POST['password'] ?? '';
@@ -292,7 +299,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="login-container">
         <div class="logo-area">
-            <img src="../assets/images/logo.svg?v=<?= filemtime(__DIR__ . '/../assets/images/logo.svg') ?>" alt="Vizit-e" style="width: 40px; height: 40px; border-radius: 10px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; overflow: hidden; flex-shrink: 0;"><?php echo $logoSvgContent; ?></div>
             <span class="logo-text">SGK Vizite</span>
         </div>
 

@@ -27,17 +27,14 @@ if($_POST["action"] == "rapor_onay_iptal"){
 
     try {
         $sgkClient = new SgkViziteService();
-        //$onayResponse= $sgkClient->raporOnayIptalEt($MEDULARAPORID);
-
-
-        //Test kullanım için aşağıdaki satırları açın ve SGK API'sine uygun şekilde kullanın
-        $onayResponse = new stdClass(); // Örnek olarak, gerçek API çağrısında bu değer dinamik olarak dönecektir.
-        $onayResponse->sonucKod = '0'; // Örnek olarak, gerçek API çağrısında bu değer dinamik olarak dönecektir.
-        $onayResponse->sonucAciklama = "Rapor onayı iptal edildi."; // Örnek açıklama
-
+        $onayResponse = $sgkClient->raporOnayIptalEt($MEDULARAPORID);
 
         if(isset($onayResponse->sonucKod) && $onayResponse->sonucKod == '0') {
-            // Onay iptali başarılıysa, raporu kuyruktan da düşelim.
+            // Onay iptali başarılıysa, yerel veritabanını güncelleyelim.
+            $db = \Core\Database::getInstance()->getConnection();
+            $stmt = $db->prepare("UPDATE onaylanan_raporlar SET onay_durumu = 'iptal', updated_at = NOW() WHERE MEDULARAPORID = ?");
+            $stmt->execute([$MEDULARAPORID]);
+
             $status = "success";
             $message = "Rapor onayı başarıyla iptal edildi.";
         } else {

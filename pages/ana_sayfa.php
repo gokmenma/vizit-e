@@ -71,7 +71,7 @@
                 'button_text' => 'Yönet',
                 'button_class' => 'btn-primary',
                 'border_class' => 'border-primary',
-                'link' => '#'
+                'link' => 'iptal-edilen-raporlar'
             ],
             [
                 'title' => 'İş Kazası Bildirimleri',

@@ -251,6 +251,12 @@ $router->get('onayli-raporlar', function () {
     require __DIR__ . '/pages/onayli_raporlar.php';
 });
 
+$router->get('iptal-edilen-raporlar', function () {
+    require __DIR__ . '/pages/iptal_edilen_raporlar.php';
+})->post('iptal-edilen-raporlar', function () {
+    require __DIR__ . '/pages/iptal_edilen_raporlar.php';
+});
+
 $router->get('manuel-rapor-bildirimi', function () {
     require __DIR__ . '/pages/manuel-rapor/manuel_rapor_bildirimi.php';
 });

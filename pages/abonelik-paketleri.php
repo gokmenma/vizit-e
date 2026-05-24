@@ -70,74 +70,92 @@ $referral_code  = $_SESSION["user"]->referral_code ?? null;
             </div>
         <?php } ?>
 
-<style>
-    .current-badge {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    background-color: #313740;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    z-index: 10;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    pointer-events: none; /* Badge'in tıklanabilir olmasını engeller */
-           
-        }
-</style>
-
-
-
-        <div class="row clearfix">
+        <div class="stats-grid animate-in" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
             <?php
-           
-            $i = 0; // Sıra numarasını başlatıyoruz
             foreach ($paketler as $paket) {
-                
+                // Deneme paketini gösterme (Do not show trial package)
+                if ($paket->fiyat == 0 || stripos($paket->ad, 'deneme') !== false) {
+                    continue;
+                }
 
-                $i++;
-                $enc_id = Security::encrypt($paket->id); // Paket ID'sini şifreliyoruz
-
-                $aktif_paket_border = $paket_id == $paket->id ? "border: 1px solid #313740;" : '';
-
-               
-
-                //1. ve 3. paketlerin butonları btn-simple olacak
-                $buttonClass = ($i != 4) ? 'btn-simple' : 'btn-primary';
-
+                $enc_id = Security::encrypt($paket->id);
+                $is_current_package = ($paket_id == $paket->id);
+                $aktif_paket_border = $is_current_package ? "border: 2px solid var(--primary) !important;" : 'border: 1px solid var(--border) !important;';
             ?>
+                <div class="card" style="display: flex; flex-direction: column; position: relative; overflow: hidden; padding: 1.5rem; <?php echo $aktif_paket_border; ?> min-height: 380px; border-radius: 12px; background: var(--card);">
+                    <!-- Color Accent Bar on Top -->
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: <?php echo $is_current_package ? 'var(--primary)' : '#e4e4e7'; ?>;"></div>
+                    
+                    <!-- Current Package Badge -->
+                    <?php if ($is_current_package): ?>
+                        <div style="position: absolute; top: 12px; right: 12px; background: var(--primary); color: var(--primary-foreground); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Mevcut Paket</div>
+                    <?php endif; ?>
 
-                <div class="col-lg-3 cool-md-6 col-sm-12" >
-                    <div class="card">
-                        <?php if ($paket_id == $paket->id) { ?>
-                            <div class="current-badge">Mevcut Paketiniz</div>
-                        <?php } ?>
-                        <ul class="pricing body active" style="<?php echo $aktif_paket_border; ?>">
-                            <li><big><?php echo $paket->ad; ?></big></li>
-                            <?php
-                            //40 Adet Firma;Tüm Web Servisleri;Anlık Durum Takibi
+                    <!-- Package Title & Description -->
+                    <div style="margin-top: 0.5rem; margin-bottom: 1.25rem; text-align: left;">
+                        <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem 0; color: var(--foreground);"><?php echo htmlspecialchars($paket->ad); ?></h3>
+                        <p style="font-size: 0.825rem; color: var(--muted-foreground); margin: 0; line-height: 1.4;"><?php echo htmlspecialchars($paket->aciklama ?? 'Tüm temel özellikler dahildir.'); ?></p>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div style="display: flex; align-items: baseline; gap: 0.25rem; margin-bottom: 1.5rem; justify-content: flex-start;">
+                        <span style="font-size: 2.25rem; font-weight: 800; color: var(--foreground); line-height: 1;">₺<?php echo number_format($paket->fiyat, 0, ',', '.'); ?></span>
+                        <span style="font-size: 0.875rem; color: var(--muted-foreground); font-weight: 500;">/ <?php echo $paket->sure; ?> Gün</span>
+                    </div>
+
+                    <!-- Package Limits / Benefits Grid -->
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--muted); border-radius: 8px; border: 1px solid var(--border); text-align: left;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 0.85rem; color: var(--muted-foreground); display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="users" style="width: 14px; height: 14px; color: var(--muted-foreground);"></i> Firma (İşyeri) Limiti
+                            </span>
+                            <span style="font-weight: 600; font-size: 0.875rem; color: var(--foreground);"><?php echo $paket->firma_hakki; ?> Firma</span>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 0.85rem; color: var(--muted-foreground); display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="user-plus" style="width: 14px; height: 14px; color: var(--muted-foreground);"></i> Alt Kullanıcı Limiti
+                            </span>
+                            <span style="font-weight: 600; font-size: 0.875rem; color: var(--foreground);"><?php echo $paket->alt_kullanici_hakki ?? 0; ?> Kullanıcı</span>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 0.85rem; color: var(--muted-foreground); display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="calendar" style="width: 14px; height: 14px; color: var(--muted-foreground);"></i> Geçerlilik Süresi
+                            </span>
+                            <span style="font-weight: 600; font-size: 0.875rem; color: var(--foreground);"><?php echo $paket->sure; ?> Gün</span>
+                        </div>
+                    </div>
+
+                    <!-- Extra features list (e.g. from ozellikler column) -->
+                    <?php if (!empty($paket->ozellikler)): ?>
+                        <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0; display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                            <?php 
                             $ozellikler = explode(';', $paket->ozellikler);
+                            foreach ($ozellikler as $ozellik): 
+                                if (empty(trim($ozellik))) continue;
                             ?>
-
-                            <?php foreach ($ozellikler as $ozellik) {
-
-                            ?>
-                                <li><?php echo $ozellik; ?></li>
-                            <?php } ?>
-                            <li>
-                                <div class="d-flex justify-content-center align-items-center mb-3">
-
-                                    <h3><?php echo $paket->fiyat; ?> ₺ /</h3> <b> <?php echo $paket->sure; ?> Gün</b>
-                                </div>
-
-                                <span><?php echo $paket->sure; ?> gün boyunca geçerlidir</span>
-                            </li>
-                            <li><button class="btn btn-primary btn-round satin-al <?php echo $buttonClass; ?>" data-id="<?php echo $enc_id; ?>">Satın Al</button></li>
+                                <li style="font-size: 0.85rem; color: var(--foreground); display: flex; align-items: center; gap: 0.5rem;">
+                                    <i data-lucide="check" style="width: 14px; height: 14px; color: #10b981; flex-shrink: 0;"></i>
+                                    <span><?php echo htmlspecialchars(trim($ozellik)); ?></span>
+                                </li>
+                            <?php endforeach; ?>
                         </ul>
+                    <?php endif; ?>
+
+                    <!-- Action Button -->
+                    <div style="margin-top: auto; width: 100%;">
+                        <?php if ($is_current_package): ?>
+                            <button class="btn btn-secondary w-full" style="height: 2.75rem; border-radius: 8px; font-weight: 600; cursor: not-allowed; opacity: 0.65; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" disabled>
+                                <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i> Mevcut Paketiniz
+                            </button>
+                        <?php else: ?>
+                            <button class="btn btn-primary w-full satin-al" style="height: 2.75rem; border-radius: 8px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" data-id="<?php echo $enc_id; ?>">
+                                <i data-lucide="shopping-cart" style="width: 16px; height: 16px;"></i> Satın Al
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php } ?>
+        </div>
         
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -386,12 +404,14 @@ $referral_code  = $_SESSION["user"]->referral_code ?? null;
 
 
 <script>
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
     $(document).on('click', '.satin-al', function() {
         var id = $(this).data('id');
         // AJAX isteği ile ödeme sayfasına yönlendiriyoruz
         window.location.href = 'odeme-sayfasi?paket_id=' + id;
-
-
     });
 </script>
 
