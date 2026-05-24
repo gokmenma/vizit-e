@@ -76,8 +76,12 @@ class Security
      */
     public static function checkFirma()
     {
+        // Don't redirect on AJAX requests (used by mobile SPA router) to prevent infinite loops
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+            return;
+        }
 
-    if (!isset($_SESSION['firma_adi'])) {
+        if (!isset($_SESSION['firma_adi'])) {
             if(!$_SESSION['role'] == "user"){
                 $_SESSION['hata'] = 'Lütfen önce firma seçiniz.';
             }

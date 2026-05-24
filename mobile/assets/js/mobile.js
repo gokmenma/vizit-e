@@ -22,8 +22,8 @@ App.loadMobilePage = async (route) => {
     App.updateBottomNav(route);
 
     try {
-        // Fetch raw sub-page contents via AJAX route relative to root basepath using mobile router
-        const response = await fetch('mobile/index.php?url=views/' + route, {
+        const ajaxBase = window.MOBILE_AJAX_BASE || 'mobile/index.php';
+        const response = await fetch(ajaxBase + '?url=views/' + route, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
 
@@ -56,7 +56,8 @@ App.loadMobilePage = async (route) => {
         if (viewport) viewport.scrollTop = 0;
 
     } catch (err) {
-        console.error('Mobile SPA Loader error:', err);
+        const ajaxBase = window.MOBILE_AJAX_BASE || 'mobile/index.php';
+        console.error('Mobile SPA Loader error:', err, 'Route:', route, 'AjaxBase:', ajaxBase);
         container.innerHTML = `
             <div class="card p-4 m-4 text-center" style="background: var(--card); border: 1px solid var(--border); border-radius: 12px;">
                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 0.5rem; padding: 1.5rem 1rem;">
@@ -67,6 +68,7 @@ App.loadMobilePage = async (route) => {
                     </svg>
                     <h3 style="font-weight: 700; font-size: 0.9rem;">Yükleme Hatası</h3>
                     <p style="font-size: 0.75rem; color: var(--muted-foreground); margin: 0.25rem 0;">${err.message || 'Lütfen bağlantınızı kontrol edin.'}</p>
+                    <p style="font-size: 0.65rem; color: var(--muted-foreground); font-family: monospace; word-break: break-all;">${ajaxBase}?url=views/${route}</p>
                     <button onclick="App.refreshMobilePage()" class="btn btn-outline" style="font-size: 0.75rem; padding: 0.35rem 0.75rem; height: auto; margin-top: 0.5rem;">Yeniden Dene</button>
                 </div>
             </div>
@@ -153,7 +155,8 @@ App.closeAllBottomSheets = () => {
 // Async Workplace switching logic
 App.selectWorkplace = async (encryptedId) => {
     try {
-        const response = await fetch(`isyeri-sec?isyeri_id=${encryptedId}`, {
+        const rootBase = window.MOBILE_ROOT_BASE || '';
+        const response = await fetch(`${rootBase}/isyeri-sec?isyeri_id=${encryptedId}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         if (!response.ok) throw new Error('İşyeri seçimi gerçekleştirilemedi');

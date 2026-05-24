@@ -25,6 +25,38 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
         $route = 'dashboard';
     }
 
+    // Workplaces check for AJAX PWA routes to prevent redirects and provide high fidelity UX
+    $workplaceDependentRoutes = [
+        'dashboard',
+        'onay-bekleyen-raporlar',
+        'onayli-raporlar',
+        'manuel-rapor-bildirimi',
+        'is-kazasi-bildirimi',
+        'arsivlenmis-raporlar',
+        'mahsuplastirilacak-raporlar',
+        'mahsuplastirilan-raporlar',
+        'prim-borcuna-mahsup-edilen-odemeler'
+    ];
+
+    if (!isset($_SESSION['firma_adi']) && in_array($route, $workplaceDependentRoutes)) {
+        echo "<div class='animate-in p-6 text-center flex flex-col items-center justify-center gap-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl m-4 shadow-sm'>
+                <div class='w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-950/20 text-amber-600 flex items-center justify-center'>
+                    <i data-lucide='building-2' style='width:24px;height:24px;'></i>
+                </div>
+                <div class='flex flex-col gap-1'>
+                    <h3 class='text-sm font-bold text-zinc-900 dark:text-zinc-50'>İşyeri Seçilmedi</h3>
+                    <p class='text-xs text-zinc-500 dark:text-zinc-400'>İşlemlere devam edebilmek için lütfen yetkili olduğunuz işyerlerinden birini seçiniz.</p>
+                </div>
+                <button type='button' onclick=\"App.openBottomSheet('workplace-sheet')\" class='h-9 px-4 bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer'>
+                    İşyeri Seçin
+                </button>
+              </div>
+              <script>
+                if (window.lucide) window.lucide.createIcons();
+              </script>";
+        exit();
+    }
+
     $fileName = str_replace('-', '_', $route) . '.php';
     
     // Mobil ve masaüstü sayfa yolları
@@ -42,14 +74,23 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
         $mobilePagePath = __DIR__ . '/pages/mahsuplastirma/prim-borcuna-mahsup-edilen-odemeler.php';
         $desktopPagePath = __DIR__ . '/../pages/mahsuplastirma/prim-borcuna-mahsup-edilen-odemeler.php';
     } elseif ($route === 'manuel-rapor-bildirimi') {
-        $mobilePagePath = __DIR__ . '/pages/manuel-rapor/manuel_rapor_bildirimi.php';
+        $mobilePagePath = __DIR__ . '/pages/manuel_rapor_bildirimi.php';
         $desktopPagePath = __DIR__ . '/../pages/manuel-rapor/manuel_rapor_bildirimi.php';
+    } elseif ($route === 'is-kazasi-bildirimi') {
+        $mobilePagePath = __DIR__ . '/pages/is_kazasi_bildirimi.php';
+        $desktopPagePath = __DIR__ . '/../pages/is_kazasi_bildirimi.php';
+    } elseif ($route === 'arsivlenmis-raporlar') {
+        $mobilePagePath = __DIR__ . '/pages/arsivlenmis_raporlar.php';
+        $desktopPagePath = __DIR__ . '/../pages/arsivlenmis_raporlar.php';
     } elseif ($route === 'iletisim-bilgileri') {
         $mobilePagePath = __DIR__ . '/pages/iletisim_bilgileri.php';
         $desktopPagePath = __DIR__ . '/../pages/iletisim-bilgileri.php';
     } elseif ($route === 'profile') {
         $mobilePagePath = __DIR__ . '/pages/profile.php';
         $desktopPagePath = __DIR__ . '/../profile.php';
+    } elseif ($route === 'kullanicilar') {
+        $mobilePagePath = __DIR__ . '/pages/kullanicilar/liste.php';
+        $desktopPagePath = __DIR__ . '/../pages/kullanicilar/liste.php';
     }
 
     if (file_exists($mobilePagePath)) {
@@ -328,6 +369,10 @@ if (isset($_SESSION['kullanici_id'])) {
                     <i data-lucide="users"></i>
                     <span>Kullanıcılar</span>
                 </a>
+                <a href="#isyerlerim" class="bottom-sheet-menu-item">
+                    <i data-lucide="building-2"></i>
+                    <span>İşyeri Yönetimi</span>
+                </a>
                 <?php endif; ?>
 
                 <a href="#profile" class="bottom-sheet-menu-item">
@@ -413,6 +458,11 @@ if (isset($_SESSION['kullanici_id'])) {
             document.documentElement.classList.remove('dark');
         }
     })();
+    </script>
+    <script>
+    // PHP-injected absolute URL bases — avoids <base href> resolution ambiguity on production servers
+    window.MOBILE_AJAX_BASE = '<?php echo htmlspecialchars(rtrim($basePath, '/') . '/mobile/index.php'); ?>';
+    window.MOBILE_ROOT_BASE = '<?php echo htmlspecialchars(rtrim($basePath, '/')); ?>';
     </script>
     <script src="mobile/assets/js/mobile.js?v=<?php echo time(); ?>"></script>
 
@@ -502,7 +552,7 @@ if (isset($_SESSION['kullanici_id'])) {
 
             let fetchUrl = action || (window.location.hash.substring(1) || 'dashboard');
             if (!action) {
-                fetchUrl = 'mobile/index.php?url=views/' + fetchUrl;
+                fetchUrl = (window.MOBILE_AJAX_BASE || 'mobile/index.php') + '?url=views/' + fetchUrl;
             }
             
             let options = {
