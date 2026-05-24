@@ -4,7 +4,7 @@
   $(document).off("click", ".onay-iptal").on("click", ".onay-iptal", function (e) {
     e.preventDefault();
     let MEDULARAPORID = $(this).data("id");
-    let row = $(this).closest("tr, .mobile-rapor-card");
+    let row = $(this).closest("tr, .rapor-row, .mobile-rapor-card");
     var formData = new FormData();
 
     swal

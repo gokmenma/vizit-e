@@ -127,6 +127,7 @@ if (isset($_SESSION['kullanici_id'])) {
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#09090b">
     <link rel="manifest" href="mobile/manifest.json">
+    <link rel="apple-touch-icon" href="mobile/assets/icons/apple-touch-icon.png">
     <link rel="icon" href="assets/images/logo.svg" type="image/svg+xml">
 
     <!-- Styling Frameworks -->
@@ -166,6 +167,11 @@ if (isset($_SESSION['kullanici_id'])) {
                 <i data-lucide="chevron-down" style="width: 10px; height: 10px;"></i>
             </button>
             <?php endif; ?>
+
+            <!-- PWA Install Button (hidden by default, shown when prompt available) -->
+            <button id="pwa-install-btn" class="topbar-btn" title="Uygulamayı Yükle" style="display:none;">
+                <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+            </button>
 
             <!-- Theme Toggle Trigger -->
             <button id="theme-toggle" class="topbar-btn" title="Tema Değiştir">
@@ -413,6 +419,33 @@ if (isset($_SESSION['kullanici_id'])) {
     <script>
     // Start Lucide Icons and register sw
     lucide.createIcons();
+
+    // PWA Install Prompt Handler
+    let _pwaInstallPrompt = null;
+    const pwaInstallBtn = document.getElementById('pwa-install-btn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        _pwaInstallPrompt = e;
+        if (pwaInstallBtn) pwaInstallBtn.style.display = 'flex';
+    });
+
+    if (pwaInstallBtn) {
+        pwaInstallBtn.addEventListener('click', async () => {
+            if (!_pwaInstallPrompt) return;
+            _pwaInstallPrompt.prompt();
+            const { outcome } = await _pwaInstallPrompt.userChoice;
+            if (outcome === 'accepted') {
+                pwaInstallBtn.style.display = 'none';
+            }
+            _pwaInstallPrompt = null;
+        });
+    }
+
+    window.addEventListener('appinstalled', () => {
+        if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+        _pwaInstallPrompt = null;
+    });
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
