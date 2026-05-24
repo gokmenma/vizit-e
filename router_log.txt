@@ -1012,3 +1012,17 @@
 15:55:55 - vizite.com - /kullanicilar
 15:55:56 - vizite.com - /isyerlerim
 15:55:58 - vizite.com - /dashboard
+16:05:18 - vizite.com - /dashboard
+16:05:20 - vizite.com - /dashboard
+16:06:05 - vizite.com - /isyerlerim
+16:06:09 - vizite.com - /isyeri-sec
+16:06:09 - vizite.com - /dashboard
+16:06:11 - vizite.com - /isyerlerim
+16:06:12 - vizite.com - /dashboard
+16:16:54 - vizite.com - /mahsuplastirilacak-raporlar
+16:16:56 - vizite.com - /mahsuplastirilacak-raporlar
+16:17:00 - vizite.com - /mahsuplastirilacak-raporlar
+16:17:03 - vizite.com - /mahsuplastirilan-raporlar
+16:17:05 - vizite.com - /mahsuplastirilan-raporlar
+16:17:12 - vizite.com - /onayli-raporlar
+16:17:15 - vizite.com - /kullanicilar

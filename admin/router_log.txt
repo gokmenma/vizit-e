@@ -2254,3 +2254,12 @@
 13:32:14 - admin.vizite.com - /satinalmalar
 13:32:21 - admin.vizite.com - /kampanyalar
 13:32:24 - admin.vizite.com - /ayarlar
+16:15:13 - admin.vizite.com - /dashboard
+16:15:13 - admin.vizite.com - /favicon.ico
+16:15:15 - admin.vizite.com - /kullanicilar
+16:15:16 - admin.vizite.com - /alt-kullanicilar
+16:16:40 - admin.vizite.com - /alt-kullanicilar
+16:16:41 - admin.vizite.com - /assets/images/logo.svg?v=1779630582
+16:16:41 - admin.vizite.com - /favicon.ico
+16:16:41 - admin.vizite.com - /assets/images/logo.svg
+16:16:42 - admin.vizite.com - /kullanicilar

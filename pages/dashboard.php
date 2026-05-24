@@ -608,11 +608,11 @@ if (typeof lucide !== 'undefined') {
 }
 
 // Aktif zaman dilimi takipçisi
-let currentTab = 'weekly';
-let currentActivePoints = [];
+var currentTab = 'weekly';
+var currentActivePoints = [];
 
 // Dinamik etiket ve yüzde verilerini PHP'den alalım
-const weeklyLabelsData = [
+var weeklyLabelsData = [
     <?php foreach ($weeklyLabels as $index => $label): 
             $pct = ($index / 6) * 100;
         ?> {
@@ -622,7 +622,7 @@ const weeklyLabelsData = [
     <?php endforeach; ?>
 ];
 
-const monthlyLabelsData = [
+var monthlyLabelsData = [
     <?php foreach ($monthlyLabels as $index => $label): 
             $pct = ($index / 5) * 100;
         ?> {
@@ -632,7 +632,7 @@ const monthlyLabelsData = [
     <?php endforeach; ?>
 ];
 
-const yearlyLabelsData = [
+var yearlyLabelsData = [
     <?php foreach ($yearlyLabels as $index => $label): 
             $pct = ($index / 5) * 100;
         ?> {
@@ -643,7 +643,7 @@ const yearlyLabelsData = [
 ];
 
 // Raw count values from database
-const rawData = {
+var rawData = {
     weekly: <?php echo json_encode($weeklyData); ?>,
     monthly: <?php echo json_encode($monthlyData); ?>,
     yearly: <?php echo json_encode($yearlyData); ?>
