@@ -989,3 +989,6 @@
 15:06:01 - vizite.com - /
 15:06:45 - vizite.com - /mobile/onay-bekleyen-raporlar
 15:13:26 - vizite.com - /mobile/onay-bekleyen-raporlar
+15:14:36 - vizite.com - /dashboard
+15:14:46 - vizite.com - /
+15:14:59 - vizite.com - /

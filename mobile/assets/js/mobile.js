@@ -22,8 +22,8 @@ App.loadMobilePage = async (route) => {
     App.updateBottomNav(route);
 
     try {
-        // Fetch raw sub-page contents via AJAX route relative to root basepath
-        const response = await fetch(route, {
+        // Fetch raw sub-page contents via AJAX route relative to root basepath using mobile router
+        const response = await fetch('mobile/index.php?url=views/' + route, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
 

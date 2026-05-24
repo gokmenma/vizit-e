@@ -1,5 +1,4 @@
 RewriteEngine On
-RewriteBase /sgk-vizite/mobile/
 
 # If the file or directory exists, serve it directly
 RewriteCond %{REQUEST_FILENAME} !-f

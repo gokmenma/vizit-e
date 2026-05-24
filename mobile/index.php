@@ -14,6 +14,58 @@ use Models\KullaniciAbonelikModel;
 // Verify user login session with absolute redirect route to prevent mobile subfolder loops
 Security::checkLogin(rtrim($basePath, '/') . '/sign-in');
 
+// ==============================================================
+// MOBİL SAYFA AJAX YÖNLENDİRİCİ (Mobil Uyumlu Sayfalar İçin)
+// ==============================================================
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+    // Rota ismini alalım
+    $requestedUrl = $_GET['url'] ?? '';
+    $route = str_replace(['mobile/views/', 'views/'], '', $requestedUrl);
+    if (empty($route)) {
+        $route = 'dashboard';
+    }
+
+    $fileName = str_replace('-', '_', $route) . '.php';
+    
+    // Mobil ve masaüstü sayfa yolları
+    $mobilePagePath = __DIR__ . '/pages/' . $fileName;
+    $desktopPagePath = __DIR__ . '/../pages/' . $fileName;
+
+    // Alt klasörler için rota eşleştirmeleri
+    if ($route === 'mahsuplastirilacak-raporlar') {
+        $mobilePagePath = __DIR__ . '/pages/mahsuplastirma/mahsuplastirilacak_raporlar.php';
+        $desktopPagePath = __DIR__ . '/../pages/mahsuplastirma/mahsuplastirilacak_raporlar.php';
+    } elseif ($route === 'mahsuplastirilan-raporlar') {
+        $mobilePagePath = __DIR__ . '/pages/mahsuplastirma/mahsuplastirilan_raporlar.php';
+        $desktopPagePath = __DIR__ . '/../pages/mahsuplastirma/mahsuplastirilan_raporlar.php';
+    } elseif ($route === 'prim-borcuna-mahsup-edilen-odemeler') {
+        $mobilePagePath = __DIR__ . '/pages/mahsuplastirma/prim-borcuna-mahsup-edilen-odemeler.php';
+        $desktopPagePath = __DIR__ . '/../pages/mahsuplastirma/prim-borcuna-mahsup-edilen-odemeler.php';
+    } elseif ($route === 'manuel-rapor-bildirimi') {
+        $mobilePagePath = __DIR__ . '/pages/manuel-rapor/manuel_rapor_bildirimi.php';
+        $desktopPagePath = __DIR__ . '/../pages/manuel-rapor/manuel_rapor_bildirimi.php';
+    } elseif ($route === 'iletisim-bilgileri') {
+        $mobilePagePath = __DIR__ . '/pages/iletisim_bilgileri.php';
+        $desktopPagePath = __DIR__ . '/../pages/iletisim-bilgileri.php';
+    } elseif ($route === 'profile') {
+        $mobilePagePath = __DIR__ . '/pages/profile.php';
+        $desktopPagePath = __DIR__ . '/../profile.php';
+    }
+
+    if (file_exists($mobilePagePath)) {
+        require_once $mobilePagePath;
+    } elseif (file_exists($desktopPagePath)) {
+        require_once $desktopPagePath;
+    } else {
+        http_response_code(404);
+        echo "<div class='card p-4 text-center' style='background: var(--card); border: 1px solid var(--border); border-radius: 12px;'>
+                <h3 class='font-bold text-sm text-rose-500'>Sayfa Bulunamadı</h3>
+                <p class='text-[10px] text-zinc-500 mt-1'>Rota: <code>" . htmlspecialchars($route) . "</code></p>
+              </div>";
+    }
+    exit();
+}
+
 $isyeriModel = new KullaniciIsyeriModel();
 $isyeriKullaniciId = $_SESSION['kullanici_id'] ?? 0;
 $header_isyerleri = [];
@@ -416,6 +468,10 @@ if (isset($_SESSION['kullanici_id'])) {
             }
 
             let fetchUrl = action || (window.location.hash.substring(1) || 'dashboard');
+            if (!action) {
+                fetchUrl = 'mobile/index.php?url=views/' + fetchUrl;
+            }
+            
             let options = {
                 method: method,
                 headers: {
