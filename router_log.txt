@@ -984,3 +984,8 @@
 15:02:59 - vizite.com - /dashboard
 15:03:57 - vizite.com - /isyeri-sec?isyeri_id=ah8pm2Xr1-N_GenNxAzKDsQMeY_wFCtp7Q6XvGM%2A
 15:04:00 - vizite.com - /dashboard
+15:04:58 - vizite.com - /dashboard
+15:05:47 - vizite.com - /dashboard
+15:06:01 - vizite.com - /
+15:06:45 - vizite.com - /mobile/onay-bekleyen-raporlar
+15:13:26 - vizite.com - /mobile/onay-bekleyen-raporlar

@@ -4,12 +4,15 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$config = require __DIR__ . '/../config.php';
+$basePath = $config['base_path'] ?? '/';
+
 use App\Helper\Security;
 use Models\KullaniciIsyeriModel;
 use Models\KullaniciAbonelikModel;
 
-// Verify user login session
-Security::checkLogin();
+// Verify user login session with absolute redirect route to prevent mobile subfolder loops
+Security::checkLogin(rtrim($basePath, '/') . '/sign-in');
 
 $isyeriModel = new KullaniciIsyeriModel();
 $isyeriKullaniciId = $_SESSION['kullanici_id'] ?? 0;
@@ -39,8 +42,6 @@ if (isset($_SESSION['kullanici_id'])) {
 $KullaniciAbonelikModel = new KullaniciAbonelikModel();
 $abonelik_varmi = $KullaniciAbonelikModel->hasActiveSubscription($_SESSION['kullanici_id'] ?? 0);
 
-$config = require __DIR__ . '/../config.php';
-$basePath = $config['base_path'] ?? '/';
 $userAd = $_SESSION['user_ad'] ?? $_SESSION['kullanici_adi'] ?? 'Kullanıcı';
 $userEmail = '';
 
@@ -61,19 +62,21 @@ if (isset($_SESSION['kullanici_id'])) {
 ?>
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <base href="<?php echo htmlspecialchars(rtrim($basePath, '/') . '/'); ?>">
     <title>Vizit-e Mobil Kullanıcı Paneli</title>
-    
+
     <!-- PWA Configurations -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#09090b">
     <link rel="manifest" href="mobile/manifest.json">
     <link rel="icon" href="assets/images/logo.svg" type="image/svg+xml">
-    
+
     <!-- Styling Frameworks -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
@@ -81,11 +84,12 @@ if (isset($_SESSION['kullanici_id'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.4/dist/sweetalert2.min.css" />
     <link rel="stylesheet" href="admin/assets/css/app.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="mobile/assets/css/mobile.css?v=<?php echo time(); ?>">
-    
+
     <!-- Lucide Icons & jQuery -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
+
 <body class="theme-light">
 
     <!-- PWA Offline status banner -->
@@ -103,7 +107,8 @@ if (isset($_SESSION['kullanici_id'])) {
         <div class="mobile-header-actions">
             <!-- Active Workplace Select Trigger -->
             <?php if (count($header_isyerleri) > 0): ?>
-            <button type="button" class="mobile-workplace-selector-btn" onclick="App.openBottomSheet('workplace-sheet')">
+            <button type="button" class="mobile-workplace-selector-btn"
+                onclick="App.openBottomSheet('workplace-sheet')">
                 <i data-lucide="building-2" style="width: 14px; height: 14px;"></i>
                 <span><?php echo htmlspecialchars($_SESSION['firma_adi'] ?? 'İşyeri Seçin'); ?></span>
                 <i data-lucide="chevron-down" style="width: 10px; height: 10px;"></i>
@@ -129,7 +134,7 @@ if (isset($_SESSION['kullanici_id'])) {
     <nav class="mobile-bottom-nav">
         <!-- Home Page Tab -->
         <button id="tab-home" class="mobile-bottom-nav__item active" onclick="window.location.hash = '#dashboard'">
-            <i data-lucide="layout-dashboard"></i>
+            <i data-lucide="house"></i>
             <span>Ana Sayfa</span>
         </button>
 
@@ -188,7 +193,8 @@ if (isset($_SESSION['kullanici_id'])) {
                     <i data-lucide="archive"></i>
                     <span>Arşive Alınan Raporlar</span>
                 </a>
-                <button type="button" class="bottom-sheet-menu-item text-zinc-400 cursor-not-allowed" style="opacity: 0.5;">
+                <button type="button" class="bottom-sheet-menu-item text-zinc-400 cursor-not-allowed"
+                    style="opacity: 0.5;">
                     <i data-lucide="x-circle"></i>
                     <span>İptal Edilen Raporlar</span>
                 </button>
@@ -223,26 +229,28 @@ if (isset($_SESSION['kullanici_id'])) {
         <div class="bottom-sheet-content">
             <div class="flex flex-col gap-1">
                 <?php if (count($header_isyerleri) > 0): ?>
-                    <?php foreach ($header_isyerleri as $isyeri): 
+                <?php foreach ($header_isyerleri as $isyeri): 
                         $is_selected = ((int)$isyeri->id === (int)($_SESSION['isyeri_id'] ?? 0));
                         $enc_id = \App\Helper\Security::encrypt($isyeri->id);
                     ?>
-                    <button type="button" class="workplace-item <?php echo $is_selected ? 'active' : ''; ?>" onclick="App.selectWorkplace('<?php echo $enc_id; ?>')">
-                        <div class="flex flex-col text-left gap-0.5 min-w-0 flex-1">
-                            <span class="text-xs font-bold <?php echo $is_selected ? 'text-primary' : 'text-foreground'; ?>" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">
-                                <?php echo htmlspecialchars($isyeri->firma_adi); ?>
-                            </span>
-                            <span class="text-[10px] text-zinc-500">
-                                Kod: <?php echo htmlspecialchars($isyeri->isyeri_kodu); ?>
-                            </span>
-                        </div>
-                        <?php if ($is_selected): ?>
-                        <i data-lucide="check" class="text-primary" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
-                        <?php endif; ?>
-                    </button>
-                    <?php endforeach; ?>
+                <button type="button" class="workplace-item <?php echo $is_selected ? 'active' : ''; ?>"
+                    onclick="App.selectWorkplace('<?php echo $enc_id; ?>')">
+                    <div class="flex flex-col text-left gap-0.5 min-w-0 flex-1">
+                        <span class="text-xs font-bold <?php echo $is_selected ? 'text-primary' : 'text-foreground'; ?>"
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">
+                            <?php echo htmlspecialchars($isyeri->firma_adi); ?>
+                        </span>
+                        <span class="text-[10px] text-zinc-500">
+                            Kod: <?php echo htmlspecialchars($isyeri->isyeri_kodu); ?>
+                        </span>
+                    </div>
+                    <?php if ($is_selected): ?>
+                    <i data-lucide="check" class="text-primary" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
+                    <?php endif; ?>
+                </button>
+                <?php endforeach; ?>
                 <?php else: ?>
-                    <p class="text-center text-xs text-zinc-500 py-4">Yetkili olduğunuz işyeri bulunamadı.</p>
+                <p class="text-center text-xs text-zinc-500 py-4">Yetkili olduğunuz işyeri bulunamadı.</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -274,7 +282,8 @@ if (isset($_SESSION['kullanici_id'])) {
                     <span>İşyeri Bilgileri</span>
                 </a>
 
-                <a href="https://api.whatsapp.com/send?phone=905079432723" target="_blank" class="bottom-sheet-menu-item">
+                <a href="https://api.whatsapp.com/send?phone=905079432723" target="_blank"
+                    class="bottom-sheet-menu-item">
                     <i data-lucide="phone-call" style="color: #16a34a;"></i>
                     <span>Teknik Destek (WhatsApp)</span>
                 </a>
@@ -296,158 +305,162 @@ if (isset($_SESSION['kullanici_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/js/basecoat.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/js/all.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/js/toast.min.js" defer></script>
-    
+
     <!-- Select2 & Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
 
     <script>
-        // Polyfill standard App object components for sub-pages
-        window.App = window.App || {};
-        
-        App.initGlobalSelect2 = (container = document) => {
-            if (window.jQuery && window.jQuery.fn.select2) {
-                const $ = window.jQuery;
-                $(container).find('select.select2, select.custom-select').each(function() {
-                    const $select = $(this);
-                    if (!$select.data('select2')) {
-                        $select.select2({
-                            placeholder: $select.attr('placeholder') || 'Seçiniz',
-                            width: '100%'
-                        });
-                    }
-                });
-            }
-        };
+    // Polyfill standard App object components for sub-pages
+    window.App = window.App || {};
 
-        App.initGlobalFlatpickr = (container = document) => {
-            if (window.flatpickr) {
-                const dateInputs = container.querySelectorAll('input[type="date"]');
-                dateInputs.forEach(input => {
-                    const val = input.value;
-                    input.setAttribute('type', 'text');
-                    flatpickr(input, {
-                        dateFormat: 'Y-m-d',
-                        locale: 'tr',
-                        defaultDate: val || undefined,
-                        allowInput: true
+    App.initGlobalSelect2 = (container = document) => {
+        if (window.jQuery && window.jQuery.fn.select2) {
+            const $ = window.jQuery;
+            $(container).find('select.select2, select.custom-select').each(function() {
+                const $select = $(this);
+                if (!$select.data('select2')) {
+                    $select.select2({
+                        placeholder: $select.attr('placeholder') || 'Seçiniz',
+                        width: '100%'
                     });
+                }
+            });
+        }
+    };
+
+    App.initGlobalFlatpickr = (container = document) => {
+        if (window.flatpickr) {
+            const dateInputs = container.querySelectorAll('input[type="date"]');
+            dateInputs.forEach(input => {
+                const val = input.value;
+                input.setAttribute('type', 'text');
+                flatpickr(input, {
+                    dateFormat: 'Y-m-d',
+                    locale: 'tr',
+                    defaultDate: val || undefined,
+                    allowInput: true
                 });
-            }
-        };
-        
-        // Theme initialization to prevent white flash in dark mode
-        (function() {
-            const theme = localStorage.getItem('theme');
-            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        })();
+            });
+        }
+    };
+
+    // Theme initialization to prevent white flash in dark mode
+    (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    })();
     </script>
     <script src="mobile/assets/js/mobile.js?v=<?php echo time(); ?>"></script>
 
     <script>
-        // Start Lucide Icons and register sw
-        lucide.createIcons();
+    // Start Lucide Icons and register sw
+    lucide.createIcons();
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('mobile/sw.js')
-                    .then(reg => console.log('PWA ServiceWorker successfully registered:', reg))
-                    .catch(err => console.warn('PWA ServiceWorker registration skipped:', err));
-            });
-        }
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('mobile/sw.js')
+                .then(reg => console.log('PWA ServiceWorker successfully registered:', reg))
+                .catch(err => console.warn('PWA ServiceWorker registration skipped:', err));
+        });
+    }
 
-        // Theme Switcher Syncing
-        const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            const sunIcon = themeToggle.querySelector('.sun-icon');
-            const moonIcon = themeToggle.querySelector('.moon-icon');
-            
-            const updateIcons = () => {
-                const isDark = document.documentElement.classList.contains('dark');
-                if (isDark) {
-                    sunIcon.style.display = 'none';
-                    moonIcon.style.display = 'block';
-                } else {
-                    sunIcon.style.display = 'block';
-                    moonIcon.style.display = 'none';
+    // Theme Switcher Syncing
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        const sunIcon = themeToggle.querySelector('.sun-icon');
+        const moonIcon = themeToggle.querySelector('.moon-icon');
+
+        const updateIcons = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+        };
+
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateIcons();
+        });
+    }
+
+    // Catch form submissions to redirect inside Mobile SPA
+    document.addEventListener('submit', async (e) => {
+        const form = e.target;
+        const action = form.getAttribute('action');
+        if (form.hasAttribute('data-bypass')) return;
+
+        e.preventDefault();
+        const container = document.getElementById('mobile-app-content');
+        if (!container) return;
+
+        container.style.opacity = '0.6';
+
+        try {
+            const method = (form.getAttribute('method') || 'GET').toUpperCase();
+            const formData = new FormData(form);
+            if (e.submitter && e.submitter.name) {
+                formData.append(e.submitter.name, e.submitter.value || '');
+            }
+
+            let fetchUrl = action || (window.location.hash.substring(1) || 'dashboard');
+            let options = {
+                method: method,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             };
 
-            updateIcons();
-
-            themeToggle.addEventListener('click', () => {
-                const isDark = document.documentElement.classList.toggle('dark');
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                updateIcons();
-            });
-        }
-
-        // Catch form submissions to redirect inside Mobile SPA
-        document.addEventListener('submit', async (e) => {
-            const form = e.target;
-            const action = form.getAttribute('action');
-            if (form.hasAttribute('data-bypass')) return;
-
-            e.preventDefault();
-            const container = document.getElementById('mobile-app-content');
-            if (!container) return;
-
-            container.style.opacity = '0.6';
-
-            try {
-                const method = (form.getAttribute('method') || 'GET').toUpperCase();
-                const formData = new FormData(form);
-                if (e.submitter && e.submitter.name) {
-                    formData.append(e.submitter.name, e.submitter.value || '');
-                }
-
-                let fetchUrl = action || (window.location.hash.substring(1) || 'dashboard');
-                let options = {
-                    method: method,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                };
-
-                if (method === 'POST') {
-                    options.body = formData;
-                } else {
-                    const params = new URLSearchParams(formData).toString();
-                    fetchUrl = fetchUrl.split('?')[0] + '?' + params;
-                }
-
-                const response = await fetch(fetchUrl, options);
-                if (!response.ok) throw new Error('Form gönderimi başarısız oldu.');
-
-                const html = await response.text();
-                
-                document.querySelectorAll('script[data-spa-page-script]').forEach(s => s.remove());
-
-                container.innerHTML = html;
-                container.style.opacity = '1';
-
-                const scripts = container.querySelectorAll('script');
-                scripts.forEach(oldScript => {
-                    const newScript = document.createElement('script');
-                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                    newScript.setAttribute('data-spa-page-script', 'true');
-                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-                    oldScript.parentNode.replaceChild(newScript, oldScript);
-                });
-
-                if (window.lucide) window.lucide.createIcons();
-                if (window.App && App.initGlobalSelect2) App.initGlobalSelect2(container);
-                if (window.App && App.initGlobalFlatpickr) App.initGlobalFlatpickr(container);
-
-            } catch (err) {
-                console.error('Mobile SPA Form Submission error:', err);
-                container.style.opacity = '1';
-                if (window.showToast) window.showToast(err.message, 'error');
+            if (method === 'POST') {
+                options.body = formData;
+            } else {
+                const params = new URLSearchParams(formData).toString();
+                fetchUrl = fetchUrl.split('?')[0] + '?' + params;
             }
-        });
+
+            const response = await fetch(fetchUrl, options);
+            if (!response.ok) throw new Error('Form gönderimi başarısız oldu.');
+
+            const html = await response.text();
+
+            document.querySelectorAll('script[data-spa-page-script]').forEach(s => s.remove());
+
+            container.innerHTML = html;
+            container.style.opacity = '1';
+
+            const scripts = container.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name,
+                    attr.value));
+                newScript.setAttribute('data-spa-page-script', 'true');
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+
+            if (window.lucide) window.lucide.createIcons();
+            if (window.App && App.initGlobalSelect2) App.initGlobalSelect2(container);
+            if (window.App && App.initGlobalFlatpickr) App.initGlobalFlatpickr(container);
+
+        } catch (err) {
+            console.error('Mobile SPA Form Submission error:', err);
+            container.style.opacity = '1';
+            if (window.showToast) window.showToast(err.message, 'error');
+        }
+    });
     </script>
 </body>
+
 </html>
