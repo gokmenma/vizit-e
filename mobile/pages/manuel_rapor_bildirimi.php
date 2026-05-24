@@ -8,7 +8,7 @@ Security::checkLogin();
 Security::checkFirma();
 Security::hasActiveSubscription();
 
-require_once 'Core/Services/SgkViziteService.php';
+require_once __DIR__ . '/../../Core/Services/SgkViziteService.php';
 
 $hataMesaji = '';
 $basariMesaji = '';

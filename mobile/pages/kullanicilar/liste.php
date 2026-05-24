@@ -7,13 +7,30 @@ use Models\UserModel;
 
 Security::checkLogin();
 
+$userRole = $_SESSION["role"] ?? "user";
+
+if ($userRole !== 'admin' && $userRole !== 'superadmin') {
+    echo "<div class='animate-in p-6 text-center border border-zinc-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-900 m-4 flex flex-col items-center justify-center gap-3 shadow-xs'>
+            <div class='w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/20 text-rose-600 flex items-center justify-center'>
+                <i data-lucide='shield-alert' style='width:24px;height:24px;'></i>
+            </div>
+            <div class='flex flex-col gap-1'>
+                <h3 class='text-sm font-bold text-zinc-900 dark:text-zinc-50'>Yetkisiz Erişim</h3>
+                <p class='text-xs text-zinc-500 dark:text-zinc-400'>Bu sayfayı görüntülemek için yetkiniz bulunmamaktadır.</p>
+            </div>
+          </div>
+          <script>
+            if (window.lucide) window.lucide.createIcons();
+          </script>";
+    exit();
+}
+
 $UserModel = new UserModel();
 
 $kullanicilar = $UserModel->AltKullanicilar($_SESSION['kullanici_id']);
 $altKullaniciSayisi = count($kullanicilar);
 $altKullaniciLimiti = $UserModel->getAltKullaniciLimiti($_SESSION['kullanici_id']);
 $hataMesaji = $_SESSION['hata'] ?? '';
-$userRole = $_SESSION["role"] ?? "user";
 ?>
 
 <div class="animate-in flex flex-col gap-4">
