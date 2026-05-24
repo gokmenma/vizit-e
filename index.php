@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ==========================================
-// BAKIM MODU INTERCEPTOR (Tüm Kullanıcılar İçin)
+// BAKIM MODU INTERCEPTOR (Süper Admin Hariç)
 // ==========================================
 try {
     require_once __DIR__ . '/Models/Model.php';
@@ -17,12 +17,35 @@ try {
     $maintenance_mode = $ayarModel->getSetting('maintenance_mode', 0);
     
     if ($maintenance_mode === '1') {
-        http_response_code(503);
-        require_once __DIR__ . '/pages/bakim.php';
-        exit();
+        // Süper Admin kontrolü (Oturumdaki rolden)
+        $is_superadmin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'superadmin') || 
+                         (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') ||
+                         (isset($_SESSION['user']) && is_object($_SESSION['user']) && isset($_SESSION['user']->role) && $_SESSION['user']->role === 'superadmin');
+        
+        if (!$is_superadmin) {
+            $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+            $url_param = $_GET['url'] ?? '';
+            
+            // Bypass edilebilir rotalar (Giriş/Çıkış ekranı, Assets, reCAPTCHA vb.)
+            $is_bypass_url = str_contains($request_uri, 'sign-in') || 
+                             str_contains($request_uri, 'login.php') || 
+                             str_contains($request_uri, 'logout') || 
+                             str_contains($request_uri, '/assets/') ||
+                             str_contains($request_uri, '/vendor/') ||
+                             str_contains($request_uri, 'autologin') ||
+                             str_contains($url_param, 'sign-in') ||
+                             str_contains($url_param, 'logout');
+            
+            if (!$is_bypass_url) {
+                http_response_code(503);
+                require_once __DIR__ . '/pages/bakim.php';
+                exit();
+            }
+        }
     }
-} catch (\Exception $e) {
-    // Veritabanı veya model yükleme hatasında sitenin kilitlenmemesi için sessizce devam et
+} catch (\Throwable $e) {
+    // Veritabanı veya model yükleme hatasını loglayalım
+    @file_put_contents(__DIR__ . '/logs/maintenance_error.log', date('Y-m-d H:i:s') . ' - ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
 }
 
 use App\Helper\Security;
@@ -128,10 +151,13 @@ $basePath = $config['base_path'] ?? '/';
 $userRole = $_SESSION["role"] ?? "user";
 
 // Logo SVG inline gömme
-$logoSvgContent = @file_get_contents(__DIR__ . '/assets/images/logo.svg') ?: '';
-if ($logoSvgContent) {
-    $logoSvgContent = preg_replace('/(<svg[^>]*)\swidth="[^"]*"/', '$1 width="100%"', $logoSvgContent);
+$rawSvgContent = @file_get_contents(__DIR__ . '/assets/images/logo.svg') ?: '';
+$logoSvgContent = '';
+$faviconDataUri = '';
+if ($rawSvgContent) {
+    $logoSvgContent = preg_replace('/(<svg[^>]*)\swidth="[^"]*"/', '$1 width="100%"', $rawSvgContent);
     $logoSvgContent = preg_replace('/(<svg[^>]*)\sheight="[^"]*"/', '$1 height="100%"', $logoSvgContent);
+    $faviconDataUri = 'data:image/svg+xml;base64,' . base64_encode($rawSvgContent);
 }
 
 // Kullanıcı Bilgilerini Alalım
@@ -181,8 +207,7 @@ if ($currentRoute !== 'dashboard') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base href="<?php echo htmlspecialchars($basePath); ?>">
     <title>Kullanıcı Paneli | SGK Vizite</title>
-    <link rel="icon" href="<?php echo rtrim($basePath, '/'); ?>/assets/images/logo.svg" type="image/svg+xml">
-    <link rel="shortcut icon" href="<?php echo rtrim($basePath, '/'); ?>/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="<?php echo $faviconDataUri ?: rtrim($basePath, '/') . '/assets/images/logo.svg'; ?>" type="image/svg+xml">
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style type="text/tailwindcss">

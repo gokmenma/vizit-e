@@ -2,6 +2,40 @@
 // Bu dosyanın bir JSON API'si olduğunu tarayıcıya bildiriyoruz.
 header('Content-Type: application/json');
 
+require_once "vendor/autoload.php";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// ==========================================
+// BAKIM MODU INTERCEPTOR (Süper Admin Hariç)
+// ==========================================
+try {
+    require_once __DIR__ . '/Models/Model.php';
+    require_once __DIR__ . '/Models/KullaniciAyarModel.php';
+    
+    $ayarModel = new \Models\KullaniciAyarModel();
+    $maintenance_mode = $ayarModel->getSetting('maintenance_mode', 0);
+    
+    if ($maintenance_mode === '1') {
+        // Süper Admin kontrolü (Oturumdaki rolden)
+        $is_superadmin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'superadmin') || 
+                         (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') ||
+                         (isset($_SESSION['user']) && is_object($_SESSION['user']) && isset($_SESSION['user']->role) && $_SESSION['user']->role === 'superadmin');
+        
+        if (!$is_superadmin) {
+            http_response_code(503);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Sistem şu anda bakım modundadır. Lütfen daha sonra tekrar deneyiniz.'
+            ]);
+            exit();
+        }
+    }
+} catch (\Throwable $e) {
+    @file_put_contents(__DIR__ . '/logs/maintenance_error.log', date('Y-m-d H:i:s') . ' - [API] ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
+}
+
 require_once 'Core/Services/SgkViziteService.php';
 
 // Güvenliğiniz için bu bilgileri daha güvenli bir yerden okuyun.

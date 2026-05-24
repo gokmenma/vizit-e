@@ -14,10 +14,13 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 $error = '';
 
 // Logo SVG inline gömme
-$logoSvgContent = @file_get_contents(__DIR__ . '/../assets/images/logo.svg') ?: '';
-if ($logoSvgContent) {
-    $logoSvgContent = preg_replace('/(<svg[^>]*)\swidth="[^"]*"/', '$1 width="100%"', $logoSvgContent);
+$rawSvgContent = @file_get_contents(__DIR__ . '/../assets/images/logo.svg') ?: '';
+$logoSvgContent = '';
+$faviconDataUri = '';
+if ($rawSvgContent) {
+    $logoSvgContent = preg_replace('/(<svg[^>]*)\swidth="[^"]*"/', '$1 width="100%"', $rawSvgContent);
     $logoSvgContent = preg_replace('/(<svg[^>]*)\sheight="[^"]*"/', '$1 height="100%"', $logoSvgContent);
+    $faviconDataUri = 'data:image/svg+xml;base64,' . base64_encode($rawSvgContent);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -65,8 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giriş Yap | SGK Vizite</title>
-    <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml">
-    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="icon" href="<?php echo $faviconDataUri ?: '../assets/images/logo.svg'; ?>" type="image/svg+xml">
     
     <!-- Basecoat CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">

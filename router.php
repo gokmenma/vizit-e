@@ -43,8 +43,9 @@ try {
             }
         }
     }
-} catch (\Exception $e) {
-    // Veritabanı veya model yükleme hatasında sitenin kilitlenmemesi için sessizce devam et
+} catch (\Throwable $e) {
+    // Veritabanı veya model yükleme hatasını loglayalım
+    @file_put_contents(__DIR__ . '/logs/maintenance_error.log', date('Y-m-d H:i:s') . ' - [Router] ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
 }
 
 if (php_sapi_name() === 'cli-server') {

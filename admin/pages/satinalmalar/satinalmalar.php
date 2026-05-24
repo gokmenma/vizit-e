@@ -50,6 +50,19 @@ foreach ($kullanicilar as $user) {
     0% { transform: scale(0.6); opacity: 1; }
     80%, 100% { transform: scale(2.8); opacity: 0; }
 }
+dialog {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    max-width: 90vw !important;
+}
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
 </style>
 
 <div class="animate-in" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">

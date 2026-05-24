@@ -34,7 +34,8 @@ class KullaniciAyarModel extends Model
                                            AND anahtar  = ? ");
 
         $sql->execute([$kullanici_id, $param]);
-        return $sql->fetchObject()->deger ?? 0;
+        $row = $sql->fetchObject();
+        return $row ? ($row->deger ?? 0) : 0;
     }
 
     

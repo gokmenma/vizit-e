@@ -3,6 +3,44 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// ==========================================
+// BAKIM MODU INTERCEPTOR (Süper Admin Hariç)
+// ==========================================
+try {
+    require_once __DIR__ . '/../Models/Model.php';
+    require_once __DIR__ . '/../Models/KullaniciAyarModel.php';
+    
+    $ayarModel = new \Models\KullaniciAyarModel();
+    $maintenance_mode = $ayarModel->getSetting('maintenance_mode', 0);
+    
+    if ($maintenance_mode === '1') {
+        // Süper Admin kontrolü (Oturumdaki rolden)
+        $is_superadmin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'superadmin') || 
+                         (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') ||
+                         (isset($_SESSION['user']) && is_object($_SESSION['user']) && isset($_SESSION['user']->role) && $_SESSION['user']->role === 'superadmin');
+        
+        if (!$is_superadmin) {
+            $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+            $url_param = $_GET['url'] ?? '';
+            
+            // Bypass edilebilir rotalar (Giriş/Çıkış ekranı, Assets, vb.)
+            $is_bypass_url = str_contains($request_uri, 'login.php') || 
+                             str_contains($request_uri, 'logout') || 
+                             str_contains($request_uri, '/assets/') ||
+                             str_contains($request_uri, '/vendor/') ||
+                             str_contains($url_param, 'logout');
+            
+            if (!$is_bypass_url) {
+                http_response_code(503);
+                require_once __DIR__ . '/../pages/bakim.php';
+                exit();
+            }
+        }
+    }
+} catch (\Throwable $e) {
+    @file_put_contents(__DIR__ . '/../logs/maintenance_error.log', date('Y-m-d H:i:s') . ' - [Admin] ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
+}
+
 // Oturum kontrolü
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
@@ -44,11 +82,13 @@ if (isset($_GET['url']) && $_GET['url'] !== 'index' && $_GET['url'] !== '') {
 }
 
 // Logo SVG'yi inline gömmek için oku (URL/path sorunlarını tamamen ortadan kaldırır)
-$logoSvgContent = @file_get_contents(__DIR__ . '/../assets/images/logo.svg') ?: '';
-if ($logoSvgContent) {
-    // width/height'i container'a uygun hale getir
-    $logoSvgContent = preg_replace('/(<svg[^>]*)\swidth="[^"]*"/', '$1 width="100%"', $logoSvgContent);
+$rawSvgContent = @file_get_contents(__DIR__ . '/../assets/images/logo.svg') ?: '';
+$logoSvgContent = '';
+$faviconDataUri = '';
+if ($rawSvgContent) {
+    $logoSvgContent = preg_replace('/(<svg[^>]*)\swidth="[^"]*"/', '$1 width="100%"', $rawSvgContent);
     $logoSvgContent = preg_replace('/(<svg[^>]*)\sheight="[^"]*"/', '$1 height="100%"', $logoSvgContent);
+    $faviconDataUri = 'data:image/svg+xml;base64,' . base64_encode($rawSvgContent);
 }
 
 // SCRIPT_NAME üzerinden gerçek root path'i hesapla (BASE_PATH yanlış olsa bile çalışır)
@@ -74,8 +114,7 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base href="<?php echo $adminBase; ?>">
     <title>Admin Panel | SGK Vizite</title>
-    <link rel="icon" href="<?php echo $scriptRoot; ?>/assets/images/logo.svg" type="image/svg+xml">
-    <link rel="shortcut icon" href="<?php echo $scriptRoot; ?>/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="<?php echo $faviconDataUri ?: $scriptRoot . '/assets/images/logo.svg'; ?>" type="image/svg+xml">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style type="text/tailwindcss">
         @custom-variant dark (&:where(.dark, .dark *));
