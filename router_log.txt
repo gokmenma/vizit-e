@@ -1147,3 +1147,10 @@
 21:23:02 - vizite.com - /is-kazasi-bildirimi
 21:24:01 - vizite.com - /is-kazasi-bildirimi
 21:24:02 - vizite.com - /iptal-edilen-raporlar
+21:26:14 - vizite.com - /profile
+21:27:32 - vizite.com - /dashboard
+21:27:35 - vizite.com - /abonelik-paketleri
+21:27:39 - vizite.com - /odeme-sayfasi?paket_id=suuWdvss9vuFP7mky1oeopc7Xq59f4wxMjRu-t8%2A
+21:29:58 - vizite.com - /abonelik-paketleri
+21:30:00 - vizite.com - /odeme-sayfasi?paket_id=VgbQkTJDopkgRKb-1wS9-zErxh20gV4L57BUjWU%2A
+21:30:40 - vizite.com - /odeme-sayfasi?paket_id=VgbQkTJDopkgRKb-1wS9-zErxh20gV4L57BUjWU%2A

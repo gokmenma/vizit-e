@@ -95,12 +95,10 @@ if ($_POST["action"] == "odeme_yap") {
                         "bitis_tarihi" => date("Y-m-d", strtotime("+30 days")),
                         "firma_hakki" => 1,
                         "durum" => "aktif",
-                        "aciklama" => "Referans ile 30 gün hediye - " . date("d-m-Y H:i:s")
-
                     ]);
                 }
             }
-        }
+        
 
 
         //Sessiondaki hata mesajını temizle
@@ -230,12 +228,16 @@ if ($_POST["action"] == "odeme_yap") {
 </html>';
 
         if ($paket_id != 4) {
-
-            MailGonderService::gonder(
-                "beyzade83@gmail.com",
-                "Abonelik Başarılı",
-                $mail_icerik
-            );
+            $superadmins = $userModel->where('role', 'superadmin');
+            foreach ($superadmins as $superadmin) {
+                if (!empty($superadmin->email)) {
+                    MailGonderService::gonder(
+                        $superadmin->email,
+                        "Abonelik Başarılı",
+                        $mail_icerik
+                    );
+                }
+            }
         }
 
         ob_clean();

@@ -4,6 +4,8 @@ use App\Helper\Security;
 use Models\UserModel;
 use Models\KullaniciAyarModel;
 use Models\KvkkRizaModel;
+use Models\KullaniciAbonelikModel;
+use App\Helper\Date;
 
 
 Security::checkFirma();
@@ -33,6 +35,28 @@ $giris_kayitlari = $UserModel->getLoginRecords($_SESSION['kullanici_id'], 15);
 if (!$user) {
     $hataMesaji = 'Kullanıcı bulunamadı.';
 }
+
+$KullaniciAbonelikModel = new KullaniciAbonelikModel();
+$db = \Core\Database::getInstance()->getConnection();
+$bugun = date('Y-m-d');
+
+// Aktif Abonelik
+$aktif_stmt = $db->prepare("SELECT ka.*, ap.ad as paket_adi, ap.fiyat as paket_fiyat, ap.sure as paket_sure
+                            FROM kullanici_abonelikleri ka 
+                            LEFT JOIN abonelik_paketleri ap ON ka.paket_id = ap.id 
+                            WHERE ka.kullanici_id = ? AND ka.durum = 'aktif' AND ka.baslangic_tarihi <= ? AND ka.bitis_tarihi >= ? 
+                            ORDER BY ka.id DESC LIMIT 1");
+$aktif_stmt->execute([$_SESSION['kullanici_id'], $bugun, $bugun]);
+$aktif_abonelik = $aktif_stmt->fetch(PDO::FETCH_OBJ);
+
+// Satın Alma Geçmişi (Tüm Abonelikleri)
+$gecmis_stmt = $db->prepare("SELECT ka.*, ap.ad as paket_adi, ap.fiyat as paket_fiyat, ap.sure as paket_sure 
+                             FROM kullanici_abonelikleri ka 
+                             LEFT JOIN abonelik_paketleri ap ON ka.paket_id = ap.id 
+                             WHERE ka.kullanici_id = ? 
+                             ORDER BY ka.id DESC");
+$gecmis_stmt->execute([$_SESSION['kullanici_id']]);
+$abonelik_gecmisi = $gecmis_stmt->fetchAll(PDO::FETCH_OBJ);
 
 $initials = '';
 $nameParts = explode(' ', $user->adi_soyadi ?? 'K');
@@ -117,8 +141,8 @@ $initials = mb_strtoupper(mb_substr($initials, 0, 2, 'UTF-8'), 'UTF-8');
                     <i data-lucide="file-text" style="width: 16px; height: 16px;"></i>
                     KVKK Bilgileri
                 </button>
-                <button onclick="switchTab('tab-account')" id="nav-tab-account" class="settings-nav-item flex items-center gap-2.5 px-3 py-2 rounded-md text-left font-medium transition-all text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20">
-                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                <button onclick="switchTab('tab-account')" id="nav-tab-account" class="settings-nav-item flex items-center gap-2.5 px-3 py-2 rounded-md text-left font-medium transition-all">
+                    <i data-lucide="credit-card" style="width: 16px; height: 16px;"></i>
                     Hesap İşlemleri
                 </button>
             <?php endif; ?>
@@ -340,13 +364,139 @@ $initials = mb_strtoupper(mb_substr($initials, 0, 2, 'UTF-8'), 'UTF-8');
             <!-- TAB 6: HESAP İŞLEMLERİ -->
             <?php if ($userRole == "admin" || $userRole == "superadmin") : ?>
                 <div id="tab-account" class="settings-tab-content space-y-6 w-full hidden">
+                    
+                    <!-- AKTİF ABONELİK BİLGİLERİ -->
+                    <div class="card border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm w-full">
+                        <div class="border-b border-zinc-100 dark:border-zinc-800/80 pb-4 mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+                                    <i data-lucide="sparkles" style="width: 18px; height: 18px;" class="text-amber-500"></i>
+                                    Aktif Abonelik Bilgileri
+                                </h3>
+                                <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Mevcut abonelik durumunuz, paket detayları ve kalan kullanım süreniz.</p>
+                            </div>
+                            <a href="abonelik-paketleri" class="btn btn-primary flex items-center gap-1.5 shadow text-xs font-semibold self-start sm:self-auto" style="text-decoration: none;">
+                                <i data-lucide="shopping-bag" style="width: 14px; height: 14px;"></i>
+                                <span>Yeni Abonelik Satın Al</span>
+                            </a>
+                        </div>
+
+                        <?php if ($aktif_abonelik): ?>
+                            <?php 
+                                $kalan_gun = Date::getRemainingDays($aktif_abonelik->bitis_tarihi); 
+                                $is_expired = $kalan_gun < 0;
+                            ?>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30 flex flex-col gap-1">
+                                    <span class="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Aktif Paket</span>
+                                    <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200"><?php echo htmlspecialchars($aktif_abonelik->paket_adi); ?></span>
+                                </div>
+                                <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30 flex flex-col gap-1">
+                                    <span class="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Başlangıç Tarihi</span>
+                                    <span class="text-xs font-semibold text-zinc-800 dark:text-zinc-200"><?php echo Date::dmY($aktif_abonelik->baslangic_tarihi); ?></span>
+                                </div>
+                                <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30 flex flex-col gap-1">
+                                    <span class="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Bitiş Tarihi</span>
+                                    <span class="text-xs font-semibold text-zinc-800 dark:text-zinc-200"><?php echo Date::dmY($aktif_abonelik->bitis_tarihi); ?></span>
+                                </div>
+                                <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30 flex flex-col gap-1">
+                                    <span class="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Kalan Süre</span>
+                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                        <?php if ($is_expired): ?>
+                                            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400">Süresi Doldu</span>
+                                        <?php else: ?>
+                                            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400"><?php echo $kalan_gun; ?> Gün Kaldı</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <div class="flex flex-col items-center justify-center gap-3 py-6 px-4 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/20 dark:bg-zinc-900/10">
+                                <div class="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
+                                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-zinc-950 dark:text-zinc-50">Aktif Aboneliğiniz Bulunmuyor</h4>
+                                    <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 max-w-[400px] leading-relaxed">
+                                        Sistem üzerinden otomatik vizite onaylama, anlık SMS/E-posta bildirimleri ve toplu sorgulama gibi özellikleri kullanabilmek için lütfen aktif bir paket satın alın.
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- SATIN ALMA GEÇMİŞİ -->
                     <div class="card border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm w-full">
                         <div class="border-b border-zinc-100 dark:border-zinc-800/80 pb-4 mb-5">
                             <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-                                <i data-lucide="trash-2" style="width: 18px; height: 18px;" class="text-red-500"></i>
-                                Hesap İşlemleri
+                                <i data-lucide="receipt" style="width: 18px; height: 18px;" class="text-zinc-700 dark:text-zinc-300"></i>
+                                Satın Alma Geçmişi
                             </h3>
-                            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Hesabınızı kalıcı olarak sonlandırma veya kaldırma işlemleri.</p>
+                            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Daha önce aldığınız tüm üyelik ve abonelik işlemlerinin detaylı dökümü.</p>
+                        </div>
+
+                        <?php if (count($abonelik_gecmisi) > 0): ?>
+                            <div class="overflow-x-auto w-full border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900 shadow-sm">
+                                <table class="w-full border-collapse text-left">
+                                    <thead>
+                                        <tr class="bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800">
+                                            <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Abonelik Paketi</th>
+                                            <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Başlangıç</th>
+                                            <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Bitiş</th>
+                                            <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Tutar</th>
+                                            <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Durum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                                        <?php foreach ($abonelik_gecmisi as $abonelik): ?>
+                                            <tr class="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 transition-colors">
+                                                <td class="py-3 px-4 text-xs font-bold text-zinc-800 dark:text-zinc-200"><?php echo htmlspecialchars($abonelik->paket_adi); ?></td>
+                                                <td class="py-3 px-4 text-xs text-zinc-600 dark:text-zinc-400"><?php echo Date::dmY($abonelik->baslangic_tarihi); ?></td>
+                                                <td class="py-3 px-4 text-xs text-zinc-600 dark:text-zinc-400"><?php echo Date::dmY($abonelik->bitis_tarihi); ?></td>
+                                                <td class="py-3 px-4 text-xs font-mono text-zinc-700 dark:text-zinc-300">
+                                                    <?php echo isset($abonelik->paket_fiyat) ? number_format($abonelik->paket_fiyat, 2, ',', '.') . ' ₺' : '0,00 ₺'; ?>
+                                                </td>
+                                                <td class="py-3 px-4 text-xs">
+                                                    <?php 
+                                                        switch ($abonelik->durum) {
+                                                            case 'aktif':
+                                                                echo '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400">Aktif</span>';
+                                                                break;
+                                                            case 'sona_erdi':
+                                                                echo '<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-zinc-50 text-zinc-600 dark:bg-zinc-800/40 dark:text-zinc-400">Süresi Doldu</span>';
+                                                                break;
+                                                            case 'iptal':
+                                                                echo '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 text-rose-750 dark:bg-rose-950/20 dark:text-rose-400">İptal Edildi</span>';
+                                                                break;
+                                                            case 'onay_bekliyor':
+                                                                echo '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400">Onay Bekliyor</span>';
+                                                                break;
+                                                            default:
+                                                                echo '<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-zinc-50 text-zinc-600 dark:bg-zinc-800/40 dark:text-zinc-400">' . htmlspecialchars($abonelik->durum) . '</span>';
+                                                        }
+                                                    ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="flex flex-col items-center justify-center gap-2 py-8 text-zinc-400">
+                                <i data-lucide="receipt" class="w-8 h-8 opacity-45"></i>
+                                <span class="text-xs font-medium">Henüz kayıtlı bir satın alma işleminiz bulunmamaktadır.</span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- HESAP SİLME İŞLEMLERİ -->
+                    <div class="card border border-red-200 dark:border-red-900/30 rounded-xl bg-red-50/10 dark:bg-red-950/5 p-6 shadow-sm w-full">
+                        <div class="border-b border-red-100 dark:border-red-900/20 pb-4 mb-5">
+                            <h3 class="font-bold text-sm text-red-650 dark:text-red-400 flex items-center gap-2">
+                                <i data-lucide="shield-alert" style="width: 18px; height: 18px;" class="text-red-550"></i>
+                                Hesabı Kapat / Sil
+                            </h3>
+                            <p class="text-xs text-red-500/80 dark:text-red-400/60 mt-1">Hesabınızı kalıcı olarak sonlandırma veya kaldırma işlemleri.</p>
                         </div>
 
                         <div class="flex flex-col gap-4">
@@ -368,6 +518,7 @@ $initials = mb_strtoupper(mb_substr($initials, 0, 2, 'UTF-8'), 'UTF-8');
                             </div>
                         </div>
                     </div>
+
                 </div>
             <?php endif; ?>
         </div>

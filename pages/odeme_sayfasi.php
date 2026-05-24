@@ -44,193 +44,195 @@ if (!$paket) {
 <!-- Topbar'ı dahil ediyoruz -->
 <?php include 'layouts/topbar.php'; ?>
 
-<!-- Navbar'ı dahil ediyoruz -->
-<?php include 'layouts/navbar.php'; ?>
+<!-- Navbar'ı dahil ediyoruz --><!-- ANA İÇERİK BÖLÜMÜ -->
+<div class="max-w-6xl mx-auto py-4 px-2">
+    <!-- Sayfa Başlığı ve Yönlendirme Butonu -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-zinc-950 dark:text-zinc-50">Ödeme Sayfası</h1>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Abonelik paketinizi tamamlamak için lütfen aşağıdaki adımları izleyin.</p>
+        </div>
+        <a href="abonelik-paketleri" class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all shadow-sm active:scale-[0.98]">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Paketlere Dön
+        </a>
+    </div>
 
-<!-- ANA İÇERİK BÖLÜMÜ -->
-<section class="content">
-    <div class="container">
+    <!-- Hata veya Bilgi Mesajları -->
+    <div class="mb-8">
+        <?php if (!empty($hataMesaji)): ?>
+            <div class="rounded-xl border border-rose-200 dark:border-rose-900/30 bg-rose-50/50 dark:bg-rose-950/20 p-4 text-rose-900 dark:text-rose-200 shadow-sm flex items-start gap-3 mb-4">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600 dark:text-rose-400 mt-0.5"></i>
+                <div class="text-sm font-medium"><?php echo $hataMesaji; ?></div>
+            </div>
+        <?php endif; ?>
 
-        <!-- Sayfa Başlığı ve Yönlendirme Butonu -->
-        <div class="row clearfix">
-            <div class="col-lg-12">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h4><strong>Ödeme Sayfası</strong></h4>
-                        <small>Abonelik paketinizi tamamlamak için lütfen aşağıdaki adımları izleyin.</small>
+        <div class="rounded-xl border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-950/20 p-5 text-blue-900 dark:text-blue-200 shadow-sm flex items-start gap-4">
+            <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400 flex-shrink-0">
+                <i data-lucide="info" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="font-bold text-base leading-none mb-2">Önemli Bilgilendirme!</h4>
+                <p class="text-sm leading-relaxed mb-1.5">
+                    Ödemenizi aşağıda belirtilen banka hesaplarına <strong>EFT/Havale</strong> yoluyla yapmanız gerekmektedir. 
+                    Ödemeyi tamamladıktan sonra sağdaki onay bölümünden talebinizi bize iletin.
+                </p>
+                <p class="text-xs text-blue-750 dark:text-blue-300/80 font-medium">
+                    Yöneticilerimiz ödemenizi kontrol ettikten sonra aboneliğiniz en kısa sürede aktif hale getirecektir.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- SOL TARAF: Paket ve Banka Bilgileri -->
+        <div class="lg:col-span-7 flex flex-col gap-8">
+            
+            <!-- 1. Adım: Paket Bilgileri -->
+            <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-zinc-950 text-white dark:bg-zinc-50 dark:text-zinc-950 text-xs font-bold">1</span>
+                    <h2 class="text-base font-bold text-zinc-950 dark:text-zinc-50">Paket Bilgileri</h2>
+                </div>
+                <div class="p-6">
+                    <?php if ($paket): ?>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-zinc-100 dark:border-zinc-800">
+                            <div>
+                                <span class="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Seçilen Paket</span>
+                                <h3 class="text-xl font-extrabold text-zinc-950 dark:text-zinc-50 mt-0.5"><?php echo htmlspecialchars($paket->ad); ?></h3>
+                                <?php if (isset($paket->aciklama) && !empty($paket->aciklama)): ?>
+                                    <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1"><?php echo htmlspecialchars($paket->aciklama); ?></p>
+                                <?php endif; ?>
+                            </div>
+                            <div class="px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold tracking-wide uppercase">
+                                Aktif Sipariş
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex flex-col gap-4">
+                            <div class="flex items-center justify-between text-sm py-2">
+                                <span class="text-zinc-500 dark:text-zinc-400 font-medium">Paket Fiyatı</span>
+                                <span class="font-semibold text-zinc-900 dark:text-zinc-100"><?php echo $paket_fiyat; ?> ₺</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm py-2 border-t border-zinc-100 dark:border-zinc-800/40">
+                                <span class="text-zinc-500 dark:text-zinc-400 font-medium">Abonelik Süresi</span>
+                                <span class="font-semibold text-zinc-900 dark:text-zinc-100"><?php echo $paket->sure; ?> Gün</span>
+                            </div>
+                            
+                            <?php if($user->referral_used == "pending"): ?>
+                            <div class="flex items-center justify-between text-sm py-2 border-t border-zinc-100 dark:border-zinc-800/40 text-emerald-600 dark:text-emerald-400 font-medium">
+                                <span>İndirim Süresi (Referans)</span>
+                                <span>30 Gün / <?php echo $paket_fiyat ?> ₺ İndirim</span>
+                            </div>
+                            <div class="flex items-center justify-between py-4 border-t border-zinc-100 dark:border-zinc-800 mt-2 bg-emerald-50/30 dark:bg-emerald-950/10 px-4 rounded-lg">
+                                <span class="font-bold text-zinc-900 dark:text-zinc-100">Toplam Ödenecek Tutar</span>
+                                <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">0,00 TL</span>
+                            </div>
+                            <?php else: ?>
+                            <div class="flex items-center justify-between py-4 border-t border-zinc-100 dark:border-zinc-800 mt-2 bg-zinc-50 dark:bg-zinc-800/20 px-4 rounded-lg animate-fade-in">
+                                <span class="font-bold text-zinc-900 dark:text-zinc-100">Ödenecek Toplam Tutar</span>
+                                <span class="text-2xl font-black text-zinc-950 dark:text-zinc-50"><?php echo $paket_fiyat; ?> TL</span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- 2. Adım: Banka Hesapları -->
+            <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-zinc-950 text-white dark:bg-zinc-50 dark:text-zinc-950 text-xs font-bold">2</span>
+                    <h2 class="text-base font-bold text-zinc-950 dark:text-zinc-50">Banka Hesaplarımız</h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-6">Lütfen ödemeyi aşağıdaki hesaplardan birine yapın.</p>
+                    
+                    <div class="flex flex-col gap-6">
+                        <!-- Ziraat Bankası -->
+                        <div class="bank-account-card p-5 rounded-xl border border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-800/10 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200 flex flex-col gap-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 bg-white rounded-xl border border-zinc-100 dark:border-zinc-800 p-2 flex items-center justify-center shadow-sm">
+                                    <img src="assets/images/ziraat_logo.png" alt="Ziraat Bankası" class="w-full h-full object-contain">
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-zinc-950 dark:text-zinc-550 text-base">ZİRAAT BANKASI</h4>
+                                    <p class="text-xs text-zinc-450 dark:text-zinc-400 font-medium">Mehmet Ali Gökmen</p>
+                                </div>
+                            </div>
+                            <div class="relative flex items-center">
+                                <input type="text" class="w-full pl-4 pr-24 py-3 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm font-mono font-medium text-zinc-800 dark:text-zinc-250 select-all focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100 shadow-inner" id="ziraatIban" value="TR66 0001 0009 8453 7612 3450 06" readonly>
+                                <button class="absolute right-2 px-3 py-1.5 text-xs font-bold rounded-md bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-sm js-copy-btn flex items-center gap-1.5 active:scale-95" type="button" data-clipboard-target="#ziraatIban">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> <span>Kopyala</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Türkiye İş Bankası -->
+                        <div class="bank-account-card p-5 rounded-xl border border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-800/10 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200 flex flex-col gap-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 bg-white rounded-xl border border-zinc-100 dark:border-zinc-800 p-2 flex items-center justify-center shadow-sm">
+                                    <img src="assets/images/isbank_logo.png" alt="İş Bankası" class="w-full h-full object-contain">
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-zinc-950 dark:text-zinc-550 text-base">TÜRKİYE İŞ BANKASI</h4>
+                                    <p class="text-xs text-zinc-450 dark:text-zinc-400 font-medium">Mehmet Ali Gökmen</p>
+                                </div>
+                            </div>
+                            <div class="relative flex items-center">
+                                <input type="text" class="w-full pl-4 pr-24 py-3 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm font-mono font-medium text-zinc-800 dark:text-zinc-250 select-all focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100 shadow-inner" id="isbankIban" value="TR60 0006 4000 0014 3201 5946 53" readonly>
+                                <button class="absolute right-2 px-3 py-1.5 text-xs font-bold rounded-md bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-sm js-copy-btn flex items-center gap-1.5 active:scale-95" type="button" data-clipboard-target="#isbankIban">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> <span>Kopyala</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <a href="/abonelik-paketleri" class="btn btn-primary btn-simple waves-effect text-nowrap">
-                        <i class="zmdi zmdi-arrow-left mr-2"></i>Paketlere Dön
-                    </a>
                 </div>
             </div>
         </div>
 
-        <div class="row clearfix">
-            <!-- Hata veya Bilgi Mesajları -->
-            <div class="col-lg-12">
-                <?php if (!empty($hataMesaji)): ?>
-                    <div class="alert alert-danger">
-                        <?php echo $hataMesaji; ?>
-                    </div>
-                <?php endif; ?>
-
-                <div class="alert alert-info">
-                    <h4 class="alert-heading">Önemli Bilgilendirme!</h4>
-                    <p style="margin:0px">Ödemenizi aşağıda belirtilen banka hesaplarına <strong>EFT/Havale</strong> yoluyla yapmanız gerekmektedir. Ödemeyi tamamladıktan sonra sağdaki onay bölümünden talebinizi bize iletin.</p>
-                    <p class="mb-0">Yöneticilerimiz ödemenizi kontrol ettikten sonra aboneliğiniz en kısa sürede aktif hale getirecektir.</p>
+        <!-- SAĞ TARAF: Ödeme Onayı -->
+        <div class="lg:col-span-5 lg:sticky lg:top-24">
+            <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-zinc-950 text-white dark:bg-zinc-50 dark:text-zinc-950 text-xs font-bold">3</span>
+                    <h2 class="text-base font-bold text-zinc-950 dark:text-zinc-550">Ödemeyi Onayla</h2>
                 </div>
-            </div>
-
-            <!-- SOL TARAF: Paket ve Banka Bilgileri -->
-            <div class="col-lg-7 col-md-12">
-                <!-- 1. Adım: Paket Bilgileri -->
-                <div class="card">
-                    <div class="header">
-                        <h2><strong>1. Adım:</strong> Paket Bilgileri</h2>
-                    </div>
-                    <div class="body">
-                        <?php if ($paket): ?>
-                            <h5 class="font-weight-bold">Seçilen Paket: <span class="text-primary"><?php echo htmlspecialchars($paket->ad); ?></span></h5>
-                            
-                            <?php // Hata kontrolü: $paket nesnesinde 'aciklama' özelliği var mı? ?>
-                            <?php if (isset($paket->aciklama) && !empty($paket->aciklama)): ?>
-                                <p><?php echo htmlspecialchars($paket->aciklama); ?></p>
-                            <?php endif; ?>
-                            
-                            <table class="table table-bordered mt-3">
-                                <tbody>
-                                    <tr>
-                                        <td>Paket Fiyatı</td>
-                                        <td class="text-right"><strong><?php echo $paket_fiyat; ?> ₺</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Abonelik Süresi</td>
-                                        <td class="text-right"><strong><?php echo $paket->sure; ?> Gün</strong></td>
-                                    </tr>
-                                   
-                                    <tr class="bg-light">
-                                        <td class="font-weight-bold">Ödenecek Toplam Tutar</td>
-                                        <td class="text-right font-weight-bold h4 m-0 text-info"><?php echo $paket_fiyat; ?> TL</td>
-                                    </tr>
-                                    <?php if($user->referral_used == "pending"): ?>
-                                    <tr>
-                                        <td>İndirim Süresi</td>
-                                        <td class="text-right"><strong>30 Gün / <?php echo $paket_fiyat ?> ₺ (Referans)</strong></td>
-                                    </tr>
-                                    <tr class="bg-light">
-                                        <td class="font-weight-bold">Toplam Ödenecek Tutar</td>
-                                        <td class="text-right font-weight-bold h4 m-0 text-success">0,00 TL</td>
-                                    </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- 2. Adım: Banka Hesapları -->
-                <div class="card">
-                    <div class="header">
-                        <h2><strong>2. Adım:</strong> Banka Hesaplarımız</h2>
-                    </div>
-                    <div class="body">
-                        <p>Lütfen ödemeyi aşağıdaki hesaplardan birine yapın.</p>
-                        
-                        <!-- Ziraat Bankası -->
-                        <div class="bank-account-card">
-                            <div class="d-flex align-items-center mb-2">
-                                <img src="assets/images/ziraat_logo.png" alt="Ziraat Bankası" class="bank-logo mr-3"> <!-- Logo yolunu güncelleyin -->
-                                <div>
-                                    <h6 class="mb-0"><strong>ZİRAAT BANKASI</strong></h6>
-                                    <span>Mehmet Ali Gökmen</span>
-                                </div>
-                            </div>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="ziraatIban" value="TR66 0001 0009 8453 7612 3450 06" readonly>
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary js-copy-btn" type="button" data-clipboard-target="#ziraatIban">
-                                        <i class="zmdi zmdi-copy mr-1"></i> Kopyala
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr>
-
-                        <!-- Türkiye İş Bankası -->
-                        <div class="bank-account-card">
-                             <div class="d-flex align-items-center mb-2">
-                                <img src="assets/images/isbank_logo.png" alt="İş Bankası" class="bank-logo mr-3"> <!-- Logo yolunu güncelleyin -->
-                                <div>
-                                    <h6 class="mb-0"><strong>TÜRKİYE İŞ BANKASI</strong></h6>
-                                    <span>Mehmet Ali Gökmen</span>
-                                </div>
-                            </div>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="isbankIban" value="TR60 0006 4000 0014 3201 5946 53" readonly>
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary js-copy-btn" type="button" data-clipboard-target="#isbankIban">
-                                        <i class="zmdi zmdi-copy mr-1"></i> Kopyala
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SAĞ TARAF: Ödeme Onayı -->
-            <div class="col-lg-5 col-md-12">
-                <div class="card">
-                    <div class="header">
-                        <h2><strong>3. Adım:</strong> Ödemeyi Onayla</h2>
-                    </div>
-                    <div class="body">
-                        <p>Yukarıdaki tutarı banka hesaplarımızdan birine gönderdiyseniz, aşağıdaki butona tıklayarak işlemi tamamlayın.</p>
-                        
-                        <form id="odemeForm" class="mt-4">
-                            <input type="hidden" name="paket_id" value="<?php echo htmlspecialchars($paket_id); ?>">
-                            <button type="button" class="btn btn-raised btn-primary btn-lg btn-block waves-effect odeme-yap">
-                                <i class="zmdi zmdi-check-circle mr-2"></i>Ödemeyi Yaptım, Onay Bekliyorum
-                            </button>
-                        </form>
-                        <small class="text-muted d-block mt-2 text-center">Butona tıkladığınızda talebiniz yönetici onayına gönderilecektir.</small>
+                <div class="p-6">
+                    <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                        Yukarıdaki tutarı banka hesaplarımızdan birine gönderdiyseniz, aşağıdaki butona tıklayarak işlemi tamamlayın.
+                    </p>
+                    
+                    <form id="odemeForm" class="mt-6">
+                        <input type="hidden" name="paket_id" value="<?php echo htmlspecialchars($paket_id); ?>">
+                        <button type="button" class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-850 text-white dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-zinc-950 font-bold transition-all shadow-md hover:shadow-lg active:scale-[0.98] odeme-yap">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                            <span class="button-text">Ödemeyi Yaptım, Onay Bekliyorum</span>
+                        </button>
+                    </form>
+                    <div class="flex items-start gap-2 mt-4 text-xs text-zinc-400 dark:text-zinc-500 leading-normal">
+                        <i data-lucide="shield-check" class="w-4 h-4 flex-shrink-0 mt-0.5 text-zinc-400"></i>
+                        <span>Butona tıkladığınızda talebiniz güvenli bir şekilde yönetici onayına gönderilecektir.</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
 
 <!-- Ekstra Stil (CSS) -->
 <style>
-    .alert-heading {
-       margin-bottom: 0px;
-       margin-top: 0px;
-    }
 .bank-account-card {
-    padding: 15px;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    transition: box-shadow 0.3s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.bank-account-card:not(:last-child) {
-    margin-bottom: 15px;
+.js-copy-btn {
+    transition: all 0.2s ease-in-out;
 }
-.bank-account-card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-.bank-account-card .form-control {
-    background-color: #f9f9f9;
-}
-.bank-logo {
-    width: 80px;
-    height: 80px;
-    object-fit: contain;
-}
-.input-group-append .btn {
-    margin: 0 !important;
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
 }
 </style>
 
@@ -250,13 +252,24 @@ if (!$paket) {
         clipboard.on('success', function(e) {
             showNotification('bg-green', 'IBAN başarıyla kopyalandı!', 'top', 'center', 'animated fadeInDown', 'animated fadeOutUp');
             
-            var originalText = $(e.trigger).html();
-            $(e.trigger).html('<i class="zmdi zmdi-check mr-1"></i> Kopyalandı');
-            $(e.trigger).addClass('btn-success').removeClass('btn-outline-secondary');
+            var btn = $(e.trigger);
+            var originalHtml = btn.html();
+            
+            btn.html('<i data-lucide="check" class="w-3.5 h-3.5"></i> <span>Kopyalandı</span>')
+               .addClass('bg-emerald-600 hover:bg-emerald-500 text-white dark:bg-emerald-500 dark:hover:bg-emerald-450 dark:text-zinc-950')
+               .removeClass('bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200');
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
             
             setTimeout(function() {
-                $(e.trigger).html(originalText);
-                $(e.trigger).removeClass('btn-success').addClass('btn-outline-secondary');
+                btn.html(originalHtml)
+                   .addClass('bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200')
+                   .removeClass('bg-emerald-600 hover:bg-emerald-500 text-white dark:bg-emerald-500 dark:hover:bg-emerald-450 dark:text-zinc-950');
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
             }, 2000);
 
             e.clearSelection();
@@ -265,6 +278,10 @@ if (!$paket) {
         clipboard.on('error', function(e) {
             showNotification('bg-red', 'Kopyalama sırasında bir hata oluştu.', 'top', 'center', 'animated fadeInDown', 'animated fadeOutUp');
         });
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     });
 </script>
 
