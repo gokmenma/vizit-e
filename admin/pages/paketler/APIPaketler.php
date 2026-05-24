@@ -27,7 +27,7 @@ use Admin\Models\PackageModel;
 
 $paketModel = new PackageModel();
 $action = $_POST['action'] ?? '';
-if (empty($action) && strpos($_SERVER['REQUEST_URI'], 'admin-paket-sil') !== false) {
+if (empty($action) && (strpos($_SERVER['REQUEST_URI'], 'admin-paket-sil') !== false || strpos($_SERVER['REQUEST_URI'], 'paket-sil') !== false)) {
     $action = 'delete';
 }
 if (empty($action)) {

@@ -2272,3 +2272,6 @@
 16:21:26 - admin.vizite.com - /paketler
 16:22:11 - admin.vizite.com - /admin-paket-kaydet
 16:22:11 - admin.vizite.com - /paketler
+16:41:13 - admin.vizite.com - /aktiviteler
+16:41:13 - admin.vizite.com - /favicon.ico
+16:41:13 - admin.vizite.com - /assets/images/logo.svg

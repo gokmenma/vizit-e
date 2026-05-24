@@ -222,7 +222,7 @@ $paketler = $paketModel->all();
         submitBtn.innerHTML = '<div class="spinner" style="width: 16px; height: 16px;"></div> İşleniyor...';
 
         try {
-            const response = await fetch('admin-paket-kaydet', {
+            const response = await fetch('paket-kaydet', {
                 method: 'POST',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData
@@ -276,7 +276,7 @@ $paketler = $paketModel->all();
             formData.append('id', packageIdToDelete);
             formData.append('action', 'delete');
 
-            const response = await fetch('admin-paket-sil', {
+            const response = await fetch('paket-sil', {
                 method: 'POST',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData
@@ -307,7 +307,7 @@ $paketler = $paketModel->all();
             formData.append('id', id);
             formData.append('action', 'toggle-status');
 
-            const response = await fetch('admin-paket-kaydet', {
+            const response = await fetch('paket-kaydet', {
                 method: 'POST',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData
