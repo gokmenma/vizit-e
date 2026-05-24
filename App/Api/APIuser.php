@@ -186,8 +186,8 @@ if ($_POST['action'] == "register") {
             "onay_durumu" => $aydinlatma_onay,
 
             "onay_tarihi" => date('Y-m-d H:i:s'),
-            "ip_address" => $_SERVER['REMOTE_ADDR'],
-            "user_agent" => $_SERVER['HTTP_USER_AGENT'],
+            "ip_address" => $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+            "user_agent" => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
         ];
         //Aydınlatma metni onayı kaydet
         $KvkkRizaModel->saveWithAttr($data);
@@ -200,8 +200,8 @@ if ($_POST['action'] == "register") {
             "kvkk_bilgi_id" => $gizlilik_sozlesmesi_id,
             "onay_durumu" => 1,
             "onay_tarihi" => date('Y-m-d H:i:s'),
-            "ip_address" => $_SERVER['REMOTE_ADDR'],
-            "user_agent" => $_SERVER['HTTP_USER_AGENT'],
+            "ip_address" => $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+            "user_agent" => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
         ];
         //Gizlilik sözleşmesi onayı kaydet
         $KvkkRizaModel->saveWithAttr($data);
@@ -214,8 +214,8 @@ if ($_POST['action'] == "register") {
             "kvkk_bilgi_id" => $acik_riza_beyani_id,
             "onay_durumu" => $acik_riza_onay,
             "onay_tarihi" => date('Y-m-d H:i:s'),
-            "ip_address" => $_SERVER['REMOTE_ADDR'],
-            "user_agent" => $_SERVER['HTTP_USER_AGENT'],
+            "ip_address" => $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+            "user_agent" => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
         ];
         //Açık Rıza Beyanı onayı kaydet
         $KvkkRizaModel->saveWithAttr($data);

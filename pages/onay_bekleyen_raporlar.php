@@ -374,7 +374,7 @@ $toplamRaporSayisi = count($raporlar);
                                         $can_approve = ($userRole == "admin" || $userRole == "superadmin" || strpos($yetkiler, "rapor_onay") !== false);
                                         ?>
                                         <?php if ($can_approve): ?>
-                                            <button type="button" class="btn-onayla inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500 rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm transition-all cursor-pointer <?php echo $is_future ? 'opacity-40 cursor-not-allowed' : ''; ?>" <?php echo $disabled_attr; ?> style="background-color: #10b981; border-color: #10b981;">
+                                            <button type="button" class="btn-onayla inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500 rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm transition-all cursor-pointer <?php echo $is_future ? 'opacity-40 cursor-not-allowed' : ''; ?>" <?php echo $disabled_attr; ?>>
                                                 <i data-lucide="check" class="w-3.5 h-3.5"></i>
                                                 <span>Onayla</span>
                                             </button>
@@ -382,7 +382,7 @@ $toplamRaporSayisi = count($raporlar);
                                                 <i data-lucide="user-x" class="w-3.5 h-3.5"></i>    
                                                 <span>Değil</span>
                                             </button>
-                                            <button type="button" class="btn-kapat inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-600 dark:hover:bg-emerald-500 rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm transition-all cursor-pointer <?php echo $is_future ? 'opacity-40 cursor-not-allowed' : ''; ?>" <?php echo $disabled_attr; ?> data-id="<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>" style="background-color: #f59e0b; border-color: #f59e0b;">
+                                            <button type="button" class="btn-kapat inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-600 dark:hover:bg-amber-500 rounded-md px-2.5 py-1.5 text-xs font-semibold shadow-sm transition-all cursor-pointer <?php echo $is_future ? 'opacity-40 cursor-not-allowed' : ''; ?>" <?php echo $disabled_attr; ?> data-id="<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>">
                                                 <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
                                                 <span>Kapat</span>
                                             </button>

@@ -1076,3 +1076,15 @@
 18:27:13 - vizite.com - /isyerlerim
 18:27:16 - vizite.com - /isyerlerim
 18:31:09 - vizite.com - /isyerlerim
+18:35:05 - vizite.com - /isyerlerim
+18:35:09 - vizite.com - /logout
+18:35:09 - vizite.com - /sign-in
+18:35:13 - vizite.com - /sign-in
+18:35:13 - vizite.com - /isyerlerim
+18:35:16 - vizite.com - /isyeri-sec
+18:35:16 - vizite.com - /dashboard
+18:35:19 - vizite.com - /isyeri-sec?isyeri_id=BysZo1_tjZ6Py8gMaSgN3lTthqqRiIDtMM4VP3I%2A
+18:35:20 - vizite.com - /
+18:35:24 - vizite.com - /mahsuplastirilacak-raporlar
+18:35:28 - vizite.com - /mahsuplastirilacak-raporlar
+18:49:40 - vizite.com - /kullanicilar

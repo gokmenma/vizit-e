@@ -89,6 +89,25 @@ class Security
             exit();
         }
 
+        // Detect Mobile browser mode to redirect correctly
+        $is_mobile = false;
+        if (isset($_SERVER['HTTP_USER_AGENT'])) {
+            $user_agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+            $mobile_agents = ['mobile', 'android', 'iphone', 'ipad', 'ipod', 'blackberry', 'opera mini', 'windows phone'];
+            foreach ($mobile_agents as $agent) {
+                if (strpos($user_agent, $agent) !== false) {
+                    $is_mobile = true;
+                    break;
+                }
+            }
+        }
+        $wants_desktop = isset($_GET['desktop']) || (isset($_SESSION['desktop_mode']) && $_SESSION['desktop_mode']);
+        $isMobileMode = $is_mobile && !$wants_desktop;
+
+        $config = require __DIR__ . '/../../config.php';
+        $basePath = rtrim($config['base_path'] ?? '', '/');
+        $redirectUrl = $isMobileMode ? ($basePath . '/mobile/#isyerlerim') : ($basePath . '/isyerlerim');
+
         $kullaniciId = $_SESSION['kullanici_id'];
         $userRole = $_SESSION["role"] ?? "user";
         
@@ -117,10 +136,10 @@ class Security
         if (empty($isyerleri)) {
             $_SESSION['hata'] = 'İşlem yapabilmek için lütfen önce en az bir işyeri ekleyiniz.';
             if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
-                echo "<script>window.location.href = 'isyerlerim';</script>";
+                echo "<script>window.location.href = '" . $redirectUrl . "';</script>";
                 exit();
             }
-            header('Location: isyerlerim');
+            header('Location: ' . $redirectUrl);
             exit();
         }
 
@@ -130,10 +149,10 @@ class Security
                 $_SESSION['hata'] = 'Lütfen önce işlem yapacağınız firmayı seçiniz.';
             }
             if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
-                echo "<script>window.location.href = 'isyerlerim';</script>";
+                echo "<script>window.location.href = '" . $redirectUrl . "';</script>";
                 exit();
             }
-            header('Location: isyerlerim');
+            header('Location: ' . $redirectUrl);
             exit();
         }
 
@@ -161,10 +180,10 @@ class Security
             unset($_SESSION['firma_adi']);
             $_SESSION['hata'] = 'Seçili işyerine erişim yetkiniz bulunmamaktadır. Lütfen listeden başka bir işyeri seçiniz.';
             if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
-                echo "<script>window.location.href = 'isyerlerim';</script>";
+                echo "<script>window.location.href = '" . $redirectUrl . "';</script>";
                 exit();
             }
-            header('Location: isyerlerim');
+            header('Location: ' . $redirectUrl);
             exit();
         }
     }

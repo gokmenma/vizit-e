@@ -508,7 +508,7 @@ if (isset($davetid)) {
                     </label>
                 </div>
 
-                <button type="button" class="btn-login btn-submit" disabled>Kaydol</button>
+                <button type="submit" class="btn-login btn-submit" disabled>Kaydol</button>
             </form>
         </div>
 
@@ -593,7 +593,8 @@ if (isset($davetid)) {
 
             updateButtonState();
 
-            $submitButton.on('click', function() {
+            $form.on('submit', function(e) {
+                e.preventDefault();
                 if (!validateForm()) {
                     console.warn('Geçersiz form gönderimi engellendi.');
                     return;
