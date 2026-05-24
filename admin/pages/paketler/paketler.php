@@ -40,7 +40,7 @@ $paketler = $paketModel->all();
                 </div>
                 <div style="text-align: right;">
                     <div style="font-size: 1.5rem; font-weight: 800; color: var(--foreground);">₺<?php echo number_format($paket->fiyat, 0); ?></div>
-                    <div style="font-size: 0.75rem; color: var(--muted-foreground);"><?php echo $paket->sure ?? 1; ?> Ay</div>
+                    <div style="font-size: 0.75rem; color: var(--muted-foreground);"><?php echo $paket->sure ?? 30; ?> Gün</div>
                 </div>
             </div>
 
@@ -61,7 +61,7 @@ $paketler = $paketModel->all();
                     <span style="font-size: 0.875rem; color: var(--muted-foreground); display: flex; align-items: center; gap: 0.5rem;">
                         <i data-lucide="calendar" style="width: 14px;"></i> Abonelik Süresi
                     </span>
-                    <span style="font-weight: 600;"><?php echo $paket->sure ?? 1; ?> Ay</span>
+                    <span style="font-weight: 600;"><?php echo $paket->sure ?? 30; ?> Gün</span>
                 </div>
             </div>
 
@@ -120,8 +120,8 @@ $paketler = $paketModel->all();
                     <span class="form-error">Geçerli bir fiyat giriniz.</span>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Süre (Ay)</label>
-                    <input type="number" name="sure" class="form-input" value="12" required>
+                    <label class="form-label">Süre (Gün)</label>
+                    <input type="number" name="sure" class="form-input" value="30" required>
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -160,7 +160,7 @@ $paketler = $paketModel->all();
                     <input type="number" id="edit-fiyat" name="fiyat" class="form-input" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Süre (Ay)</label>
+                    <label class="form-label">Süre (Gün)</label>
                     <input type="number" id="edit-sure" name="sure" class="form-input" required>
                 </div>
             </div>

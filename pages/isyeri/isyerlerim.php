@@ -375,7 +375,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                             <td class="py-3.5 px-4 text-sm text-center font-medium text-zinc-500 dark:text-zinc-400"><?php echo $i; ?></td>
                             <td class="py-3.5 px-4 text-sm">
                                 <div class="flex flex-col">
-                                    <span class="font-semibold text-zinc-900 dark:text-zinc-100 leading-tight"><?php echo htmlspecialchars($isyeri->firma_adi); ?></span>
+                                    <span class="isyeri-duzenle font-semibold text-zinc-900 dark:text-zinc-100 leading-tight cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors" data-id="<?php echo $enc_id; ?>"><?php echo htmlspecialchars($isyeri->firma_adi); ?></span>
                                     <span class="text-xs text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">İşyeri Kodu: <?php echo htmlspecialchars($isyeri->isyeri_kodu); ?></span>
                                 </div>
                             </td>
@@ -390,8 +390,12 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                                 <?php
                                 if (!empty($isyeri->otomatik_onay_eposta)) {
                                     $eposta_adresleri = explode(',', $isyeri->otomatik_onay_eposta);
-                                    foreach ($eposta_adresleri as $eposta) {
-                                        echo htmlspecialchars(trim($eposta)) . '<br>';
+                                    $ilk_eposta = htmlspecialchars(trim($eposta_adresleri[0]));
+                                    if (count($eposta_adresleri) > 1) {
+                                        $tum_epostalar = htmlspecialchars(implode("\n", array_map('trim', $eposta_adresleri)));
+                                        echo '<span class="cursor-help border-b border-dashed border-zinc-400 dark:border-zinc-600 pb-0.5" data-tooltip="' . $tum_epostalar . '">' . $ilk_eposta . ' <span class="text-zinc-400 dark:text-zinc-600">...</span></span>';
+                                    } else {
+                                        echo $ilk_eposta;
                                     }
                                 } else {
                                     echo '<span class="text-zinc-400 dark:text-zinc-600">-</span>';

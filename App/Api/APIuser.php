@@ -46,10 +46,13 @@ function validateUserInput($userInput, $fieldName)
 if ($_POST['action'] == "register") {
     $kullanici_adi = $_POST["kullanici_adi"];
     $email = $_POST["email"];
+    $adi_soyadi = $_POST["adi_soyadi"] ?? '';
 
+    //Adı Soyadı, Kullanıcı adı, email ve şifre validasyonları
+    if (empty($adi_soyadi)) {
+        validateUserInput($adi_soyadi, "Adı Soyadı");
+    }
 
-
-    //Kullanici adı, email ve şifre validasyonları
     if (empty($kullanici_adi)) {
         validateUserInput($kullanici_adi, "Kullanıcı adı");
     }
@@ -119,6 +122,7 @@ if ($_POST['action'] == "register") {
     try {
 
         $data = [
+            "adi_soyadi" => $adi_soyadi,
             "kullanici_adi" => $_POST["kullanici_adi"],
             "sifre" => password_hash($_POST["sifre"], PASSWORD_DEFAULT),
             "role" => "admin",
@@ -433,7 +437,16 @@ if ($_POST['action'] == "admin-kullanici-guncelle") {
                 $stmt->execute([$id]);
 
                 $final_start = $baslangic_tarihi ?: date('Y-m-d');
-                $final_end = $bitis_tarihi ?: date('Y-m-d', strtotime('+1 year'));
+                $sure = 30;
+                if ($paket_id) {
+                    $paket_stmt = $db->prepare("SELECT sure FROM abonelik_paketleri WHERE id = ?");
+                    $paket_stmt->execute([$paket_id]);
+                    $paket_obj = $paket_stmt->fetch(PDO::FETCH_OBJ);
+                    if ($paket_obj && !empty($paket_obj->sure)) {
+                        $sure = (int)$paket_obj->sure;
+                    }
+                }
+                $final_end = $bitis_tarihi ?: date('Y-m-d', strtotime($final_start . " +$sure days"));
 
                 $stmt = $db->prepare("INSERT INTO kullanici_abonelikleri (kullanici_id, paket_id, durum, baslangic_tarihi, bitis_tarihi, firma_hakki, alt_kullanici_hakki) VALUES (?, ?, 'aktif', ?, ?, ?, ?)");
                 $stmt->execute([$id, $paket_id, $final_start, $final_end, $firma_hakki, $alt_kullanici_hakki]);

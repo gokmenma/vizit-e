@@ -11,7 +11,6 @@ use App\Helper\Security;
 use Random\Engine\Secure;
 
 $IsyeriModel = new KullaniciIsyeriModel();
-$sgkClient = new SgkViziteService();
 
 
 //İşyeri Kaydet
@@ -27,6 +26,7 @@ if ($_POST["action"] == "isyeri_kaydet") {
         $wsSifre = $_POST["ws_sifre"];
 
         if ($id  == 0) {
+            $sgkClient = new SgkViziteService($kullanici_kodu, $isyeri_kodu, $wsSifre);
             //Bilgilerin doğruluğunu SGK'ya sor
             $dogrulama = $sgkClient->bilgileriDogrula($kullanici_kodu, $isyeri_kodu, $wsSifre);
 
@@ -213,6 +213,7 @@ if ($_POST["action"] == "excel_upload_isyeri") {
             }
 
             //İşyeri bilgilerini SGK'ya sor
+            $sgkClient = new SgkViziteService($row[2], $row[3], $row[4]);
             $dogrulama = $sgkClient->bilgileriDogrula($row[2], $row[3], $row[4]);
             //Eğer hata varsa hata mesajını ekle
             if ($dogrulama->sonucKod == 105) {

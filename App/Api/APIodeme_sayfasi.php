@@ -50,7 +50,7 @@ if ($_POST["action"] == "odeme_yap") {
             "kullanici_id" => $_SESSION['kullanici_id'],
             "paket_id" => $paket_id,
             "baslangic_tarihi" => date("Y-m-d"),
-            "bitis_tarihi" => date("Y-m-d", strtotime("+1 month")), // 1 ay geçerli
+            "bitis_tarihi" => date("Y-m-d", strtotime("+" . ($paket->sure ?? 30) . " days")), // Paket suresi kadar gun gecerli
             "firma_hakki" => $paket->firma_hakki,
 
         ];
@@ -79,13 +79,12 @@ if ($_POST["action"] == "odeme_yap") {
             $ref_user = $userModel->find($referred_by);
             if ($ref_user) {
                 $ref_user_abonelik = $KullaniciAbonelikModel->getSubscriptionByUserId($ref_user->id);
-                if ($ref_user_abonelik) {
-                    //Eğer referans kullanıcının aktif aboneliği varsa bitiş tarihine 1 ay ekle
-                    $new_bitis_tarihi = date("Y-m-d", strtotime($ref_user_abonelik->bitis_tarihi . " +1 month"));
+                    //Eğer referans kullanıcının aktif aboneliği varsa bitiş tarihine 30 gün ekle
+                    $new_bitis_tarihi = date("Y-m-d", strtotime($ref_user_abonelik->bitis_tarihi . " +30 days"));
                     $KullaniciAbonelikModel->saveWithAttr([
                         "id" => $ref_user_abonelik->id,
                         "bitis_tarihi" => $new_bitis_tarihi,
-                        "aciklama" =>  $ref_user_abonelik->aciklama . "\n" . $user->id . " id'li kullanıcının referans ile 1 ay uzatıldı - " . date("d-m-Y H:i:s")
+                        "aciklama" =>  $ref_user_abonelik->aciklama . "\n" . $user->id . " id'li kullanıcının referans ile 30 gün uzatıldı - " . date("d-m-Y H:i:s")
                     ]);
                 } else {    
                     //Eğer referans kullanıcının aktif aboneliği yoksa yeni bir abonelik oluştur
@@ -93,10 +92,10 @@ if ($_POST["action"] == "odeme_yap") {
                         "kullanici_id" => $ref_user->id,
                         "paket_id" => 4, //Ücretsiz paket
                         "baslangic_tarihi" => date("Y-m-d"),
-                        "bitis_tarihi" => date("Y-m-d", strtotime("+1 month")),
+                        "bitis_tarihi" => date("Y-m-d", strtotime("+30 days")),
                         "firma_hakki" => 1,
                         "durum" => "aktif",
-                        "aciklama" => "Referans ile 1 ay hediye - " . date("d-m-Y H:i:s")
+                        "aciklama" => "Referans ile 30 gün hediye - " . date("d-m-Y H:i:s")
 
                     ]);
                 }

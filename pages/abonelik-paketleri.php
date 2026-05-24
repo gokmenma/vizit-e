@@ -128,10 +128,10 @@ $referral_code  = $_SESSION["user"]->referral_code ?? null;
                             <li>
                                 <div class="d-flex justify-content-center align-items-center mb-3">
 
-                                    <h3><?php echo $paket->fiyat; ?> ₺ /</h3> <b> Ay</b>
+                                    <h3><?php echo $paket->fiyat; ?> ₺ /</h3> <b> <?php echo $paket->sure; ?> Gün</b>
                                 </div>
 
-                                <span>Yıllık faturalandırma yapılır</span>
+                                <span><?php echo $paket->sure; ?> gün boyunca geçerlidir</span>
                             </li>
                             <li><button class="btn btn-primary btn-round satin-al <?php echo $buttonClass; ?>" data-id="<?php echo $enc_id; ?>">Satın Al</button></li>
                         </ul>

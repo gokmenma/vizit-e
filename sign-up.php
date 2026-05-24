@@ -167,7 +167,7 @@ if (isset($davetid)) {
             border-radius: 6px;
             border: 1px solid #e4e4e7;
             background: #fff;
-            padding: 0 0.75rem;
+            padding: 0 0.75rem 0 2.25rem !important; /* make space for the icon */
             font-size: 0.875rem;
             font-family: inherit;
             box-sizing: border-box;
@@ -178,6 +178,39 @@ if (isset($davetid)) {
             outline: none;
             border-color: #18181b;
             ring: 1px solid #18181b;
+        }
+
+        /* Custom Input Icon Styling */
+        .input-icon-wrapper {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+
+        .input-icon-wrapper i,
+        .input-icon-wrapper svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1rem;
+            height: 1rem;
+            color: #a1a1aa; /* text-zinc-400 */
+            pointer-events: none;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group input:focus + i,
+        .form-group input:focus + svg {
+            color: #18181b; /* zinc-900 */
+        }
+
+        .dark .form-group input:focus + i,
+        .dark .form-group input:focus + svg {
+            color: #f4f4f5; /* zinc-100 */
         }
 
         .btn-login {
@@ -428,18 +461,35 @@ if (isset($davetid)) {
                 <?php endif; ?>
 
                 <div class="form-group">
+                    <label for="adi_soyadi">Adı Soyadı</label>
+                    <div class="input-icon-wrapper">
+                        <input type="text" id="adi_soyadi" name="adi_soyadi" placeholder="Ad ve soyadınızı giriniz" required autofocus>
+                        <i data-lucide="user"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label for="kullanici_adi">Kullanıcı Adı</label>
-                    <input type="text" id="kullanici_adi" name="kullanici_adi" placeholder="Kullanıcı adı giriniz" required autofocus>
+                    <div class="input-icon-wrapper">
+                        <input type="text" id="kullanici_adi" name="kullanici_adi" placeholder="Kullanıcı adı giriniz" required>
+                        <i data-lucide="at-sign"></i>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="email">E-Posta</label>
-                    <input type="email" id="email" name="email" placeholder="isim@sirket.com" required>
+                    <div class="input-icon-wrapper">
+                        <input type="email" id="email" name="email" placeholder="isim@sirket.com" required>
+                        <i data-lucide="mail"></i>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="sifre">Şifre</label>
-                    <input type="password" id="sifre" name="sifre" placeholder="••••••••" required>
+                    <div class="input-icon-wrapper">
+                        <input type="password" id="sifre" name="sifre" placeholder="••••••••" required>
+                        <i data-lucide="lock"></i>
+                    </div>
                 </div>
 
                 <hr style="border: 0; border-top: 1px solid #e4e4e7; margin: 1.5rem 0;" class="dark:border-zinc-800">
@@ -511,7 +561,9 @@ if (isset($davetid)) {
 
     <script>
         $(function() {
+            if (window.lucide) lucide.createIcons();
             const $form = $('#signupForm');
+            const $adiSoyadiInput = $('#adi_soyadi');
             const $kullaniciAdiInput = $('#kullanici_adi');
             const $emailInput = $('#email');
             const $sifreInput = $('#sifre');
@@ -519,10 +571,11 @@ if (isset($davetid)) {
             const $aydinlatmaCheckbox = $('#aydinlatma_onay');
             const $submitButton = $('.btn-submit');
 
-            const $fieldsToValidate = $kullaniciAdiInput.add($emailInput).add($sifreInput).add($rizaCheckbox).add($aydinlatmaCheckbox);
+            const $fieldsToValidate = $adiSoyadiInput.add($kullaniciAdiInput).add($emailInput).add($sifreInput).add($rizaCheckbox).add($aydinlatmaCheckbox);
 
             function validateForm() {
-                const textInputsValid = $.trim($kullaniciAdiInput.val()) !== '' &&
+                const textInputsValid = $.trim($adiSoyadiInput.val()) !== '' &&
+                    $.trim($kullaniciAdiInput.val()) !== '' &&
                     $.trim($emailInput.val()) !== '' &&
                     $.trim($sifreInput.val()) !== '';
                 const checkboxesValid = $rizaCheckbox.is(':checked') && $aydinlatmaCheckbox.is(':checked');

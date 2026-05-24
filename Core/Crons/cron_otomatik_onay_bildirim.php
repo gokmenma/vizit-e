@@ -31,6 +31,7 @@ use App\Helper\Security;
 use Models\KullaniciIsyeriModel;
 use Models\KullaniciAyarModel;
 use Core\Services\CronReporter;
+use Models\RaporModel;
 
 
 $logger = new FileLogger(__DIR__ . '/../../logs/crons', 'otomatik_onay_bildirim');
@@ -59,6 +60,7 @@ try {
     // Veritabanı modellerini başlat
     $userModel = new UserModel();
     $isyeriModel = new KullaniciIsyeriModel();
+    $raporModel = new RaporModel();
 
     // 1. Sistemdeki tüm aktif kullanıcıları al
     $kullanicilar = $userModel->all();
@@ -145,6 +147,23 @@ try {
 
                 // Gerekli raporları (3+ gün) filtrele ve ana toplama dizisine ekle
                 foreach ($raporlar as $rapor) {
+                    // Eğer ARSIV durumu = 1 ise bu raporu atla
+                    if ($rapor['ARSIV'] == 1) {
+                        continue;
+                    }
+
+                    // Eğer rapor durumu "ONAYLI" veya "ONAYLANDI" içeriyorsa bu raporu atla (SGK'dan gelen veri)
+                    if ((isset($rapor['RAPORDURUMADI']) && stripos($rapor['RAPORDURUMADI'], 'ONAY') !== false) ||
+                        (isset($rapor['ONAYLI']) && ($rapor['ONAYLI'] == '1' || $rapor['ONAYLI'] == 'E')) ||
+                        (isset($rapor['ONAYDURUMU']) && ($rapor['ONAYDURUMU'] == '1' || $rapor['ONAYDURUMU'] == 'E'))) {
+                        continue;
+                    }
+
+                    // Eğer bu rapor bizim veritabanımızda zaten onaylanmış görünüyorsa atla
+                    if ($raporModel->findReportByRaporTakipNo($rapor['RAPORTAKIPNO'])) {
+                        continue;
+                    }
+
                     // Tarih kontrolü
                     $baslangic = new DateTime($rapor['POLIKLINIKTAR']);
                     $iseBasi = new DateTime($rapor['ISBASKONTTAR']);

@@ -71,19 +71,88 @@ class Security
 
 
     /**
-     * firma Adı kontrolü yapılır, sessionda yoksa firma seçme sayfasına yönlendirir
+     * firma Adı kontrolü yapılır, sessionda yoksa veya tanımlı işyeri yoksa firma seçme sayfasına yönlendirir
      * 
      */
     public static function checkFirma()
     {
-        // Don't redirect on AJAX requests (used by mobile SPA router) to prevent infinite loops
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
-            return;
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
 
-        if (!isset($_SESSION['firma_adi'])) {
-            if(!$_SESSION['role'] == "user"){
-                $_SESSION['hata'] = 'Lütfen önce firma seçiniz.';
+        if (!isset($_SESSION['kullanici_id'])) {
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                echo "<script>window.location.href = 'sign-in';</script>";
+                exit();
+            }
+            header('Location: sign-in');
+            exit();
+        }
+
+        $kullaniciId = $_SESSION['kullanici_id'];
+        $userRole = $_SESSION["role"] ?? "user";
+        
+        $isyeriModel = new KullaniciIsyeriModel();
+        $isyerleri = [];
+
+        if ($userRole === 'user') {
+            $isyeri_ids = '';
+            if (isset($_SESSION['user']) && is_object($_SESSION['user'])) {
+                $isyeri_ids = $_SESSION['user']->yetkili_oldugu_isyeri_ids ?? '';
+            } else {
+                try {
+                    $db = \Core\Database::getInstance()->getConnection();
+                    $stmt = $db->prepare("SELECT yetkili_oldugu_isyeri_ids FROM kullanicilar WHERE id = ?");
+                    $stmt->execute([$kullaniciId]);
+                    $isyeri_ids = $stmt->fetchColumn() ?: '';
+                } catch (\Exception $e) {
+                }
+            }
+            $isyerleri = $isyeriModel->AltKullaniciİsyerleri($isyeri_ids);
+        } else {
+            $isyerleri = $isyeriModel->whereRaw('kullanici_id = ? AND aktif_mi = ?', [$kullaniciId, 1]);
+        }
+
+        // 1. Eğer kullanıcının tanımlı hiçbir işyeri yoksa, isyerlerim sayfasına yönlendir
+        if (empty($isyerleri)) {
+            $_SESSION['hata'] = 'İşlem yapabilmek için lütfen önce en az bir işyeri ekleyiniz.';
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                echo "<script>window.location.href = 'isyerlerim';</script>";
+                exit();
+            }
+            header('Location: isyerlerim');
+            exit();
+        }
+
+        // 2. Eğer session'da işyeri seçili değilse, isyerlerim sayfasına yönlendir
+        if (!isset($_SESSION['isyeri_id']) || empty($_SESSION['isyeri_id']) || !isset($_SESSION['firma_adi'])) {
+            if ($userRole !== "user") {
+                $_SESSION['hata'] = 'Lütfen önce işlem yapacağınız firmayı seçiniz.';
+            }
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                echo "<script>window.location.href = 'isyerlerim';</script>";
+                exit();
+            }
+            header('Location: isyerlerim');
+            exit();
+        }
+
+        // 3. Eğer session'da seçili olan işyeri kullanıcının yetkili olduğu işyerleri arasında değilse (silinmiş/yetkisi kalkmışsa)
+        $isyeriAuthorized = false;
+        foreach ($isyerleri as $isyeri) {
+            if ((int)$isyeri->id === (int)$_SESSION['isyeri_id']) {
+                $isyeriAuthorized = true;
+                break;
+            }
+        }
+
+        if (!$isyeriAuthorized) {
+            unset($_SESSION['isyeri_id']);
+            unset($_SESSION['firma_adi']);
+            $_SESSION['hata'] = 'Seçili işyerine erişim yetkiniz bulunmamaktadır. Lütfen listeden başka bir işyeri seçiniz.';
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                echo "<script>window.location.href = 'isyerlerim';</script>";
+                exit();
             }
             header('Location: isyerlerim');
             exit();

@@ -101,26 +101,26 @@ if (!$paket) {
                             <table class="table table-bordered mt-3">
                                 <tbody>
                                     <tr>
-                                        <td>Paket Aylık Fiyatı</td>
+                                        <td>Paket Fiyatı</td>
                                         <td class="text-right"><strong><?php echo $paket_fiyat; ?> ₺</strong></td>
                                     </tr>
                                     <tr>
                                         <td>Abonelik Süresi</td>
-                                        <td class="text-right"><strong>12 Ay</strong></td>
+                                        <td class="text-right"><strong><?php echo $paket->sure; ?> Gün</strong></td>
                                     </tr>
                                    
                                     <tr class="bg-light">
                                         <td class="font-weight-bold">Ödenecek Toplam Tutar</td>
-                                        <td class="text-right font-weight-bold h4 m-0 text-info"><?php echo number_format($paket->fiyat * 12, 2, ',', '.'); ?> TL</td>
+                                        <td class="text-right font-weight-bold h4 m-0 text-info"><?php echo $paket_fiyat; ?> TL</td>
                                     </tr>
                                     <?php if($user->referral_used == "pending"): ?>
                                     <tr>
                                         <td>İndirim Süresi</td>
-                                        <td class="text-right"><strong>1 Ay / <?php echo $paket_fiyat ?> ₺</strong></td>
+                                        <td class="text-right"><strong>30 Gün / <?php echo $paket_fiyat ?> ₺ (Referans)</strong></td>
                                     </tr>
                                     <tr class="bg-light">
                                         <td class="font-weight-bold">Toplam Ödenecek Tutar</td>
-                                        <td class="text-right font-weight-bold h4 m-0 text-success"><?php echo number_format($paket->fiyat * 11, 2, ',', '.'); ?> TL</td>
+                                        <td class="text-right font-weight-bold h4 m-0 text-success">0,00 TL</td>
                                     </tr>
                                     <?php endif; ?>
                                 </tbody>

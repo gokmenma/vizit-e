@@ -52,10 +52,13 @@ $paketler = $paketModel->all();
                         <th class="sortable" onclick="sortTable(0)" style="width: 80px;">ID <i data-lucide="chevron-down" class="sort-icon" style="width: 12px;"></i></th>
                         <th class="sortable" onclick="sortTable(1)">Kullanıcı / Firma <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
                         <th class="sortable" onclick="sortTable(2)">Paket / İletişim <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
-                        <th class="sortable" onclick="sortTable(3)" style="width: 120px;">Yetki <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(3)" style="width: 100px; white-space: nowrap;">Başlangıç <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(4)" style="width: 100px; white-space: nowrap;">Bitiş <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(5)" style="width: 100px; white-space: nowrap;">Kalan <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(6)" style="width: 120px;">Yetki <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
                         <th>İşlem Yetkileri</th>
-                        <th class="sortable" onclick="sortTable(5)" style="text-align: center;">Alt Kullanıcı <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
-                        <th class="sortable" onclick="sortTable(6)">Kayıt Tarihi <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(8)" style="text-align: center;">Alt Kullanıcı <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
+                        <th class="sortable" onclick="sortTable(9)">Kayıt Tarihi <i data-lucide="chevrons-up-down" class="sort-icon" style="width: 12px;"></i></th>
                         <th>Durum</th>
                         <th style="text-align: right;">İşlemler</th>
                     </tr>
@@ -102,6 +105,35 @@ $paketler = $paketModel->all();
                                 <span style="font-size: 0.875rem; font-weight: 600; color: #2563eb;"><?php echo $user->paket_adi ?? 'Paketsiz'; ?></span>
                                 <span style="font-size: 0.75rem; color: var(--muted-foreground);"><?php echo $user->email; ?></span>
                             </div>
+                        </td>
+                        <?php 
+                            $has_sub = !empty($user->baslangic_tarihi) && !empty($user->bitis_tarihi) && $user->current_paket_id;
+                            $kalan_gun = 0;
+                            $start_formatted = '-';
+                            $end_formatted = '-';
+                            if ($has_sub) {
+                                $bugun = new DateTime(date('Y-m-d'));
+                                $bitis = new DateTime($user->bitis_tarihi);
+                                if ($bitis > $bugun) {
+                                    $diff = $bugun->diff($bitis);
+                                    $kalan_gun = $diff->days;
+                                }
+                                $start_formatted = date('d.m.Y', strtotime($user->baslangic_tarihi));
+                                $end_formatted = date('d.m.Y', strtotime($user->bitis_tarihi));
+                            }
+                        ?>
+                        <td style="font-size: 0.775rem; font-weight: 500; color: var(--foreground); white-space: nowrap; width: 100px;"><?php echo $start_formatted; ?></td>
+                        <td style="font-size: 0.775rem; font-weight: 500; color: var(--foreground); white-space: nowrap; width: 100px;"><?php echo $end_formatted; ?></td>
+                        <td style="white-space: nowrap; width: 100px;">
+                            <?php if ($has_sub): ?>
+                                <?php if ($kalan_gun > 0): ?>
+                                    <span class="badge" style="background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; font-weight: 600; font-size: 0.7rem; padding: 0.125rem 0.375rem; border-radius: 4px; display: inline-flex; align-items: center;"><?php echo $kalan_gun; ?> Gün</span>
+                                <?php else: ?>
+                                    <span class="badge" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; font-weight: 600; font-size: 0.7rem; padding: 0.125rem 0.375rem; border-radius: 4px; display: inline-flex; align-items: center;">Süresi Doldu</span>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <span style="color: #a1a1aa; font-size: 0.75rem;">-</span>
+                            <?php endif; ?>
                         </td>
                         <td>
                             <span class="badge <?php echo $roleBadge; ?>" style="font-size: 0.7rem;">

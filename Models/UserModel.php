@@ -194,6 +194,8 @@ class UserModel extends Model
                                         k.*, 
                                         ap.ad as paket_adi,
                                         ka.paket_id as current_paket_id,
+                                        ka.baslangic_tarihi,
+                                        ka.bitis_tarihi,
                                         (SELECT COUNT(*) FROM kullanicilar k2 WHERE k2.admin_id = k.id AND (k2.silinme_tarihi IS NULL OR k2.silinme_tarihi = '')) as alt_kullanici_sayisi
                                     FROM {$this->table} k 
                                     LEFT JOIN (

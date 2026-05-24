@@ -43,6 +43,19 @@ if (isset($_GET['url']) && $_GET['url'] !== 'index' && $_GET['url'] !== '') {
     $pageContent = ob_get_clean();
 }
 
+// Logo SVG'yi inline gömmek için oku (URL/path sorunlarını tamamen ortadan kaldırır)
+$logoSvgContent = @file_get_contents(__DIR__ . '/../assets/images/logo.svg') ?: '';
+if ($logoSvgContent) {
+    // width/height'i container'a uygun hale getir
+    $logoSvgContent = preg_replace('/(<svg[^>]*)\swidth="[^"]*"/', '$1 width="100%"', $logoSvgContent);
+    $logoSvgContent = preg_replace('/(<svg[^>]*)\sheight="[^"]*"/', '$1 height="100%"', $logoSvgContent);
+}
+
+// SCRIPT_NAME üzerinden gerçek root path'i hesapla (BASE_PATH yanlış olsa bile çalışır)
+$scriptRoot = dirname(dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+if ($scriptRoot === '/' || $scriptRoot === '\\') $scriptRoot = '';
+$scriptRoot = rtrim($scriptRoot, '/');
+
 if ($is_admin_host) {
     $adminBase = '/';
     $assetBase = '/assets/';
@@ -61,8 +74,8 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base href="<?php echo $adminBase; ?>">
     <title>Admin Panel | SGK Vizite</title>
-    <link rel="icon" href="<?php echo rtrim($basePath, '/'); ?>/assets/images/logo.svg" type="image/svg+xml">
-    <link rel="shortcut icon" href="<?php echo rtrim($basePath, '/'); ?>/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="<?php echo $scriptRoot; ?>/assets/images/logo.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="<?php echo $scriptRoot; ?>/favicon.ico" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Basecoat CSS (BaseUI) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
@@ -121,7 +134,7 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
         <nav aria-label="Sidebar navigation">
             <header class="sidebar-header">
                 <div class="sidebar-logo">
-                    <img src="<?php echo rtrim($basePath, '/'); ?>/assets/images/logo.svg?v=<?php echo filemtime(__DIR__ . '/../assets/images/logo.svg'); ?>" alt="Vizit-e" style="width: 28px; height: 28px; border-radius: 6px;">
+                    <div style="width: 28px; height: 28px; border-radius: 6px; overflow: hidden; flex-shrink: 0;"><?php echo $logoSvgContent; ?></div>
                     <div class="logo-text">
                         <span class="logo-title">Vizit-e</span>
                         <span class="logo-subtitle">Admin v1.0</span>

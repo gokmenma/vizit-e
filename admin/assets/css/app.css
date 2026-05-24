@@ -2358,5 +2358,62 @@ dialog {
     padding: 12px 10px !important;
 }
 
+/* Custom Tooltip using data-tooltip */
+[data-tooltip] {
+    position: relative;
+    cursor: help;
+}
+
+[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, -8px) scale(0.95);
+    padding: 6px 10px;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: center;
+    white-space: pre-line;
+    width: max-content;
+    max-width: 320px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+    z-index: 10000;
+}
+
+[data-tooltip]::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, -3px) scale(0.95);
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--primary) transparent transparent transparent;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+    z-index: 10000;
+}
+
+[data-tooltip]:hover::before {
+    opacity: 1;
+    transform: translate(-50%, -6px) scale(1);
+}
+
+[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translate(-50%, -1px) scale(1);
+}
+
+
 
 

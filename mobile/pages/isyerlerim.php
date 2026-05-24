@@ -103,7 +103,7 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                     <!-- Title & Code -->
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex flex-col text-left min-w-0">
-                            <span class="font-bold text-xs text-zinc-900 dark:text-zinc-50 leading-tight"><?php echo htmlspecialchars($isyeri->firma_adi); ?></span>
+                            <span class="isyeri-duzenle font-bold text-xs text-zinc-900 dark:text-zinc-50 leading-tight cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors" data-id="<?php echo $enc_id; ?>"><?php echo htmlspecialchars($isyeri->firma_adi); ?></span>
                             <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono mt-1">Kod: <?php echo htmlspecialchars($isyeri->isyeri_kodu); ?></span>
                         </div>
                         <?php if ($is_selected): ?>
@@ -125,9 +125,14 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                             <?php endif; ?>
                         </div>
                         <?php if (!empty($isyeri->otomatik_onay_eposta)): ?>
-                            <div class="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800 max-w-[200px] truncate" title="<?php echo htmlspecialchars($isyeri->otomatik_onay_eposta); ?>">
+                            <?php 
+                            $eposta_adresleri = explode(',', $isyeri->otomatik_onay_eposta);
+                            $ilk_eposta = htmlspecialchars(trim($eposta_adresleri[0]));
+                            $display_text = $ilk_eposta . (count($eposta_adresleri) > 1 ? ' ...' : '');
+                            ?>
+                            <div class="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800 max-w-[200px] truncate cursor-help" data-tooltip="<?php echo htmlspecialchars(implode("\n", array_map('trim', $eposta_adresleri))); ?>">
                                 <i data-lucide="mail" style="width: 10px; height: 10px;" class="text-zinc-400"></i>
-                                <span class="text-zinc-500 truncate"><?php echo htmlspecialchars($isyeri->otomatik_onay_eposta); ?></span>
+                                <span class="text-zinc-500 truncate"><?php echo $display_text; ?></span>
                             </div>
                         <?php endif; ?>
                     </div>

@@ -199,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 6px;
             border: 1px solid #e4e4e7;
             background: #fff;
-            padding: 0 0.75rem;
+            padding: 0 0.75rem 0 2.25rem !important; /* make space for the icon */
             font-size: 0.875rem;
             font-family: inherit;
             box-sizing: border-box;
@@ -210,6 +210,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             outline: none;
             border-color: #18181b;
             ring: 1px solid #18181b;
+        }
+
+        /* Custom Input Icon Styling */
+        .input-icon-wrapper {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+
+        .input-icon-wrapper i,
+        .input-icon-wrapper svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1rem;
+            height: 1rem;
+            color: #a1a1aa; /* text-zinc-400 */
+            pointer-events: none;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group input:focus + i,
+        .form-group input:focus + svg {
+            color: #18181b; /* zinc-900 */
+        }
+
+        .dark .form-group input:focus + i,
+        .dark .form-group input:focus + svg {
+            color: #f4f4f5; /* zinc-100 */
         }
 
         .forgot-password-link {
@@ -349,7 +382,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form id="loginForm" action="sign-in" method="POST">
                 <div class="form-group">
                     <label for="kullanici_adi">Kullanıcı Adı</label>
-                    <input type="text" id="kullanici_adi" name="kullanici_adi" placeholder="Kullanıcı adınızı giriniz" required autofocus>
+                    <div class="input-icon-wrapper">
+                        <input type="text" id="kullanici_adi" name="kullanici_adi" placeholder="Kullanıcı adınızı giriniz" required autofocus>
+                        <i data-lucide="user"></i>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -357,7 +393,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label for="password">Şifre</label>
                         <a href="forgot-password" class="forgot-password-link">Şifremi Unuttum?</a>
                     </div>
-                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    <div class="input-icon-wrapper">
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                        <i data-lucide="lock"></i>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-login">Giriş Yap</button>

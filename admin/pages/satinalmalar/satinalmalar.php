@@ -219,7 +219,7 @@ foreach ($kullanicilar as $user) {
                 </div>
                 <div class="form-group">
                     <label class="form-label">Bitiş Tarihi</label>
-                    <input type="date" name="bitis_tarihi" class="form-input" value="<?php echo date('Y-m-d', strtotime('+1 year')); ?>" required>
+                    <input type="date" name="bitis_tarihi" class="form-input" value="<?php echo date('Y-m-d', strtotime('+30 days')); ?>" required>
                 </div>
             </div>
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
@@ -327,6 +327,18 @@ foreach ($kullanicilar as $user) {
         if (paket) {
             document.getElementById('add-firma-hakki').value = paket.firma_hakki || 30;
             document.getElementById('add-alt-kullanici-hakki').value = paket.alt_kullanici_hakki || 3;
+            
+            // Set bitis_tarihi dynamically based on paket.sure (days)
+            const sure = parseInt(paket.sure) || 30;
+            const startInput = document.querySelector('#add-purchase-form input[name="baslangic_tarihi"]');
+            const refDate = startInput && startInput.value ? new Date(startInput.value) : new Date();
+            refDate.setDate(refDate.getDate() + sure);
+            const calculatedEnd = refDate.toISOString().split('T')[0];
+            const endInput = document.querySelector('#add-purchase-form input[name="bitis_tarihi"]');
+            if (endInput) {
+                endInput.value = calculatedEnd;
+                if (endInput._flatpickr) endInput._flatpickr.setDate(calculatedEnd);
+            }
         }
     }
 
@@ -372,6 +384,18 @@ foreach ($kullanicilar as $user) {
         if (paket) {
             document.getElementById('sub-edit-firma-hakki').value = paket.firma_hakki || 30;
             document.getElementById('sub-edit-alt-kullanici-hakki').value = paket.alt_kullanici_hakki || 3;
+            
+            // Set bitis_tarihi dynamically based on paket.sure (days)
+            const sure = parseInt(paket.sure) || 30;
+            const startInput = document.getElementById('sub-edit-start-date');
+            const refDate = startInput && startInput.value ? new Date(startInput.value) : new Date();
+            refDate.setDate(refDate.getDate() + sure);
+            const calculatedEnd = refDate.toISOString().split('T')[0];
+            const endInput = document.getElementById('sub-edit-end-date');
+            if (endInput) {
+                endInput.value = calculatedEnd;
+                if (endInput._flatpickr) endInput._flatpickr.setDate(calculatedEnd);
+            }
         }
     }
 
@@ -416,8 +440,11 @@ foreach ($kullanicilar as $user) {
             endInput.value = endDate;
             if (endInput._flatpickr) endInput._flatpickr.setDate(endDate);
         } else {
+            const pkgId = el.dataset.package;
+            const paket = availablePackages.find(p => p.id == pkgId);
+            const sure = paket ? parseInt(paket.sure) : 30;
             const refDate = (startDate && startDate !== '0000-00-00') ? new Date(startDate) : new Date();
-            refDate.setFullYear(refDate.getFullYear() + 1);
+            refDate.setDate(refDate.getDate() + sure);
             const calculatedEnd = refDate.toISOString().split('T')[0];
             endInput.value = calculatedEnd;
             if (endInput._flatpickr) endInput._flatpickr.setDate(calculatedEnd);
