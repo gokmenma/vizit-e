@@ -362,13 +362,13 @@ $toplamRaporSayisi = count($raporlar);
                                             $raporBitis->setTime(0, 0, 0);
                                             $bugun = new DateTime();
                                             $bugun->setTime(0, 0, 0);
-                                            if ($raporBitis > $bugun || $is_invalid_date) {
+                                            if ($raporBitis >= $bugun || $is_invalid_date) {
                                                 $is_future = true;
                                             }
                                         } catch (Exception $e) {
                                             $is_future = true;
                                         }
-                                        $disabled_attr = $is_future ? 'disabled title="Rapor süresi henüz dolmadı veya bitiş tarihi belirsiz"' : '';
+                                        $disabled_attr = $is_future ? 'disabled title="Rapor süresi henüz dolmadı, bugün bitiyor veya bitiş tarihi belirsiz"' : '';
                                         
                                         $yetkiler = $_SESSION["yetkiler"] ?? "";
                                         $can_approve = ($userRole == "admin" || $userRole == "superadmin" || strpos($yetkiler, "rapor_onay") !== false);

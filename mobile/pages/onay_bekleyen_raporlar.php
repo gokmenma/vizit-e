@@ -157,13 +157,13 @@ $toplamRaporSayisi = count($raporlar);
                     $raporBitis->setTime(0, 0, 0);
                     $bugun = new DateTime();
                     $bugun->setTime(0, 0, 0);
-                    if ($raporBitis > $bugun || $is_invalid_date) {
+                    if ($raporBitis >= $bugun || $is_invalid_date) {
                         $is_future = true;
                     }
                 } catch (Exception $e) {
                     $is_future = true;
                 }
-                $disabled_attr = $is_future ? 'disabled title="Rapor süresi henüz dolmadı veya bitiş tarihi belirsiz"' : '';
+                $disabled_attr = $is_future ? 'disabled title="Rapor süresi henüz dolmadı, bugün bitiyor veya bitiş tarihi belirsiz"' : '';
                 $can_approve = ($userRole == "admin" || $userRole == "superadmin" || strpos($_SESSION["yetkiler"] ?? "", "rapor_onay") !== false);
             ?>
             <div class="rapor-row p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col gap-3.5 shadow-xs" data-rapor='<?php echo htmlspecialchars(json_encode($rapor)); ?>' data-gun-farki="<?php echo $rapor['gun_farki']; ?>">
