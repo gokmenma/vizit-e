@@ -5,6 +5,20 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ==========================================
+// AJAX BAŞLIĞI NORMALİZASYONU (bkz. kök index.php açıklaması)
+// Bazı sunucularda 'X-Requested-With' bozuk harf düzeniyle (HTTP_X_REQUESTED_WiTH) gelir.
+// ==========================================
+if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+    foreach ($_SERVER as $__k => $__v) {
+        if (strcasecmp($__k, 'HTTP_X_REQUESTED_WITH') === 0) {
+            $_SERVER['HTTP_X_REQUESTED_WITH'] = $__v;
+            break;
+        }
+    }
+    unset($__k, $__v);
+}
+
+// ==========================================
 // BAKIM MODU INTERCEPTOR (Süper Admin Hariç)
 // ==========================================
 try {

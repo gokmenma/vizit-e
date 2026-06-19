@@ -47,16 +47,17 @@ class DatabaseLogger extends Model implements LoggerInterface
 
         $sql = "INSERT INTO logs (
                     ip_address,user_id,
-                    browser,
-                    level, message, 
-                    context, channel) 
-                VALUES (:ip_address,:user_id,:browser,:level, :message, :context, :channel)";
+                    browser, os,
+                    level, message,
+                    context, channel)
+                VALUES (:ip_address,:user_id,:browser,:os,:level, :message, :context, :channel)";
 
 
 
-        
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
         $stmt = $this->db->prepare($sql);
-        
+
         $stmt->execute([
             ':ip_address' => $_SERVER['REMOTE_ADDR'] ?? 0,
             ':user_id' => $userId,
@@ -64,7 +65,8 @@ class DatabaseLogger extends Model implements LoggerInterface
             ':message' => $message,
             ':context' => !empty($context) ? json_encode($context, JSON_UNESCAPED_UNICODE) : null,
             ':channel' => $this->channel,
-           ':browser' => UserAgent::parseBrowser($_SERVER['HTTP_USER_AGENT']) ?? 0
+           ':browser' => UserAgent::parseBrowser($userAgent) ?? '',
+           ':os' => UserAgent::parseOS($userAgent) ?? ''
 
 
         ]);

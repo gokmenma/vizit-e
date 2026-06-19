@@ -41,15 +41,20 @@ try {
             $raporBitisTarihiStr = $inputData['raporBitisTarihi'] ?? null;
 
             // Vaka(İş Kazası(1), Meslek Hastalığı (2), Hastalık(3), Analık(4))
-            $vaka = [
+            $vakaMap = [
                 "İŞ KAZASI" => 1,
                 "MESLEK HASTALIK" => 2,
                 "HASTALIK" => 3,
                 "ANALIK" => 4
-
             ];
 
-            $rapor['VAKA'] = $vaka[$rapor['VAKA']]; // Varsayılan olarak 'Hastalık' (3) atandı
+            $vakaInput = $rapor['VAKA'] ?? '';
+            if (in_array((int)$vakaInput, [1, 2, 3, 4], true)) {
+                $rapor['VAKA'] = (int)$vakaInput;
+            } else {
+                $normalizedVaka = strtoupper(trim($vakaInput));
+                $rapor['VAKA'] = $vakaMap[$normalizedVaka] ?? 3; // Varsayılan olarak 'Hastalık' (3) atandı
+            }
 
             //Eğer vaka boş işe veya geçersiz ise hata ver
             if (empty($rapor['VAKA']) || !in_array($rapor['VAKA'], [1, 2, 3, 4])) {
@@ -143,6 +148,22 @@ try {
             if (!$rapor) {
                 throw new Exception("Eksik parametre: raporData zorunludur.");
             };
+
+            // Vaka(İş Kazası(1), Meslek Hastalığı (2), Hastalık(3), Analık(4))
+            $vakaMap = [
+                "İŞ KAZASI" => 1,
+                "MESLEK HASTALIK" => 2,
+                "HASTALIK" => 3,
+                "ANALIK" => 4
+            ];
+
+            $vakaInput = $rapor['VAKA'] ?? '';
+            if (in_array((int)$vakaInput, [1, 2, 3, 4], true)) {
+                $rapor['VAKA'] = (int)$vakaInput;
+            } else {
+                $normalizedVaka = strtoupper(trim($vakaInput));
+                $rapor['VAKA'] = $vakaMap[$normalizedVaka] ?? 3; // Varsayılan
+            }
 
             $pdResponse = $sgkClient->personelimDegilBildir(
                 $rapor['MEDULARAPORID'],

@@ -7,6 +7,23 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ==========================================
+// AJAX BAŞLIĞI NORMALİZASYONU
+// Bazı sunucu/modül kombinasyonlarında (ör. bu makinedeki mod_perl) 'X-Requested-With'
+// başlığı bozuk büyük/küçük harfle (HTTP_X_REQUESTED_WiTH) geliyor ve kodun beklediği
+// HTTP_X_REQUESTED_WITH anahtarı boş kalıyor. Anahtarı normalize ediyoruz.
+// Üretimde başlık zaten doğru geldiğinden bu blok etkisizdir.
+// ==========================================
+if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+    foreach ($_SERVER as $__k => $__v) {
+        if (strcasecmp($__k, 'HTTP_X_REQUESTED_WITH') === 0) {
+            $_SERVER['HTTP_X_REQUESTED_WITH'] = $__v;
+            break;
+        }
+    }
+    unset($__k, $__v);
+}
+
+// ==========================================
 // BAKIM MODU INTERCEPTOR (Süper Admin Hariç)
 // ==========================================
 try {

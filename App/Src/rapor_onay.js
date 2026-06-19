@@ -28,7 +28,7 @@
         RAPORTAKIPNO: raporData.RAPORTAKIPNO,
         ABASTAR: raporData.ABASTAR,
         ABITTAR: raporData.ABITTAR,
-        VAKA: raporData.VAKAADI,
+        VAKA: raporData.VAKA,
         SIGORTALIADSOYAD: raporData.SIGORTALIADSOYAD,
         POLIKLINIKTAR: raporData.POLIKLINIKTAR,
         ISBASKONTTAR: raporData.ISBASKONTTAR,
@@ -154,7 +154,7 @@
     let payload = {
       MEDULARAPORID: raporData.MEDULARAPORID,
       TCKIMLIKNO: raporData.TCKIMLIKNO,
-      VAKA: raporData.VAKAADI
+      VAKA: raporData.VAKA
     };
 
     swal.fire({
