@@ -476,6 +476,89 @@ if (isset($_SESSION['kullanici_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
 
     <script>
+    // Global Flatpickr Month Selector Customization
+    (function() {
+        if (typeof window.flatpickr === 'undefined') return;
+
+        const originalFlatpickr = window.flatpickr;
+
+        function initCustomMonthSelector(instance) {
+            const nativeSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
+            if (!nativeSelect) return;
+
+            // Hide native select
+            nativeSelect.style.display = 'none';
+
+            // Check if already initialized
+            if (instance.calendarContainer.querySelector('.custom-month-wrapper')) return;
+
+            // Create custom select container
+            const customSelectWrapper = document.createElement('div');
+            customSelectWrapper.className = 'custom-month-wrapper';
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'custom-month-btn';
+            btn.innerHTML = `<span>${nativeSelect.options[nativeSelect.selectedIndex].text}</span><svg class="w-3 h-3 text-zinc-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
+
+            const list = document.createElement('div');
+            list.className = 'custom-month-list hidden';
+
+            // Populate months
+            Array.from(nativeSelect.options).forEach((opt, idx) => {
+                const item = document.createElement('div');
+                item.className = 'custom-month-item';
+                item.textContent = opt.text;
+                item.dataset.value = idx;
+                item.addEventListener('click', () => {
+                    instance.changeMonth(idx, false);
+                    btn.querySelector('span').textContent = opt.text;
+                    list.classList.add('hidden');
+                });
+                list.appendChild(item);
+            });
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.custom-month-list').forEach(l => {
+                    if (l !== list) l.classList.add('hidden');
+                });
+                list.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', () => {
+                list.classList.add('hidden');
+            });
+
+            customSelectWrapper.appendChild(btn);
+            customSelectWrapper.appendChild(list);
+
+            nativeSelect.parentNode.insertBefore(customSelectWrapper, nativeSelect);
+
+            instance.config.onMonthChange.push(function() {
+                btn.querySelector('span').textContent = nativeSelect.options[instance.currentMonth].text;
+            });
+        }
+
+        window.flatpickr = function(selector, config) {
+            config = config || {};
+            config.monthSelectorType = 'dropdown';
+
+            const userOnReady = config.onReady;
+            config.onReady = function(selectedDates, dateStr, instance) {
+                initCustomMonthSelector(instance);
+                if (typeof userOnReady === 'function') {
+                    userOnReady(selectedDates, dateStr, instance);
+                }
+            };
+
+            return originalFlatpickr(selector, config);
+        };
+
+        Object.assign(window.flatpickr, originalFlatpickr);
+    })();
+    </script>
+    <script>
     // Polyfill standard App object components for sub-pages
     window.App = window.App || {};
 

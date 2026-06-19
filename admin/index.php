@@ -145,7 +145,7 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     
     <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="<?php echo $assetBase; ?>css/flatpickr.custom.css">
+    <link rel="stylesheet" href="<?php echo $assetBase; ?>css/flatpickr.custom.css?v=<?php echo filemtime(__DIR__ . '/assets/css/flatpickr.custom.css'); ?>">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
     

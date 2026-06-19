@@ -49,8 +49,47 @@
 }
 
 .flatpickr-current-month .flatpickr-monthDropdown-months {
-    padding: 0 2px !important;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    padding: 2px 22px 2px 6px !important;
     font-weight: 600;
+    color: #18181b;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    font-size: 14px;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2371717a' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 0.8rem;
+}
+
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months {
+    color: #f4f4f5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a1a1aa' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E");
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+    background-color: #f4f4f5;
+}
+
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+    background-color: #27272a;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months option {
+    background-color: #ffffff;
+    color: #18181b;
+    font-weight: 500;
+}
+
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months option {
+    background-color: #18181b;
+    color: #f4f4f5;
 }
 
 .flatpickr-current-month .numInputWrapper {
@@ -182,4 +221,111 @@ input.flatpickr-input {
     background-position: right 0.75rem center;
     background-size: 1.1rem;
     padding-right: 2.25rem;
+}
+
+/* Hide flatpickr calendar icon on the right if a manual icon is already placed on the left */
+.relative > svg + input.flatpickr-input,
+.relative > i + input.flatpickr-input {
+    background-image: none !important;
+    padding-right: 0.75rem !important;
+}
+
+/* Allow custom month dropdown list to overflow the calendar container and stack above days */
+.flatpickr-calendar,
+.flatpickr-month,
+.flatpickr-current-month {
+    overflow: visible !important;
+}
+
+.flatpickr-months {
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* Custom Month Selector Dropdown Styling */
+.custom-month-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-month-btn {
+    padding: 4px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid #e4e4e7;
+    background-color: #ffffff;
+    color: #18181b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.dark .custom-month-btn {
+    border-color: #27272a;
+    background-color: #18181b;
+    color: #f4f4f5;
+}
+
+.custom-month-btn:hover {
+    background-color: #f4f4f5;
+}
+
+.dark .custom-month-btn:hover {
+    background-color: #27272a;
+}
+
+.custom-month-list {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 4px;
+    width: 124px;
+    background-color: #ffffff !important;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    padding: 6px;
+    z-index: 999999 !important;
+    display: none;
+    flex-direction: column;
+}
+
+.dark .custom-month-list {
+    background-color: #09090b !important; /* zinc-950 */
+    border-color: #27272a;
+}
+
+.custom-month-list:not(.hidden) {
+    display: flex;
+}
+
+.custom-month-item {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #3f3f46; /* zinc-700 */
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    text-align: center;
+}
+
+.dark .custom-month-item {
+    color: #d4d4d8; /* zinc-300 */
+}
+
+.custom-month-item:hover {
+    background-color: #f4f4f5;
+    color: #18181b;
+}
+
+.dark .custom-month-item:hover {
+    background-color: #27272a;
+    color: #f4f4f5;
 }

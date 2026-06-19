@@ -15,11 +15,18 @@ $RaporModel = new RaporModel();
 $onayliRaporlar = []; 
 $hataMesaji = '';
 
-$tarih1Str = !empty($_REQUEST['tarih1']) ? $_REQUEST['tarih1'] : date('Y-m-01');
-$tarih2Str = !empty($_REQUEST['tarih2']) ? $_REQUEST['tarih2'] : date('Y-m-d');
+$tarih1Str = !empty($_REQUEST['tarih1']) ? $_REQUEST['tarih1'] : date('01.m.Y');
+$tarih2Str = !empty($_REQUEST['tarih2']) ? $_REQUEST['tarih2'] : date('d.m.Y');
 
-$tarih1 = new DateTime($tarih1Str);
-$tarih2 = new DateTime($tarih2Str);
+$tarih1 = DateTime::createFromFormat('d.m.Y', $tarih1Str);
+if (!$tarih1) {
+    $tarih1 = new DateTime($tarih1Str);
+}
+
+$tarih2 = DateTime::createFromFormat('d.m.Y', $tarih2Str);
+if (!$tarih2) {
+    $tarih2 = new DateTime($tarih2Str);
+}
 $isQueried = !empty($_REQUEST['tarih1']) && !empty($_REQUEST['tarih2']);
 
 if ($isQueried) {
@@ -165,7 +172,7 @@ if ($isQueried) {
     if (window.flatpickr) {
         const fp1 = flatpickr("#tarih1", {
             locale: "tr",
-            dateFormat: "Y-m-d",
+            dateFormat: "d.m.Y",
             allowInput: true,
             onChange: function(selectedDates, dateStr, instance) {
                 if (selectedDates.length > 0) {
@@ -176,7 +183,7 @@ if ($isQueried) {
 
                     let ayStr = String(ay).padStart(2, '0');
                     let gunStr = String(sonGun).padStart(2, '0');
-                    let newDate2 = `${yil}-${ayStr}-${gunStr}`;
+                    let newDate2 = `${gunStr}.${ayStr}.${yil}`;
 
                     if (window.fp2Instance) {
                         window.fp2Instance.setDate(newDate2, true);
@@ -187,7 +194,7 @@ if ($isQueried) {
 
         const fp2 = flatpickr("#tarih2", {
             locale: "tr",
-            dateFormat: "Y-m-d",
+            dateFormat: "d.m.Y",
             allowInput: true
         });
 
