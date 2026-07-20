@@ -22,7 +22,7 @@ window.fetch = async (...args) => {
 App.assets = {
     styles: [
         { id: 'basecoat-css', url: 'https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css' },
-        { id: 'geist-css', url: 'https://cdn.jsdelivr.net/npm/geist@latest/dist/fonts/geist/style.css' },
+        { id: 'geist-css', url: 'https://cdn.jsdelivr.net/npm/@fontsource/geist-sans/index.css' },
         { id: 'flatpickr-css', url: 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css' },
         { id: 'summernote-css', url: 'https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css' }
     ],

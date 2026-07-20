@@ -21,7 +21,7 @@ window.fetch = async (...args) => {
 App.assets = {
     styles: [
         { id: 'basecoat-css', url: 'https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css' },
-        { id: 'geist-css', url: 'https://cdn.jsdelivr.net/npm/geist@latest/dist/fonts/geist/style.css' }
+        { id: 'geist-css', url: 'https://cdn.jsdelivr.net/npm/@fontsource/geist-sans/index.css' }
     ],
     scripts: [
         { id: 'tailwind', url: 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4', check: () => window.tailwind },

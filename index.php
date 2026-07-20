@@ -234,7 +234,7 @@ if ($currentRoute !== 'dashboard') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@latest/dist/fonts/geist/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist-sans/index.css">
 
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.4/dist/sweetalert2.min.css" />
@@ -264,6 +264,7 @@ if ($currentRoute !== 'dashboard') {
         const originalFlatpickr = window.flatpickr;
 
         function initCustomMonthSelector(instance) {
+            if (!instance || !instance.calendarContainer) return;
             const nativeSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
             if (!nativeSelect) return;
 

@@ -137,7 +137,7 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
     
     <!-- Fonts -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@latest/dist/fonts/geist/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist-sans/index.css">
     
     <!-- Custom Admin Styles -->
     <link rel="stylesheet" href="<?php echo $assetBase; ?>css/app.css?v=<?php echo time(); ?>">

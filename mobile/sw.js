@@ -4,7 +4,7 @@ const ASSETS = [
     './assets/css/mobile.css',
     './assets/js/mobile.js',
     'https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css',
-    'https://cdn.jsdelivr.net/npm/geist@latest/dist/fonts/geist/style.css',
+    'https://cdn.jsdelivr.net/npm/@fontsource/geist-sans/index.css',
     'https://unpkg.com/lucide@latest',
     'https://code.jquery.com/jquery-3.7.1.min.js'
 ];
@@ -41,7 +41,10 @@ self.addEventListener('fetch', (e) => {
                           url.pathname.endsWith('.png') ||
                           url.pathname.endsWith('.ico');
 
-    if (isStaticAsset && e.request.method === 'GET') {
+    // Only cache HTTP/HTTPS GET requests to prevent unsupported scheme errors (like chrome-extension)
+    const isHttpOrHttps = url.protocol === 'http:' || url.protocol === 'https:';
+
+    if (isStaticAsset && e.request.method === 'GET' && isHttpOrHttps) {
         e.respondWith(
             caches.match(e.request).then((cachedResponse) => {
                 return cachedResponse || fetch(e.request).then((networkResponse) => {

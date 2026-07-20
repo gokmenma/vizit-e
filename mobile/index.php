@@ -235,7 +235,7 @@ if (isset($_SESSION['kullanici_id'])) {
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@latest/dist/fonts/geist/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist-sans/index.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.4/dist/sweetalert2.min.css" />
     <link rel="stylesheet" href="admin/assets/css/app.css?v=<?php echo time(); ?>">
@@ -483,6 +483,7 @@ if (isset($_SESSION['kullanici_id'])) {
         const originalFlatpickr = window.flatpickr;
 
         function initCustomMonthSelector(instance) {
+            if (!instance || !instance.calendarContainer) return;
             const nativeSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
             if (!nativeSelect) return;
 
