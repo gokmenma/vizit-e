@@ -457,7 +457,7 @@ window.setFilterTab = function setFilterTab(tabName) {
     } else {
         noReportRow.style.display = 'none';
     }
-}
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     // Flatpickr initialization

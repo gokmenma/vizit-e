@@ -293,7 +293,7 @@ window.setFilterTab = function setFilterTab(tabName) {
             noReportRow.style.display = 'none';
         }
     }
-}
+};
 
 // Mobile page loaded hooks
 (function() {
