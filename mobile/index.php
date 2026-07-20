@@ -244,6 +244,8 @@ if (isset($_SESSION['kullanici_id'])) {
     <!-- Lucide Icons & jQuery -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.4/dist/sweetalert2.all.min.js"></script>
+    <script>window.swal = window.swal || Swal;</script>
 </head>
 
 <body class="theme-light">

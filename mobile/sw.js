@@ -6,7 +6,9 @@ const ASSETS = [
     'https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css',
     'https://cdn.jsdelivr.net/npm/@fontsource/geist-sans/index.css',
     'https://unpkg.com/lucide@latest',
-    'https://code.jquery.com/jquery-3.7.1.min.js'
+    'https://code.jquery.com/jquery-3.7.1.min.js',
+    'https://cdn.jsdelivr.net/npm/sweetalert2@11.22.4/dist/sweetalert2.min.css',
+    'https://cdn.jsdelivr.net/npm/sweetalert2@11.22.4/dist/sweetalert2.all.min.js'
 ];
 
 self.addEventListener('install', (e) => {
