@@ -100,6 +100,7 @@ try {
 
                     // SGK'dan gelen rapor bilgileri
                     'TCKIMLIKNO'            => $rapor['TCKIMLIKNO'],
+                    'soyad'                 => $rapor['SOYAD'] ?? '',
                     'SIGORTALIADSOYAD'      => $rapor['SIGORTALIADSOYAD'],
                     'MEDULARAPORID'         => $rapor['MEDULARAPORID'],
                     'RAPORTAKIPNO'          => $rapor['RAPORTAKIPNO'] ?? null,
@@ -128,7 +129,14 @@ try {
                 $fisId = $tamRaporBilgisi['MEDULARAPORID']; // Fiş ID'si olarak Medula ID'yi kullanalım, daha tutarlı.
                 $_SESSION['rapor_fisleri'][$fisId] = $tamRaporBilgisi;
 
-                $RaporModel->saveWithAttr($tamRaporBilgisi);
+                // SGK tarafında onay ve kapatma işlemi zaten tamamlandı; yerel kayıt
+                // (istatistik/tekrar kontrolü amaçlı) başarısız olsa bile kullanıcıya
+                // SGK işleminin başarısını bildiriyoruz. Hata ekrana yansıtılmaz, loglanır.
+                try {
+                    $RaporModel->saveWithAttr($tamRaporBilgisi);
+                } catch (Exception $e) {
+                    error_log('Rapor onay kaydı yerel veritabanına yazılamadı (MEDULARAPORID: ' . $fisId . '): ' . $e->getMessage());
+                }
 
                 $response = [
                     'status' => 'success',

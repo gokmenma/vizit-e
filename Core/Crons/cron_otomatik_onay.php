@@ -116,6 +116,7 @@ try {
         $kullaniciAdi = $isyeri->kullanici_kodu;
         $isyeriKodu = $isyeri->isyeri_kodu;
         $wsSifre = Security::decrypt($isyeri->isyeri_sifre);
+        $ilgiliKullaniciIdleri = $isyeriModel->findUserIdsByIsyeriId($isyeriId);
 
         $reporter->log("{$i}. İşyeri sorgulanıyor: {$isyeriAdi} (SGK Kodu: {$isyeriKodu})\n");
         $logger->info("{$i}. İşyeri sorgulanıyor: {$isyeriAdi} (SGK Kodu: {$isyeriKodu})\n");
@@ -159,9 +160,11 @@ try {
                 // --- Onaylama ve Loglama İşlemi ---
                 $logData = [
                     'isyeri_id' => $isyeriId,
+                    'kullanici_id' => $ilgiliKullaniciIdleri[0] ?? 0,
                     'MEDULARAPORID' => $rapor['MEDULARAPORID'],
                     'RAPORTAKIPNO' => $rapor['RAPORTAKIPNO'],
                     'TCKIMLIKNO' => $rapor['TCKIMLIKNO'],
+                    'soyad' => rtrim($rapor['SOYAD'], ' '),
                     'SIGORTALIADSOYAD' => rtrim($rapor['AD'], ' ') . ' ' . rtrim($rapor['SOYAD'], ' '),
                     'POLIKLINIKTAR' => (new DateTime($rapor['POLIKLINIKTAR']))->format('Y-m-d'),
                     'ISBASKONTTAR' => (new DateTime($rapor['ISBASKONTTAR']))->format('Y-m-d'),
@@ -172,7 +175,7 @@ try {
                     // Başlangıçta durumu başarısız olarak ayarlayalım
                     "onay_turu" => "Otomatik Onay",
                     'onay_durumu' => 'basarisiz',
-                    //'hata_mesaji' => null,
+                    'onay_tarihi' => date('Y-m-d H:i:s'),
                     'sgk_bildirim_id' => null
                 ];
 
@@ -202,22 +205,27 @@ try {
                     $logData['onay_durumu'] = 'basarili';
                     $logData['sgk_bildirim_id'] = $onayResponse->sonucAciklama[1] ?? null;
 
-                    $raporModel->saveWithAttr($logData);
-                    
+                    try {
+                        $raporModel->saveWithAttr($logData);
+                    } catch (Exception $e) {
+                        error_log('Otomatik onay kaydı yerel veritabanına yazılamadı (MEDULARAPORID: ' . $rapor['MEDULARAPORID'] . '): ' . $e->getMessage());
+                    }
+
                 } else {
                     $rapor['ONAY_SONUC'] = 'BAŞARISIZ: ' . ($onayResponse->sonucAciklama ?? 'Bilinmeyen hata');
                     $reporter->log("   - [BAŞARISIZ] Rapor ID: {$rapor['MEDULARAPORID']} ONAYLANAMADI: {$rapor['ONAY_SONUC']}\n");
                     $logger->info("   - [BAŞARISIZ] Rapor ID: {$rapor['MEDULARAPORID']} ONAYLANAMADI: {$rapor['ONAY_SONUC']}\n");
 
-
                     $logData['onay_durumu'] = 'basarisiz';
-                    $logData['hata_mesaji'] = $rapor['ONAY_SONUC'];
-                    $raporModel->saveWithAttr($logData);
+                    try {
+                        $raporModel->saveWithAttr($logData);
+                    } catch (Exception $e) {
+                        error_log('Otomatik onay (başarısız) kaydı yerel veritabanına yazılamadı (MEDULARAPORID: ' . $rapor['MEDULARAPORID'] . '): ' . $e->getMessage());
+                    }
                 }
 
                 // 3. ADIM: İşlem yapılan raporu ve ilgili TÜM kullanıcıları ana yapıya ekle
                 $raporId = $rapor['MEDULARAPORID'];
-                $ilgiliKullaniciIdleri = $isyeriModel->findUserIdsByIsyeriId($isyeriId);
 
                 if (!isset($islemYapilanRaporlarVeKullanicilari[$raporId])) {
                     $rapor['ISYERI_ADI'] = $isyeriAdi;

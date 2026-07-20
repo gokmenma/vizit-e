@@ -510,6 +510,53 @@ XML;
     }
 
     /**
+     * raporlariGetir() ile gelen ham rapor dizisindeki ARSIV=1 (sonuçlanmış/arşivlenmiş)
+     * raporları SGK üzerinde raporuKapat() ile kapatır. Bu sayede raporAramaTarihile'in
+     * sabit 100 kayıtlık penceresi eski kapanmış raporlarla dolu kalmaz ve gerçek
+     * onay bekleyen raporlar sorgularda görünür olur.
+     *
+     * @param array $raporlar raporlariGetir()'dan dönen dizi
+     * @param int $limit Tek seferde en fazla kaç rapor kapatılacağı (sunucuyu yormamak için)
+     * @return array ['kapatilan' => int, 'hatalar' => array]
+     */
+    public function arsivlenmisRaporlariKapat(array $raporlar, int $limit = 20): array
+    {
+        $kapatilan = 0;
+        $hatalar = [];
+
+        foreach ($raporlar as $rapor) {
+            if ($kapatilan + count($hatalar) >= $limit) {
+                break;
+            }
+            if (($rapor['ARSIV'] ?? '0') != '1') {
+                continue;
+            }
+
+            try {
+                $sonuc = $this->raporuKapat($rapor['MEDULARAPORID']);
+                $kod = (string)($sonuc->sonucKod ?? '');
+                if ($kod === '0' || $kod === '600') {
+                    $kapatilan++;
+                } else {
+                    $hatalar[] = [
+                        'medulaRaporId' => $rapor['MEDULARAPORID'],
+                        'raporTakipNo' => $rapor['RAPORTAKIPNO'] ?? null,
+                        'mesaj' => (string)($sonuc->sonucAciklama ?? 'Bilinmeyen hata'),
+                    ];
+                }
+            } catch (Exception $e) {
+                $hatalar[] = [
+                    'medulaRaporId' => $rapor['MEDULARAPORID'],
+                    'raporTakipNo' => $rapor['RAPORTAKIPNO'] ?? null,
+                    'mesaj' => $e->getMessage(),
+                ];
+            }
+        }
+
+        return ['kapatilan' => $kapatilan, 'hatalar' => $hatalar];
+    }
+
+    /**
      * METOT 10: OnaylIptal
      * Daha önce onaylanmış bir raporun onayını (çalışmazlık bildirimini) iptal eder.
      * @param string $medulaRaporId Onayı iptal edilecek raporun Medula Rapor ID'si.

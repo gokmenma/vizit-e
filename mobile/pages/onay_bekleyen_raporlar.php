@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Helper\Security;
 use App\Helper\Date;
+use Core\Services\FileLogger;
 use Models\RaporModel;
 
 Security::checkLogin();
@@ -24,7 +25,24 @@ try {
     $raporModel = new RaporModel();
 
     $tumRaporlar = $sgkClient->raporlariGetir(new DateTime($tarih));
-    
+
+    // Arşivlenmiş (ARSIV=1) raporları SGK'da kapat ki 100 kayıtlık sabit pencere
+    // eski/kapanmış raporlarla dolu kalmasın ve gerçek onay bekleyen raporlar görünsün.
+    //
+    // NOT: "Onaylı raporlar listesiyle çapraz kontrol" (onaylanmisRaporlariTemizle)
+    // ANALIK gibi çok dönemli raporlarda hâlâ işlem gerektiren kayıtları yanlışlıkla
+    // kapattığı için KALDIRILDI - artık sadece SGK'nın kendi ARSIV bayrağına güveniliyor.
+    $arsivKapatSonucu = $sgkClient->arsivlenmisRaporlariKapat($tumRaporlar);
+    if ($arsivKapatSonucu['kapatilan'] > 0 || !empty($arsivKapatSonucu['hatalar'])) {
+        $arsivLogger = new FileLogger(__DIR__ . '/../../logs', 'arsiv_otomatik_kapat');
+        $arsivLogger->info('Arşivlenmiş raporlar otomatik kapatıldı (mobil).', [
+            'isyeriKodu' => $_SESSION['isyeriKodu'] ?? null,
+            'kullanici_id' => $_SESSION['kullanici_id'] ?? null,
+            'kapatilan' => $arsivKapatSonucu['kapatilan'],
+            'hatalar' => $arsivKapatSonucu['hatalar'],
+        ]);
+    }
+
     if (!empty($tumRaporlar)) {
         $islenmisRaporlar = [];
         foreach ($tumRaporlar as $rapor) {
@@ -242,9 +260,10 @@ $toplamRaporSayisi = count($raporlar);
 </div>
 
 <script>
+(function () {
 let activeTab = 'uzun';
 
-function setFilterTab(tabName) {
+window.setFilterTab = function setFilterTab(tabName) {
     activeTab = tabName;
     
     // Reset and set active tabs style
@@ -306,6 +325,7 @@ function setFilterTab(tabName) {
     
     // Initial run
     setFilterTab('uzun');
+})();
 })();
 </script>
 <script src="App/Src/rapor_onay.js?v=<?php echo time(); ?>"></script>

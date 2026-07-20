@@ -1,6 +1,7 @@
 <?php
 
 use App\Helper\Security;
+use Core\Services\FileLogger;
 
 
 Security::checkLogin();
@@ -27,8 +28,29 @@ try {
     // $tumRaporlar = $sgkClient->raporlariGetir(new DateTime('tomorrow'));
     $tumRaporlar = $sgkClient->raporlariGetir(new DateTime($tarih)); // İkinci parametre true ise onay bekleyen raporları getir
     //var_dump($tumRaporlar); // Tüm raporları kontrol etmek için
-  
-  
+
+    // 1.1 Arşivlenmiş (ARSIV=1) raporları SGK'da kapat. Bu, SGK'nın 100 kayıtlık
+    // sabit penceresinin eski/kapanmış raporlarla dolu kalmasını önler; aksi halde
+    // gerçek onay bekleyen raporlar bu pencerenin dışında kalıp hiç görünmez.
+    //
+    // NOT: Daha önce burada "onaylı raporlar listesiyle çapraz kontrol" de yapılıyordu
+    // (onaylanmisRaporlariTemizle), ancak ANALIK gibi çok dönemli/kısmi onaylanabilen
+    // raporlarda bir dönemin onaylanmış olması raporun TAMAMEN bittiği anlamına gelmiyor;
+    // SGK'nın kendi "Onay Bekleyen Rapor Listesi"nde hâlâ bekleyen çıkabiliyor. Bu
+    // çapraz kontrol gerçekten hâlâ işlem gerektiren 2 raporu (Gizem İlhan, Eda
+    // Demircioğlu) yanlışlıkla kapattığı için KALDIRILDI - artık sadece SGK'nın kendi
+    // ARSIV bayrağına güveniliyor.
+    $arsivKapatSonucu = $sgkClient->arsivlenmisRaporlariKapat($tumRaporlar);
+    if ($arsivKapatSonucu['kapatilan'] > 0 || !empty($arsivKapatSonucu['hatalar'])) {
+        $arsivLogger = new FileLogger(__DIR__ . '/../logs', 'arsiv_otomatik_kapat');
+        $arsivLogger->info('Arşivlenmiş raporlar otomatik kapatıldı.', [
+            'isyeriKodu' => $_SESSION['isyeriKodu'] ?? null,
+            'kullanici_id' => $_SESSION['kullanici_id'] ?? null,
+            'kapatilan' => $arsivKapatSonucu['kapatilan'],
+            'hatalar' => $arsivKapatSonucu['hatalar'],
+        ]);
+    }
+
     // 2. Filtreleme işlemini yap
     if (!empty($tumRaporlar)) {
 
@@ -418,9 +440,10 @@ $toplamRaporSayisi = count($raporlar);
 
 <!-- Custom Script for Shadcn Tab Filtering & PDF/Excel Export -->
 <script>
+(function () {
 let activeTab = 'uzun'; // Varsayılan sekme '3 Gün ve Üzeri'
 
-function setFilterTab(tabName) {
+window.setFilterTab = function setFilterTab(tabName) {
     activeTab = tabName;
     
     // Sekme buton stillerini güncelle (Shadcn style)
@@ -505,6 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Başlangıç filtrelemesini çalıştır (Varsayılan: uzun)
     setFilterTab('uzun');
 });
+})();
 </script>
 
 <script src="App/Src/rapor_onay.js?v=<?php echo filemtime('App/Src/rapor_onay.js'); ?>"></script>

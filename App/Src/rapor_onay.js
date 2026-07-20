@@ -25,6 +25,7 @@
       let payload = {
         MEDULARAPORID: raporData.MEDULARAPORID,
         TCKIMLIKNO: raporData.TCKIMLIKNO,
+        SOYAD: raporData.SOYAD,
         RAPORTAKIPNO: raporData.RAPORTAKIPNO,
         ABASTAR: raporData.ABASTAR,
         ABITTAR: raporData.ABITTAR,
