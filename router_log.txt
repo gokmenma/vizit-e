@@ -1304,3 +1304,4 @@
 13:55:48 - vizite.com - /onay-bekleyen-raporlar
 14:07:08 - vizite.com - /onay-bekleyen-raporlar
 14:07:16 - vizite.com - /rapor-onay-goster?id=151356735
+14:12:59 - vizite.com - /onay-bekleyen-raporlar

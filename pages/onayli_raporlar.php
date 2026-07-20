@@ -295,7 +295,7 @@ function parseSgkError($errorMessage) {
                         <td class="py-3.5 px-4 text-sm pr-6">
                             <div class="flex items-center justify-end gap-2">
                                 <!-- Raporu Göster (Fiş) Icon Button -->
-                                <a href="rapor-onay-goster?id=<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>"
+                                <a href="rapor-onay-goster.php?id=<?php echo htmlspecialchars($rapor['MEDULARAPORID']); ?>"
                                     target="_blank"
                                     class="w-8 h-8 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 flex items-center justify-center transition-colors shadow-sm"
                                     title="Fişi Göster">

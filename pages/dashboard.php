@@ -405,7 +405,7 @@ $quickActions = [
                                     ?>
                                 </td>
                                 <td style="text-align: center;">
-                                    <a href="rapor-onay-goster?id=<?php echo htmlspecialchars($rapor->MEDULARAPORID); ?>"
+                                    <a href="rapor-onay-goster.php?id=<?php echo htmlspecialchars($rapor->MEDULARAPORID); ?>"
                                         target="_blank" class="btn btn-outline"
                                         style="width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px;"
                                         title="Detay">

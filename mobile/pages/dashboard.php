@@ -215,7 +215,7 @@ $quickActions = [
                         </div>
                     </div>
                 </div>
-                <a href="rapor-onay-goster?id=<?php echo htmlspecialchars($rapor->MEDULARAPORID); ?>" target="_blank" class="w-8 h-8 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center flex-shrink-0 active:bg-zinc-50 dark:active:bg-zinc-800">
+                <a href="rapor-onay-goster.php?id=<?php echo htmlspecialchars($rapor->MEDULARAPORID); ?>" target="_blank" class="w-8 h-8 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center flex-shrink-0 active:bg-zinc-50 dark:active:bg-zinc-800">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
                 </a>
             </div>

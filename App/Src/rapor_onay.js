@@ -42,7 +42,30 @@
         BRANSKODU: raporData.BRANSKODU,
       };
 
-      callApi("raporOnayla", payload, satirElement);
+      let adSoyad = "";
+      if (raporData.SIGORTALIADSOYAD) {
+        adSoyad = raporData.SIGORTALIADSOYAD;
+      } else if (raporData.AD && raporData.SOYAD) {
+        adSoyad = raporData.AD + " " + raporData.SOYAD;
+      } else if (raporData.AD) {
+        adSoyad = raporData.AD;
+      } else {
+        adSoyad = "Seçilen personelin";
+      }
+
+      swal.fire({
+        title: "Emin misiniz?",
+        text: adSoyad + " isimli personelin vizite raporunu onaylamak istediğinize emin misiniz?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Evet, onayla",
+        cancelButtonText: "Hayır, iptal et",
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          callApi("raporOnayla", payload, satirElement);
+        }
+      });
     });
 
     // Tekrarlanan fetch kodunu bir fonksiyona alalım

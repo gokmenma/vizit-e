@@ -123,7 +123,17 @@ try {
 
         try {
             $sgkClient = new SgkViziteService($kullaniciAdi, $isyeriKodu, $wsSifre);
-            $raporlar = $sgkClient->raporlariGetir(new DateTime('tomorrow'));
+
+            // SGK'dan onay bekleyen raporları çek (arşivlenmiş olanları otomatik kapatma
+            // ve onay/yerel-DB filtrelemesi dahil). Bu mantık SgkViziteService::bekleyenRaporlariGetir()
+            // içinde merkezi tutulur; panel sayfaları da aynı metodu kullanır.
+            $bekleyenSonuc = $sgkClient->bekleyenRaporlariGetir(new DateTime('tomorrow'), $raporModel);
+            $raporlar = $bekleyenSonuc['raporlar'];
+            $arsivKapatSonucu = $bekleyenSonuc['arsiv_kapatma'];
+            if ($arsivKapatSonucu['kapatilan'] > 0 || !empty($arsivKapatSonucu['hatalar'])) {
+                $reporter->log(" - {$arsivKapatSonucu['kapatilan']} arşivlenmiş rapor SGK'da kapatıldı.\n");
+                $logger->info(" - {$arsivKapatSonucu['kapatilan']} arşivlenmiş rapor SGK'da kapatıldı.\n", ['hatalar' => $arsivKapatSonucu['hatalar']]);
+            }
 
             if (empty($raporlar)) {
                 $reporter->log(" - Bu işyeri için onay bekleyen rapor bulunamadı.\n");
@@ -133,20 +143,6 @@ try {
 
             // Onaylanacak raporları filtrele
             foreach ($raporlar as $rapor) {
-                if ($rapor['ARSIV'] == 1) continue; // Arşivlenmişleri atla
-
-                // Eğer rapor durumu "ONAYLI" veya "ONAYLANDI" içeriyorsa bu raporu atla (SGK'dan gelen veri)
-                if ((isset($rapor['RAPORDURUMADI']) && stripos($rapor['RAPORDURUMADI'], 'ONAY') !== false) ||
-                    (isset($rapor['ONAYLI']) && ($rapor['ONAYLI'] == '1' || $rapor['ONAYLI'] == 'E')) ||
-                    (isset($rapor['ONAYDURUMU']) && ($rapor['ONAYDURUMU'] == '1' || $rapor['ONAYDURUMU'] == 'E'))) {
-                    continue;
-                }
-
-                // Eğer bu rapor bizim veritabanımızda zaten onaylanmış görünüyorsa atla
-                if ($raporModel->findReportByRaporTakipNo($rapor['RAPORTAKIPNO'])) {
-                    continue;
-                }
-
                 $baslangic = new DateTime($rapor['POLIKLINIKTAR']);
                 $iseBasi = new DateTime($rapor['ISBASKONTTAR']);
 

@@ -141,7 +141,7 @@ try {
                 $response = [
                     'status' => 'success',
                     'message' => 'Rapor onaylama işlemi başarılı.',
-                    'redirectUrl' =>  "rapor-onay-goster?id=" . $fisId
+                    'redirectUrl' =>  "rapor-onay-goster.php?id=" . $fisId
                     
                 ];
                 echo json_encode($response);

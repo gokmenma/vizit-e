@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Helper\Security;
 use App\Helper\Helper;
+use Models\RaporModel;
 
 class SgkViziteService
 {
@@ -554,6 +555,53 @@ XML;
         }
 
         return ['kapatilan' => $kapatilan, 'hatalar' => $hatalar];
+    }
+
+    /**
+     * Onay Bekleyen Raporlar panel sayfaları ve otomatik onay cron'unun ortak kullandığı
+     * merkezi metot: SGK'dan bekleyen raporları çeker, arşivlenmiş (ARSIV=1) olanları
+     * SGK'da kapatıp 100 kayıtlık pencereyi boşaltır, ardından zaten SGK'da onaylanmış/
+     * arşivlenmiş veya bizim veritabanımızda daha önce onaylanmış görünen raporları
+     * eleyerek geriye sadece gerçekten işlem gerektiren raporları döndürür.
+     *
+     * Bu filtreleme mantığı tek bir yerde tutulur; ileride bir kural değişirse
+     * (ör. yeni bir "zaten onaylı" göstergesi eklenirse) sadece burası güncellenir.
+     *
+     * @param DateTime $tarih
+     * @param RaporModel $raporModel
+     * @return array ['raporlar' => array, 'arsiv_kapatma' => ['kapatilan' => int, 'hatalar' => array]]
+     */
+    public function bekleyenRaporlariGetir(DateTime $tarih, RaporModel $raporModel): array
+    {
+        $tumRaporlar = $this->raporlariGetir($tarih);
+        $arsivKapatSonucu = $this->arsivlenmisRaporlariKapat($tumRaporlar);
+
+        $bekleyenRaporlar = [];
+        foreach ($tumRaporlar as $rapor) {
+            // Arşivlenmiş (kısa süreli, SGK tarafından otomatik sonuçlandırılmış) raporları atla
+            if (($rapor['ARSIV'] ?? '0') == 1) {
+                continue;
+            }
+
+            // Rapor durumu "ONAY" içeriyorsa veya ONAYLI/ONAYDURUMU işaretliyse atla (SGK'dan gelen veri)
+            if ((isset($rapor['RAPORDURUMADI']) && stripos($rapor['RAPORDURUMADI'], 'ONAY') !== false) ||
+                (isset($rapor['ONAYLI']) && ($rapor['ONAYLI'] == '1' || $rapor['ONAYLI'] == 'E')) ||
+                (isset($rapor['ONAYDURUMU']) && ($rapor['ONAYDURUMU'] == '1' || $rapor['ONAYDURUMU'] == 'E'))) {
+                continue;
+            }
+
+            // Bu rapor bizim veritabanımızda zaten onaylanmış görünüyorsa atla
+            if ($raporModel->findReportByRaporTakipNo($rapor['RAPORTAKIPNO'])) {
+                continue;
+            }
+
+            $bekleyenRaporlar[] = $rapor;
+        }
+
+        return [
+            'raporlar' => $bekleyenRaporlar,
+            'arsiv_kapatma' => $arsivKapatSonucu,
+        ];
     }
 
     /**

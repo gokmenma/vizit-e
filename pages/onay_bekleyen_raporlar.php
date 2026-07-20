@@ -24,23 +24,12 @@ try {
     $raporModel = new RaporModel();
     $tarih = !empty($_REQUEST["rapor_tarihi"]) ? $_REQUEST["rapor_tarihi"] : date('Y-m-d');
 
-    // 1. SGK'dan tüm onay bekleyen raporları çek
-    // $tumRaporlar = $sgkClient->raporlariGetir(new DateTime('tomorrow'));
-    $tumRaporlar = $sgkClient->raporlariGetir(new DateTime($tarih)); // İkinci parametre true ise onay bekleyen raporları getir
-    //var_dump($tumRaporlar); // Tüm raporları kontrol etmek için
-
-    // 1.1 Arşivlenmiş (ARSIV=1) raporları SGK'da kapat. Bu, SGK'nın 100 kayıtlık
-    // sabit penceresinin eski/kapanmış raporlarla dolu kalmasını önler; aksi halde
-    // gerçek onay bekleyen raporlar bu pencerenin dışında kalıp hiç görünmez.
-    //
-    // NOT: Daha önce burada "onaylı raporlar listesiyle çapraz kontrol" de yapılıyordu
-    // (onaylanmisRaporlariTemizle), ancak ANALIK gibi çok dönemli/kısmi onaylanabilen
-    // raporlarda bir dönemin onaylanmış olması raporun TAMAMEN bittiği anlamına gelmiyor;
-    // SGK'nın kendi "Onay Bekleyen Rapor Listesi"nde hâlâ bekleyen çıkabiliyor. Bu
-    // çapraz kontrol gerçekten hâlâ işlem gerektiren 2 raporu (Gizem İlhan, Eda
-    // Demircioğlu) yanlışlıkla kapattığı için KALDIRILDI - artık sadece SGK'nın kendi
-    // ARSIV bayrağına güveniliyor.
-    $arsivKapatSonucu = $sgkClient->arsivlenmisRaporlariKapat($tumRaporlar);
+    // 1. SGK'dan onay bekleyen raporları çek (arşivlenmiş olanları otomatik kapatma
+    // ve onay/yerel-DB filtrelemesi dahil). Bu mantık SgkViziteService::bekleyenRaporlariGetir()
+    // içinde merkezi tutulur; otomatik onay cron'u da aynı metodu kullanır.
+    $sonuc = $sgkClient->bekleyenRaporlariGetir(new DateTime($tarih), $raporModel);
+    $tumRaporlar = $sonuc['raporlar'];
+    $arsivKapatSonucu = $sonuc['arsiv_kapatma'];
     if ($arsivKapatSonucu['kapatilan'] > 0 || !empty($arsivKapatSonucu['hatalar'])) {
         $arsivLogger = new FileLogger(__DIR__ . '/../logs', 'arsiv_otomatik_kapat');
         $arsivLogger->info('Arşivlenmiş raporlar otomatik kapatıldı.', [
@@ -51,29 +40,12 @@ try {
         ]);
     }
 
-    // 2. Filtreleme işlemini yap
+    // 2. Kalan raporlar için ekrana özgü işlemleri yap (süre hesabı, sekme dağılımı)
     if (!empty($tumRaporlar)) {
 
         $islenmisRaporlar = []; // İşlenmiş raporları koyacağımız yeni dizi
 
         foreach ($tumRaporlar as $rapor) {
-            //Eğer ARSIV durumu = 1 ise bu raporu atla
-            if ($rapor['ARSIV'] == 1) {
-                continue;
-            }
-
-            // Eğer rapor durumu "ONAYLI" veya "ONAYLANDI" içeriyorsa bu raporu atla (SGK'dan gelen veri)
-            if ((isset($rapor['RAPORDURUMADI']) && stripos($rapor['RAPORDURUMADI'], 'ONAY') !== false) ||
-                (isset($rapor['ONAYLI']) && ($rapor['ONAYLI'] == '1' || $rapor['ONAYLI'] == 'E')) ||
-                (isset($rapor['ONAYDURUMU']) && ($rapor['ONAYDURUMU'] == '1' || $rapor['ONAYDURUMU'] == 'E'))) {
-                continue;
-            }
-
-            // Eğer bu rapor bizim veritabanımızda zaten onaylanmış görünüyorsa atla
-            if ($raporModel->findReportByRaporTakipNo($rapor['RAPORTAKIPNO'])) {
-                continue;
-            }
-
             // Rapor süresini hesapla
             $gunFarki = 0;
             if (!empty($rapor['POLIKLINIKTAR']) && !empty($rapor['ISBASKONTTAR'])) {

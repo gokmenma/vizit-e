@@ -24,15 +24,12 @@ try {
     $sgkClient = new SgkViziteService();
     $raporModel = new RaporModel();
 
-    $tumRaporlar = $sgkClient->raporlariGetir(new DateTime($tarih));
-
-    // Arşivlenmiş (ARSIV=1) raporları SGK'da kapat ki 100 kayıtlık sabit pencere
-    // eski/kapanmış raporlarla dolu kalmasın ve gerçek onay bekleyen raporlar görünsün.
-    //
-    // NOT: "Onaylı raporlar listesiyle çapraz kontrol" (onaylanmisRaporlariTemizle)
-    // ANALIK gibi çok dönemli raporlarda hâlâ işlem gerektiren kayıtları yanlışlıkla
-    // kapattığı için KALDIRILDI - artık sadece SGK'nın kendi ARSIV bayrağına güveniliyor.
-    $arsivKapatSonucu = $sgkClient->arsivlenmisRaporlariKapat($tumRaporlar);
+    // SGK'dan onay bekleyen raporları çek (arşivlenmiş olanları otomatik kapatma ve
+    // onay/yerel-DB filtrelemesi dahil). Bu mantık SgkViziteService::bekleyenRaporlariGetir()
+    // içinde merkezi tutulur; masaüstü panel ve otomatik onay cron'u da aynı metodu kullanır.
+    $sonuc = $sgkClient->bekleyenRaporlariGetir(new DateTime($tarih), $raporModel);
+    $tumRaporlar = $sonuc['raporlar'];
+    $arsivKapatSonucu = $sonuc['arsiv_kapatma'];
     if ($arsivKapatSonucu['kapatilan'] > 0 || !empty($arsivKapatSonucu['hatalar'])) {
         $arsivLogger = new FileLogger(__DIR__ . '/../../logs', 'arsiv_otomatik_kapat');
         $arsivLogger->info('Arşivlenmiş raporlar otomatik kapatıldı (mobil).', [
@@ -46,17 +43,6 @@ try {
     if (!empty($tumRaporlar)) {
         $islenmisRaporlar = [];
         foreach ($tumRaporlar as $rapor) {
-            if ($rapor['ARSIV'] == 1) continue;
-            if ((isset($rapor['RAPORDURUMADI']) && stripos($rapor['RAPORDURUMADI'], 'ONAY') !== false) ||
-                (isset($rapor['ONAYLI']) && ($rapor['ONAYLI'] == '1' || $rapor['ONAYLI'] == 'E')) ||
-                (isset($rapor['ONAYDURUMU']) && ($rapor['ONAYDURUMU'] == '1' || $rapor['ONAYDURUMU'] == 'E'))) {
-                continue;
-            }
-
-            if ($raporModel->findReportByRaporTakipNo($rapor['RAPORTAKIPNO'])) {
-                continue;
-            }
-
             $gunFarki = 0;
             if (!empty($rapor['POLIKLINIKTAR']) && !empty($rapor['ISBASKONTTAR'])) {
                 try {
