@@ -27,6 +27,23 @@ class RaporModel extends Model
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
+    /**
+     * SGK'nin her rapor satiri icin verdigi tekil Medula rapor kimligine gore kaydi getirir.
+     * Ayni RAPORTAKIPNO altinda birden fazla RAPORSIRANO bulunabildigi icin bekleyen rapor
+     * kontrolünde takip numarasi tek basina kullanilmamalidir.
+     */
+    public function findReportByMedulaRaporId($medulaRaporId)
+    {
+        if ($medulaRaporId === null || $medulaRaporId === '') {
+            return false;
+        }
+
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE MEDULARAPORID = :medula_rapor_id LIMIT 1");
+        $stmt->bindValue(':medula_rapor_id', (string)$medulaRaporId, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
 
 
     /** Raporun onaylanma türünü döndürür

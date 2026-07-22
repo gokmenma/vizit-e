@@ -416,6 +416,7 @@ XML;
                         'ABITTAR' => (string)$rapor->ABITTAR,
                         'MEDULARAPORID' => (string)$rapor->MEDULARAPORID,
                         'RAPORTAKIPNO' => (string)$rapor->RAPORTAKIPNO,
+                        'RAPORSIRANO' => (string)$rapor->RAPORSIRANO,
                         'ARSIV' => (string)$rapor->ARSIV, // <-- BU SATIRIN OLDUĞUNDAN EMİN OLUN
                         'SIGORTALIADSOYAD' => (string)$rapor->AD . ' ' . (string)$rapor->SOYAD,
                         'RAPORDURUMU' => (string)$rapor->RAPORDURUMU,
@@ -590,8 +591,9 @@ XML;
                 continue;
             }
 
-            // Bu rapor bizim veritabanımızda zaten onaylanmış görünüyorsa atla
-            if ($raporModel->findReportByRaporTakipNo($rapor['RAPORTAKIPNO'])) {
+            // Takip numarasi birden fazla rapor sirasinda ortak olabilir. Yalnizca SGK'nin
+            // tekil Medula rapor kimligi daha once kaydedildiyse bu satiri atla.
+            if ($raporModel->findReportByMedulaRaporId($rapor['MEDULARAPORID'] ?? null)) {
                 continue;
             }
 

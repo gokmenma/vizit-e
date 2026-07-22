@@ -159,8 +159,9 @@ try {
                         continue;
                     }
 
-                    // Eğer bu rapor bizim veritabanımızda zaten onaylanmış görünüyorsa atla
-                    if ($raporModel->findReportByRaporTakipNo($rapor['RAPORTAKIPNO'])) {
+                    // Takip numarasi birden fazla rapor sirasinda ortak olabilir; tekil
+                    // Medula rapor kimligi daha once kaydedilmisse bu satiri atla.
+                    if ($raporModel->findReportByMedulaRaporId($rapor['MEDULARAPORID'] ?? null)) {
                         continue;
                     }
 

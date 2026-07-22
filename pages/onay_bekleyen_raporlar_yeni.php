@@ -42,7 +42,7 @@ try {
             }
 
             // Eğer bu rapor bizim veritabanımızda zaten onaylanmış görünüyorsa atla
-            if ($raporModel->findReportByRaporTakipNo($rapor['RAPORTAKIPNO'])) {
+            if ($raporModel->findReportByMedulaRaporId($rapor['MEDULARAPORID'] ?? null)) {
                 continue;
             }
 

@@ -159,6 +159,7 @@ try {
                     'kullanici_id' => $ilgiliKullaniciIdleri[0] ?? 0,
                     'MEDULARAPORID' => $rapor['MEDULARAPORID'],
                     'RAPORTAKIPNO' => $rapor['RAPORTAKIPNO'],
+                    'RAPORSIRANO' => $rapor['RAPORSIRANO'] ?? null,
                     'TCKIMLIKNO' => $rapor['TCKIMLIKNO'],
                     'soyad' => rtrim($rapor['SOYAD'], ' '),
                     'SIGORTALIADSOYAD' => rtrim($rapor['AD'], ' ') . ' ' . rtrim($rapor['SOYAD'], ' '),
