@@ -1172,18 +1172,31 @@ XML;
      * @return array Arşivlenmiş raporların bulunduğu saf bir PHP dizisi.
      * @throws Exception
      */
-    public function arsivlenmisRaporlariGetir(DateTime $tarih1, DateTime $tarih2)
+    public function arsivlenmisRaporlariGetir(
+        DateTime $tarih1,
+        DateTime $tarih2,
+        ?string &$sgkHatasi = null
+    )
     {
-        // SGK'nın bu tür bir metodu olmadığı için, geniş bir aralıktaki TÜM onay bekleyenleri
-        // çekip içinden filtreleme yapmamız gerekir.
-        // Tarih parametresi olarak geleceği veriyoruz ki hiçbirini kaçırmayalım.
-        $tumBekleyenRaporlar = $this->raporlariGetir(new DateTime('tomorrow'));
+        $sgkHatasi = null;
         $arsivRaporModel = new ArsivRaporModel();
         $arsivlenmisRaporlar = $arsivRaporModel->tarihAraligindaGetir(
             $this->isyeriKodu,
             $tarih1,
             $tarih2
         );
+
+        // SGK'nın bu tür bir metodu olmadığı için, geniş bir aralıktaki TÜM onay bekleyenleri
+        // çekip içinden filtreleme yapmamız gerekir.
+        // Tarih parametresi olarak geleceği veriyoruz ki hiçbirini kaçırmayalım.
+        try {
+            $tumBekleyenRaporlar = $this->raporlariGetir(new DateTime('tomorrow'));
+        } catch (Exception $e) {
+            // SGK oturumu geçici olarak kullanılamasa bile daha önce kalıcı arşive
+            // alınan kayıtları göstermeye devam et.
+            $tumBekleyenRaporlar = [];
+            $sgkHatasi = $e->getMessage();
+        }
 
         $tekilRaporlar = [];
         foreach ($arsivlenmisRaporlar as $rapor) {

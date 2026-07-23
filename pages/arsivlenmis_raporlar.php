@@ -22,8 +22,12 @@ $isQueried = !empty($_REQUEST['tarih1']) && !empty($_REQUEST['tarih2']);
 
 if ($isQueried) {
     try {
-        $sgkClient = new SgkViziteService(); 
-        $arsivlenmisRaporlar = $sgkClient->arsivlenmisRaporlariGetir($tarih1, $tarih2);
+        $sgkClient = new SgkViziteService();
+        $sgkHatasi = null;
+        $arsivlenmisRaporlar = $sgkClient->arsivlenmisRaporlariGetir($tarih1, $tarih2, $sgkHatasi);
+        if ($sgkHatasi !== null) {
+            $hataMesaji = "SGK canlı sorgusu tamamlanamadı: " . $sgkHatasi;
+        }
     } catch (Exception $e) {
         $hataMesaji = "KRİTİK HATA: " . $e->getMessage();
     }
@@ -163,7 +167,11 @@ if ($isQueried) {
                                 <td colspan="6" class="text-center py-10 text-zinc-400 dark:text-zinc-500 font-medium">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <i data-lucide="inbox" class="w-8 h-8 opacity-40"></i>
-                                        <span>Belirtilen tarih aralığında arşive kaldırılmış (3 günden kısa) rapor bulunamadı.</span>
+                                        <span>
+                                            <?php echo $hataMesaji
+                                                ? 'SGK sorgusu tamamlanamadığı için yeni arşiv kayıtları kontrol edilemedi.'
+                                                : 'Belirtilen tarih aralığında arşive kaldırılmış (3 günden kısa) rapor bulunamadı.'; ?>
+                                        </span>
                                     </div>
                                 </td>
                             </tr>

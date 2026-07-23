@@ -21,8 +21,12 @@ $isQueried = !empty($_REQUEST['tarih1']) && !empty($_REQUEST['tarih2']);
 
 if ($isQueried) {
     try {
-        $sgkClient = new SgkViziteService(); 
-        $arsivlenmisRaporlar = $sgkClient->arsivlenmisRaporlariGetir($tarih1, $tarih2);
+        $sgkClient = new SgkViziteService();
+        $sgkHatasi = null;
+        $arsivlenmisRaporlar = $sgkClient->arsivlenmisRaporlariGetir($tarih1, $tarih2, $sgkHatasi);
+        if ($sgkHatasi !== null) {
+            $hataMesaji = "SGK canlı sorgusu tamamlanamadı: " . $sgkHatasi;
+        }
     } catch (Exception $e) {
         $hataMesaji = "Mevcut arşiv kayıtları çekilirken hata oluştu: " . $e->getMessage();
     }
@@ -133,7 +137,11 @@ if ($isQueried) {
                 <?php endforeach; ?>
             <?php else: ?>
                 <div class="p-6 text-center border border-zinc-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-900">
-                    <p class="text-xs text-zinc-500">Belirtilen tarih aralığında arşive kaldırılmış rapor bulunamadı.</p>
+                    <p class="text-xs text-zinc-500">
+                        <?php echo $hataMesaji
+                            ? 'SGK sorgusu tamamlanamadığı için yeni arşiv kayıtları kontrol edilemedi.'
+                            : 'Belirtilen tarih aralığında arşive kaldırılmış rapor bulunamadı.'; ?>
+                    </p>
                 </div>
             <?php endif; ?>
         <?php else: ?>
