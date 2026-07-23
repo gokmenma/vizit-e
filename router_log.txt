@@ -1330,3 +1330,6 @@
 19:17:53 - vizite.com - /
 19:17:55 - vizite.com - /arsivlenmis-raporlar
 19:17:59 - vizite.com - /arsivlenmis-raporlar
+19:20:47 - vizite.com - /logout
+19:20:47 - vizite.com - /sign-in
+19:20:49 - vizite.com - /forgot-password
