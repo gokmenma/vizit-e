@@ -1317,3 +1317,11 @@
 15:38:02 - vizite.com - /
 15:38:05 - vizite.com - /arsivlenmis-raporlar
 15:38:07 - vizite.com - /arsivlenmis-raporlar
+15:44:11 - vizite.com - /arsivlenmis-raporlar
+15:44:17 - vizite.com - /mahsuplastirilacak-raporlar
+15:44:19 - vizite.com - /mahsuplastirilan-raporlar
+15:44:21 - vizite.com - /onay-bekleyen-raporlar
+18:35:40 - vizite.com - /onay-bekleyen-raporlar
+19:11:40 - vizite.com - /onay-bekleyen-raporlar
+19:11:47 - vizite.com - /arsivlenmis-raporlar
+19:11:49 - vizite.com - /arsivlenmis-raporlar

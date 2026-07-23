@@ -33,6 +33,12 @@ if ($isQueried) {
     try {
         $sgkClient = new SgkViziteService();
         $onayliRaporlar = $sgkClient->onayliRaporlariGetir($tarih1, $tarih2);
+        foreach ($onayliRaporlar as $rapor) {
+            $medulaRaporId = (string)($rapor['MEDULARAPORID'] ?? '');
+            if ($medulaRaporId !== '') {
+                $_SESSION['rapor_fisleri'][$medulaRaporId] = $rapor;
+            }
+        }
     } catch (Exception $e) {
         $hataMesaji = $e->getMessage();
     }

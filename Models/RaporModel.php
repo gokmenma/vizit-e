@@ -44,6 +44,31 @@ class RaporModel extends Model
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
+    /**
+     * Verilen Medula rapor kimliklerinden yerel veritabanında bulunanları topluca getirir.
+     *
+     * @return string[]
+     */
+    public function findExistingMedulaRaporIds(array $medulaRaporIds): array
+    {
+        $medulaRaporIds = array_values(array_unique(array_filter(
+            array_map(static fn($id): string => trim((string)$id), $medulaRaporIds),
+            static fn(string $id): bool => $id !== ''
+        )));
+
+        if ($medulaRaporIds === []) {
+            return [];
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($medulaRaporIds), '?'));
+        $stmt = $this->db->prepare(
+            "SELECT MEDULARAPORID FROM {$this->table} WHERE MEDULARAPORID IN ({$placeholders})"
+        );
+        $stmt->execute($medulaRaporIds);
+
+        return array_map('strval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
 
 
     /** Raporun onaylanma türünü döndürür

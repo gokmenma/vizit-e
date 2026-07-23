@@ -2,13 +2,20 @@
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Helper\Security;
-use App\Helper\Helper;
 use Models\ArsivRaporModel;
 use Models\RaporModel;
 
 class SgkViziteService
 {
-    private $serviceUrl = 'https://uyg.sgk.gov.tr/Ws_Vizite/services/ViziteGonder';
+    /**
+     * ARSIV=1 raporların raporAramaTarihile sonuçlarından kaybolup kaybolmadığını
+     * gözlemlemek için otomatik raporOkunduKapat işlemi geçici olarak kapalıdır.
+     */
+    private const ARSIV_RAPORLARINI_OTOMATIK_KAPAT = false;
+
+    private const TOKEN_TTL_SECONDS = 1740;
+
+    private string $serviceUrl = 'https://uyg.sgk.gov.tr/Ws_Vizite/services/ViziteGonder';
     private $kullaniciAdi;
     private $isyeriKodu;
     private $wsSifre;
@@ -53,30 +60,18 @@ class SgkViziteService
         $this->isyeriKodu           = trim($isyeriKodu ?? '');
         $this->wsSifre              = trim($wsSifre ?? '');
 
-        $currentUserKey = $this->kullaniciAdi . '|' . $this->isyeriKodu;
-        $cacheFile = __DIR__ . '/../../cache/sgk_token_' . md5($currentUserKey) . '.json';
-        
         $this->wsToken          = null;
         $this->tokenExpiresAt   = null;
         $this->activeUserKey    = null;
 
-        if (file_exists($cacheFile)) {
-            $cacheData = json_decode(file_get_contents($cacheFile), true);
-            if ($cacheData && isset($cacheData['wsToken']) && isset($cacheData['tokenExpiresAt'])) {
-                if (time() < $cacheData['tokenExpiresAt']) {
-                    $this->wsToken          = $cacheData['wsToken'];
-                    $this->tokenExpiresAt   = $cacheData['tokenExpiresAt'];
-                    $this->activeUserKey    = $currentUserKey;
-                }
-            }
-        }
-
-
-
-      //  3. Son kontrol: Tüm kontrollerden sonra bile bilgiler hala eksikse hata ver
+        // Son kontrol: Tüm kontrollerden sonra bile bilgiler eksikse hata ver.
         if (!$this->kullaniciAdi || !$this->isyeriKodu || !$this->wsSifre) {
             throw new Exception("SGK Servisi için gerekli kimlik bilgileri eksik veya bulunamadı.");
         }
+
+        $currentUserKey = $this->currentUserKey();
+        $this->migrateLegacyTokenCache($currentUserKey);
+        $this->loadTokenFromCache($currentUserKey);
     }
 
     /**
@@ -85,11 +80,18 @@ class SgkViziteService
      * SGK sunucusu büyük cevaplarda bağlantıyı protokole uygun kapatmadığı için
      * cURL hata 56 verir. file_get_contents buna tolerans gösterir.
      */
-    private function sendRequest($methodName, $params)
+    private function sendRequest(string $methodName, array $params, bool $tokenRetryAllowed = true): object
     {
+        if (!preg_match('/^[A-Za-z][A-Za-z0-9]*$/', $methodName)) {
+            throw new InvalidArgumentException('Geçersiz SGK metot adı.');
+        }
+
         $paramXml = '';
         foreach ($params as $key => $value) {
-            $paramXml .= "<{$key}>" . htmlspecialchars($value, ENT_XML1, 'UTF-8') . "</{$key}>";
+            if (!preg_match('/^[A-Za-z][A-Za-z0-9]*$/', (string)$key)) {
+                throw new InvalidArgumentException('Geçersiz SGK parametre adı.');
+            }
+            $paramXml .= "<{$key}>" . htmlspecialchars((string)$value, ENT_XML1, 'UTF-8') . "</{$key}>";
         }
 
         $xml_request = <<<XML
@@ -114,14 +116,15 @@ XML;
                 'ignore_errors' => true,
             ],
             'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true,
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+                'allow_self_signed' => false,
                 'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
             ]
         ]);
 
         $responseXml = @file_get_contents($this->serviceUrl, false, $streamContext);
+        $httpStatus = $this->extractHttpStatus($http_response_header ?? []);
 
         if ($responseXml === false) {
             $lastErr = error_get_last();
@@ -129,70 +132,112 @@ XML;
             throw new Exception("Bağlantı Hatası: {$errMsg} (Method: {$methodName})");
         }
 
-        // Cevap boşsa veya bir HTML hata sayfasıysa
-        if (empty($responseXml) || strpos(trim($responseXml), '<') !== 0) {
-            throw new Exception("SGK sunucusundan geçerli bir XML cevabı alınamadı. Gelen cevap: " . $responseXml);
+        if (empty($responseXml) || strpos(ltrim($responseXml), '<') !== 0) {
+            throw new Exception("SGK sunucusundan geçerli bir XML cevabı alınamadı (Method: {$methodName}).");
         }
 
-        // Gelen XML'i parse edip obje haline getirelim (Daha sağlam bir yöntemle)
-        $responseXml = preg_replace("/(\<\/?)(\w+)\:([^\>]*\>)/", "$1$2$3", $responseXml);
-        libxml_use_internal_errors(true); // XML hatalarını yakalamak için
-        $xml = simplexml_load_string($responseXml);
+        $previousLibxmlSetting = libxml_use_internal_errors(true);
+        $xml = simplexml_load_string($responseXml, SimpleXMLElement::class, LIBXML_NONET | LIBXML_NOCDATA);
 
         if ($xml === false) {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousLibxmlSetting);
             throw new Exception("Sunucudan gelen XML parse edilemedi.");
         }
 
-        $body = $xml->xpath('//soapenvBody')[0];
-        $responseNode = $body->children()->children(); // wsLoginReturn, raporAramaTarihileReturn vb.
-        return $responseNode;
+        $faultNodes = $xml->xpath('//*[local-name()="Fault"]');
+        if (!empty($faultNodes)) {
+            $faultString = $faultNodes[0]->xpath('./*[local-name()="faultstring"]');
+            $message = !empty($faultString) ? trim((string)$faultString[0]) : 'Bilinmeyen SOAP hatası';
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousLibxmlSetting);
+            throw new Exception("SGK SOAP hatası ({$methodName}): {$message}");
+        }
+
+        if ($httpStatus !== null && ($httpStatus < 200 || $httpStatus >= 300)) {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousLibxmlSetting);
+            throw new Exception("SGK HTTP hatası {$httpStatus} (Method: {$methodName}).");
+        }
+
+        $returnName = $methodName . 'Return';
+        $returnNodes = $xml->xpath('//*[local-name()="' . $returnName . '"]');
+        if (empty($returnNodes)) {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousLibxmlSetting);
+            throw new Exception("SGK cevabında {$returnName} alanı bulunamadı.");
+        }
+
+        $returnNode = $returnNodes[0];
+        $resultCodeNodes = $returnNode->xpath('./*[local-name()="sonucKod"]');
+        $resultCode = !empty($resultCodeNodes) ? trim((string)$resultCodeNodes[0]) : null;
+
+        libxml_clear_errors();
+        libxml_use_internal_errors($previousLibxmlSetting);
+
+        if (
+            $tokenRetryAllowed
+            && $methodName !== 'wsLogin'
+            && array_key_exists('wsToken', $params)
+            && in_array($resultCode, ['104', '106'], true)
+        ) {
+            $this->invalidateTokenCache();
+            $params['wsToken'] = $this->getValidToken();
+            return $this->sendRequest($methodName, $params, false);
+        }
+
+        $response = new stdClass();
+        $response->{$returnName} = $returnNode;
+        return $response;
     }
 
-    private function getValidToken()
+    private function getValidToken(): string
     {
-        $currentUserKey = $this->kullaniciAdi . '|' . $this->isyeriKodu;
+        $currentUserKey = $this->currentUserKey();
 
-        // Eğer kullanıcı değişmişse token sıfırlansın
         if ($this->activeUserKey !== $currentUserKey) {
             $this->wsToken = null;
             $this->tokenExpiresAt = 0;
         }
-        if (!$this->wsToken || time() > $this->tokenExpiresAt) {
-            // Sunucuyu yormamak ve bağlantı kopmasını önlemek için kısa bir gecikme
-            usleep(500000); // 0.5 saniye bekle
-            
-            //echo "Yeni token alınıyor...\n";
+
+        if ($this->hasValidToken()) {
+            return $this->wsToken;
+        }
+
+        $cacheFile = $this->tokenCacheFile($currentUserKey);
+        $lockHandle = fopen($cacheFile . '.lock', 'c');
+        if ($lockHandle === false) {
+            throw new Exception('SGK token kilit dosyası oluşturulamadı.');
+        }
+        @chmod($cacheFile . '.lock', 0600);
+
+        try {
+            if (!flock($lockHandle, LOCK_EX)) {
+                throw new Exception('SGK token kilidi alınamadı.');
+            }
+
+            // Başka bir süreç kilidi beklerken token almış olabilir.
+            $this->loadTokenFromCache($currentUserKey);
+            if ($this->hasValidToken()) {
+                return $this->wsToken;
+            }
+
             $params = [
                 'kullaniciAdi' => $this->kullaniciAdi,
                 'isyeriKodu' => $this->isyeriKodu,
-                'isyeriSifresi' => $this->wsSifre, // WSDL'ye göre doğru parametre adı
+                'isyeriSifresi' => $this->wsSifre,
             ];
 
-            $response = $this->sendRequest('wsLogin', $params);
-            //var_dump($response); // Gelen ham cevabı kontrol etmek için
-
-            // =============================================================
-            // ===                KRİTİK DÜZELTME BURADA                 ===
-            // =============================================================
-            // Gelen cevabın doğru katmanına erişiyoruz: wsLoginReturn
-            if (isset($response->wsLoginReturn->sonucKod) && $response->wsLoginReturn->sonucKod == '0') {
-                // Token'ı ve açıklamayı da doğru yoldan alıyoruz
+            $response = $this->sendRequest('wsLogin', $params, false);
+            if (isset($response->wsLoginReturn->sonucKod) && (string)$response->wsLoginReturn->sonucKod === '0') {
                 $this->wsToken = (string)$response->wsLoginReturn->wsToken;
-                $this->tokenExpiresAt = time() + (29 * 60);
+                $this->tokenExpiresAt = time() + self::TOKEN_TTL_SECONDS;
                 $this->activeUserKey = $currentUserKey;
-
-                $cacheFile = __DIR__ . '/../../cache/sgk_token_' . md5($currentUserKey) . '.json';
-                $cacheData = [
+                $this->writeTokenCache($cacheFile, [
                     'wsToken' => $this->wsToken,
-                    'tokenExpiresAt' => $this->tokenExpiresAt
-                ];
-                if (!is_dir(dirname($cacheFile))) {
-                    mkdir(dirname($cacheFile), 0777, true);
-                }
-                file_put_contents($cacheFile, json_encode($cacheData));
-                //echo "Token başarıyla alındı: " . $this->wsToken . "\n";
+                    'tokenExpiresAt' => $this->tokenExpiresAt,
+                ]);
             } else {
-                // Hata mesajını da doğru yoldan alıyoruz
                 $hataMesaji = isset($response->wsLoginReturn->sonucAciklama)
                     ? (string)$response->wsLoginReturn->sonucAciklama
                     : 'Bilinmeyen Hata';
@@ -202,9 +247,128 @@ XML;
                 }
                 throw new Exception("Login başarısız: " . $hataMesaji);
             }
-            // =============================================================
+        } finally {
+            flock($lockHandle, LOCK_UN);
+            fclose($lockHandle);
         }
+
         return $this->wsToken;
+    }
+
+    private function currentUserKey(): string
+    {
+        return $this->kullaniciAdi . '|' . $this->isyeriKodu;
+    }
+
+    private function hasValidToken(): bool
+    {
+        return is_string($this->wsToken)
+            && $this->wsToken !== ''
+            && is_int($this->tokenExpiresAt)
+            && time() < $this->tokenExpiresAt;
+    }
+
+    private function tokenCacheDirectory(): string
+    {
+        $configuredDirectory = getenv('SGK_TOKEN_CACHE_DIR');
+        $directory = $configuredDirectory !== false && trim($configuredDirectory) !== ''
+            ? rtrim($configuredDirectory, DIRECTORY_SEPARATOR)
+            : '/opt/lampp/temp/sgk-vizite-tokens';
+
+        if (!is_dir($directory) && !mkdir($directory, 0700, true) && !is_dir($directory)) {
+            throw new Exception('Güvenli SGK token dizini oluşturulamadı.');
+        }
+        @chmod($directory, 0700);
+
+        return $directory;
+    }
+
+    private function tokenCacheFile(string $currentUserKey): string
+    {
+        return $this->tokenCacheDirectory()
+            . DIRECTORY_SEPARATOR
+            . 'sgk_token_' . hash('sha256', $currentUserKey) . '.json';
+    }
+
+    private function loadTokenFromCache(string $currentUserKey): void
+    {
+        $cacheFile = $this->tokenCacheFile($currentUserKey);
+        if (!is_file($cacheFile) || !is_readable($cacheFile)) {
+            return;
+        }
+
+        $cacheData = json_decode((string)file_get_contents($cacheFile), true);
+        if (
+            is_array($cacheData)
+            && isset($cacheData['wsToken'], $cacheData['tokenExpiresAt'])
+            && is_string($cacheData['wsToken'])
+            && $cacheData['wsToken'] !== ''
+            && is_numeric($cacheData['tokenExpiresAt'])
+            && time() < (int)$cacheData['tokenExpiresAt']
+        ) {
+            $this->wsToken = $cacheData['wsToken'];
+            $this->tokenExpiresAt = (int)$cacheData['tokenExpiresAt'];
+            $this->activeUserKey = $currentUserKey;
+        }
+    }
+
+    private function writeTokenCache(string $cacheFile, array $cacheData): void
+    {
+        $json = json_encode($cacheData, JSON_THROW_ON_ERROR);
+        $temporaryFile = $cacheFile . '.tmp.' . bin2hex(random_bytes(6));
+        if (file_put_contents($temporaryFile, $json, LOCK_EX) === false) {
+            throw new Exception('SGK token önbelleği yazılamadı.');
+        }
+        @chmod($temporaryFile, 0600);
+
+        if (!rename($temporaryFile, $cacheFile)) {
+            @unlink($temporaryFile);
+            throw new Exception('SGK token önbelleği güvenli biçimde taşınamadı.');
+        }
+        @chmod($cacheFile, 0600);
+    }
+
+    private function invalidateTokenCache(): void
+    {
+        $cacheFile = $this->tokenCacheFile($this->currentUserKey());
+        if (is_file($cacheFile)) {
+            @unlink($cacheFile);
+        }
+        $this->wsToken = null;
+        $this->tokenExpiresAt = 0;
+        $this->activeUserKey = null;
+    }
+
+    private function migrateLegacyTokenCache(string $currentUserKey): void
+    {
+        $secureCacheFile = $this->tokenCacheFile($currentUserKey);
+        if (is_file($secureCacheFile)) {
+            return;
+        }
+
+        $legacyCacheFile = __DIR__ . '/../../cache/sgk_token_' . md5($currentUserKey) . '.json';
+        if (!is_file($legacyCacheFile) || !is_readable($legacyCacheFile)) {
+            return;
+        }
+
+        $cacheData = json_decode((string)file_get_contents($legacyCacheFile), true);
+        if (
+            is_array($cacheData)
+            && isset($cacheData['wsToken'], $cacheData['tokenExpiresAt'])
+            && time() < (int)$cacheData['tokenExpiresAt']
+        ) {
+            $this->writeTokenCache($secureCacheFile, $cacheData);
+        }
+    }
+
+    private function extractHttpStatus(array $headers): ?int
+    {
+        foreach (array_reverse($headers) as $header) {
+            if (preg_match('/^HTTP\/\S+\s+(\d{3})\b/i', $header, $matches)) {
+                return (int)$matches[1];
+            }
+        }
+        return null;
     }
 
     /**
@@ -255,7 +419,6 @@ XML;
         ];
 
         $response = $this->sendRequest('onayliRaporlarTarihile', $params);
-        //var_dump($response); // Gelen ham cevabı kontrol etmek için
         $returnNode = $response->onayliRaporlarTarihileReturn;
         $sonucDizisi = []; // Döndüreceğimiz temiz dizi
 
@@ -298,11 +461,6 @@ XML;
                         'VAKA' => (string)$rapor->VAKA,
                     ];
 
-                    // 2. ADIM: Oluşturduğumuz bu yeni diziyi, MEDULARAPORID'sini anahtar 
-                    // olarak kullanarak session'a kaydediyoruz.
-                    $_SESSION['rapor_fisleri'][$yeniRaporDizisi['MEDULARAPORID']] = $yeniRaporDizisi;
-
-                    // 3. ADIM: Aynı yeni diziyi, fonksiyonun döndüreceği sonuç listesine ekliyoruz.
                     $sonucDizisi[] = $yeniRaporDizisi;
                 }
                 // =============================================================
@@ -345,34 +503,13 @@ XML;
         }
     }
 
-    // SgkViziteService.php içinde
-
+    /**
+     * Geriye dönük uyumluluk için detay metodu takma adı.
+     * @deprecated onayliRaporDetayGetir() kullanın.
+     */
     public function raporDetayGetir(string $medulaRaporId)
     {
-        $params = [
-            'kullaniciAdi' => $this->kullaniciAdi,
-            'isyeriKodu' => $this->isyeriKodu,
-            'wsToken' => $this->getValidToken(),
-            'medulaRaporId' => $medulaRaporId, // Anahtarı burada kullanıyoruz
-        ];
-
-        // 'onayliRaporlarDetay' kapısını çalıyoruz (SOAP operasyonunu çağırıyoruz)
-        $response = $this->sendRequest('onayliRaporlarDetay', $params);
-        var_dump($response);
-        $returnNode = $response->onayliRaporlarDetayReturn;
-
-        if (isset($returnNode->sonucKod) && $returnNode->sonucKod == '0') {
-            // Kapı açıldıktan sonra içerideki 'tarihSorguBean' odasını arıyoruz.
-            // Burası, 'struct ekran' yapısını içeren yerdir.
-            if (isset($returnNode->tarihSorguBean->TarihSorguBean)) {
-                $detayObject = $returnNode->tarihSorguBean->TarihSorguBean;
-                // İçerideki tüm veriyi alıp standart bir PHP dizisine çeviriyoruz.
-                return json_decode(json_encode($detayObject), true);
-            }
-            return null; // Oda boş olabilir.
-        } else {
-            throw new Exception("Kapı açılamadı (Rapor detayı getirilemedi)");
-        }
+        return $this->onayliRaporDetayGetir($medulaRaporId);
     }
 
     /**
@@ -433,7 +570,6 @@ XML;
                     ];
                 }
             };
-            //Helper::dd($sonucDizisi);
         } else if (isset($returnNode->sonucKod) && $returnNode->sonucKod == '503') {
             // Rapor bulunamadı.
         } else {
@@ -441,7 +577,6 @@ XML;
             throw new Exception("Raporlar getirilemedi: " . $hataMesaji);
         }
 
-       // var_dump($sonucDizisi);
         return $sonucDizisi;
     }
 
@@ -466,8 +601,6 @@ XML;
 
         $response = $this->sendRequest('raporAramaTarihile', $params);
         $returnNode = $response->raporAramaTarihileReturn;
-
-        // var_dump($returnNode); // Gelen ham cevabı kontrol etmek için
 
         if (isset($returnNode->sonucKod) && $returnNode->sonucKod == '0') {
 
@@ -575,10 +708,10 @@ XML;
 
     /**
      * Onay Bekleyen Raporlar panel sayfaları ve otomatik onay cron'unun ortak kullandığı
-     * merkezi metot: SGK'dan bekleyen raporları çeker, arşivlenmiş (ARSIV=1) olanları
-     * SGK'da kapatıp 100 kayıtlık pencereyi boşaltır, ardından zaten SGK'da onaylanmış/
-     * arşivlenmiş veya bizim veritabanımızda daha önce onaylanmış görünen raporları
-     * eleyerek geriye sadece gerçekten işlem gerektiren raporları döndürür.
+     * merkezi metot: SGK'dan bekleyen raporları çeker ve sadece gerçekten işlem
+     * gerektiren raporları döndürür. ARSIV=1 kayıtların SGK'da otomatik kapatılması,
+     * arşiv görünürlüğünü test etmek amacıyla özellik bayrağı üzerinden geçici olarak
+     * devre dışıdır.
      *
      * Bu filtreleme mantığı tek bir yerde tutulur; ileride bir kural değişirse
      * (ör. yeni bir "zaten onaylı" göstergesi eklenirse) sadece burası güncellenir.
@@ -590,25 +723,46 @@ XML;
     public function bekleyenRaporlariGetir(DateTime $tarih, RaporModel $raporModel): array
     {
         $tumRaporlar = $this->raporlariGetir($tarih);
-        $arsivKapatSonucu = $this->arsivlenmisRaporlariKapat($tumRaporlar);
+        $arsivKapatSonucu = [
+            'kapatilan' => 0,
+            'hatalar' => [],
+            'devre_disi' => !self::ARSIV_RAPORLARINI_OTOMATIK_KAPAT,
+        ];
+
+        if (self::ARSIV_RAPORLARINI_OTOMATIK_KAPAT) {
+            $arsivKapatSonucu = $this->arsivlenmisRaporlariKapat($tumRaporlar);
+            $arsivKapatSonucu['devre_disi'] = false;
+        }
 
         $bekleyenRaporlar = [];
+        $mevcutMedulaRaporIds = array_fill_keys(
+            $raporModel->findExistingMedulaRaporIds(array_column($tumRaporlar, 'MEDULARAPORID')),
+            true
+        );
+
         foreach ($tumRaporlar as $rapor) {
             // Arşivlenmiş (kısa süreli, SGK tarafından otomatik sonuçlandırılmış) raporları atla
             if (($rapor['ARSIV'] ?? '0') == 1) {
                 continue;
             }
 
-            // Rapor durumu "ONAY" içeriyorsa veya ONAYLI/ONAYDURUMU işaretliyse atla (SGK'dan gelen veri)
-            if ((isset($rapor['RAPORDURUMADI']) && stripos($rapor['RAPORDURUMADI'], 'ONAY') !== false) ||
-                (isset($rapor['ONAYLI']) && ($rapor['ONAYLI'] == '1' || $rapor['ONAYLI'] == 'E')) ||
-                (isset($rapor['ONAYDURUMU']) && ($rapor['ONAYDURUMU'] == '1' || $rapor['ONAYDURUMU'] == 'E'))) {
+            // "ONAY BEKLİYOR" gibi durumları yanlışlıkla elememek için metinde ONAY
+            // aramak yerine yalnızca kesin onay durumlarını kabul et.
+            $raporDurumAdi = mb_strtoupper(trim((string)($rapor['RAPORDURUMADI'] ?? '')), 'UTF-8');
+            $onayli = strtoupper(trim((string)($rapor['ONAYLI'] ?? '')));
+            $onayDurumu = strtoupper(trim((string)($rapor['ONAYDURUMU'] ?? '')));
+            if (
+                in_array($raporDurumAdi, ['ONAYLI', 'ONAYLANDI'], true)
+                || in_array($onayli, ['1', 'E'], true)
+                || in_array($onayDurumu, ['1', 'E'], true)
+            ) {
                 continue;
             }
 
             // Takip numarasi birden fazla rapor sirasinda ortak olabilir. Yalnizca SGK'nin
             // tekil Medula rapor kimligi daha once kaydedildiyse bu satiri atla.
-            if ($raporModel->findReportByMedulaRaporId($rapor['MEDULARAPORID'] ?? null)) {
+            $medulaRaporId = trim((string)($rapor['MEDULARAPORID'] ?? ''));
+            if ($medulaRaporId !== '' && isset($mevcutMedulaRaporIds[$medulaRaporId])) {
                 continue;
             }
 
@@ -683,7 +837,6 @@ XML;
             // =============================================================
 
         } else if (isset($returnNode->sonucKod) && $returnNode->sonucKod == '501') {
-            echo "Kayıtlı iletişim bilgisi bulunamadı.\n";
             return null;
         } else {
             $hataMesaji = isset($returnNode->sonucAciklama)
@@ -844,10 +997,6 @@ XML;
      */
     public function mahsuplasmayiOnayla(array $rapor)
     {
-        // Vaka Adı'ndan Vaka Kodu'nu bulmamız gerekiyor.
-        $vakaKodlari = ['İş Kazası' => '1', 'Meslek Hastalığı' => '2', 'Hastalık' => '3', 'Analık' => '4'];
-        $vakaKodu = $vakaKodlari[$rapor['vakaAdi']] ?? '3'; // Bulamazsa varsayılan olarak Hastalık
-
         $params = [
             'kullaniciAdi' => $this->kullaniciAdi,
             'isyeriKodu' => $this->isyeriKodu,
@@ -1200,6 +1349,10 @@ XML;
 
         $tekilRaporlar = [];
         foreach ($arsivlenmisRaporlar as $rapor) {
+            if (!$this->arsivRaporuFiltreyeUyuyor($rapor, $tarih1, $tarih2)) {
+                continue;
+            }
+
             $anahtar = (string)($rapor['MEDULARAPORID'] ?? '');
             if ($anahtar !== '') {
                 $tekilRaporlar[$anahtar] = $rapor;
@@ -1207,38 +1360,22 @@ XML;
         }
 
         foreach ($tumBekleyenRaporlar as $rapor) {
-            // Arşiv listesine yalnızca SGK'nın ARSIV=1 olarak işaretlediği ve süresi
-            // 3 günden küçük olan kayıtlar alınır. İki koşul birlikte zorunludur.
-            if ((string)($rapor['ARSIV'] ?? '0') !== '1') {
+            if (!$this->arsivRaporuFiltreyeUyuyor($rapor, $tarih1, $tarih2)) {
                 continue;
             }
 
-            try {
-                $baslangic = new DateTime($rapor['POLIKLINIKTAR'] ?? '');
-                $iseBasi = new DateTime($rapor['ISBASKONTTAR'] ?? '');
-                if ($baslangic->diff($iseBasi)->days >= 3) {
-                    continue;
-                }
+            // Henüz SGK kuyruğunda duran arşivleri de hemen yerel arşive
+            // kaydet; sonraki bekleyen rapor sorgusu kapatsa bile kaybolmasın.
+            $arsivRaporModel->arsivle(
+                $rapor,
+                $this->isyeriKodu,
+                isset($_SESSION['isyeri_id']) ? (int)$_SESSION['isyeri_id'] : null,
+                isset($_SESSION['kullanici_id']) ? (int)$_SESSION['kullanici_id'] : null
+            );
 
-                if ($baslangic < $tarih1 || $baslangic > $tarih2) {
-                    continue;
-                }
-
-                // Henüz SGK kuyruğunda duran arşivleri de hemen yerel arşive
-                // kaydet; sonraki bekleyen rapor sorgusu kapatsa bile kaybolmasın.
-                $arsivRaporModel->arsivle(
-                    $rapor,
-                    $this->isyeriKodu,
-                    isset($_SESSION['isyeri_id']) ? (int)$_SESSION['isyeri_id'] : null,
-                    isset($_SESSION['kullanici_id']) ? (int)$_SESSION['kullanici_id'] : null
-                );
-
-                $anahtar = (string)($rapor['MEDULARAPORID'] ?? '');
-                if ($anahtar !== '') {
-                    $tekilRaporlar[$anahtar] = $rapor;
-                }
-            } catch (Exception $e) {
-                // Tarihi eksik veya geçersiz kayıt arşiv listesine alınmaz.
+            $anahtar = (string)($rapor['MEDULARAPORID'] ?? '');
+            if ($anahtar !== '') {
+                $tekilRaporlar[$anahtar] = $rapor;
             }
         }
 
@@ -1248,5 +1385,46 @@ XML;
         });
 
         return $arsivlenmisRaporlar;
+    }
+
+    private function arsivRaporuFiltreyeUyuyor(array $rapor, DateTime $tarih1, DateTime $tarih2): bool
+    {
+        if ((string)($rapor['ARSIV'] ?? '0') !== '1') {
+            return false;
+        }
+
+        $baslangic = $this->parseSgkDate($rapor['POLIKLINIKTAR'] ?? null);
+        $iseBasi = $this->parseSgkDate($rapor['ISBASKONTTAR'] ?? null);
+        if ($baslangic === null || $iseBasi === null || $iseBasi < $baslangic) {
+            return false;
+        }
+
+        if ($baslangic->diff($iseBasi)->days >= 3) {
+            return false;
+        }
+
+        $aralikBaslangici = DateTimeImmutable::createFromMutable($tarih1)->setTime(0, 0);
+        $aralikBitisi = DateTimeImmutable::createFromMutable($tarih2)->setTime(23, 59, 59);
+        return $baslangic >= $aralikBaslangici && $baslangic <= $aralikBitisi;
+    }
+
+    private function parseSgkDate($value): ?DateTimeImmutable
+    {
+        $value = trim((string)$value);
+        if ($value === '' || in_array($value, ['0000-00-00', '0001-01-01'], true)) {
+            return null;
+        }
+
+        foreach (['Y-m-d', 'd.m.Y'] as $format) {
+            $date = DateTimeImmutable::createFromFormat('!' . $format, $value);
+            $errors = DateTimeImmutable::getLastErrors();
+            $hasErrors = is_array($errors)
+                && ($errors['warning_count'] > 0 || $errors['error_count'] > 0);
+            if ($date !== false && !$hasErrors && $date->format($format) === $value) {
+                return $date;
+            }
+        }
+
+        return null;
     }
 }
