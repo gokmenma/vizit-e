@@ -78,7 +78,7 @@ if ($isQueried) {
         <div>
             <h4 class="font-bold text-sm">Bilgilendirme!</h4>
             <p class="text-xs mt-1 leading-relaxed opacity-95">
-                Bu liste, SGK web servisinden anlık olarak çekilen ve henüz işlemden geçirilmemiş arşivlenmiş raporları göstermektedir. Geçmişte 'okundu' olarak işaretlenmiş veya manuel olarak kapatılmış eski arşiv kayıtları bu listede görünmeyebilir. Tüm tarihsel arşive ulaşmak için lütfen SGK'nın resmi e-Vizite uygulamasını kullanınız.
+                Bu liste, SGK web servisinden alınan arşivlenmiş raporlarla sistemin yerel arşivine kaydedilen raporları birlikte göstermektedir. Sistem tarafından kapatılan yeni arşiv kayıtları sonraki sorgularda da listelenmeye devam eder. Yerel arşiv özelliği eklenmeden önce SGK'da kapatılmış eski kayıtlar web servisinden tekrar alınamayabilir.
             </p>
         </div>
     </div>

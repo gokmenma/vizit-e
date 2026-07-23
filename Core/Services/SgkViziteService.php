@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Helper\Security;
 use App\Helper\Helper;
+use Models\ArsivRaporModel;
 use Models\RaporModel;
 
 class SgkViziteService
@@ -525,6 +526,7 @@ XML;
     {
         $kapatilan = 0;
         $hatalar = [];
+        $arsivRaporModel = new ArsivRaporModel();
 
         foreach ($raporlar as $rapor) {
             if ($kapatilan + count($hatalar) >= $limit) {
@@ -535,10 +537,23 @@ XML;
             }
 
             try {
+                // SGK kuyruğundan kaldırmadan önce kalıcı arşive al. Yerel kayıt
+                // başarısız olursa veri kaybını önlemek için SGK kaydını kapatma.
+                $arsivRaporModel->arsivle(
+                    $rapor,
+                    $this->isyeriKodu,
+                    isset($_SESSION['isyeri_id']) ? (int)$_SESSION['isyeri_id'] : null,
+                    isset($_SESSION['kullanici_id']) ? (int)$_SESSION['kullanici_id'] : null
+                );
+
                 $sonuc = $this->raporuKapat($rapor['MEDULARAPORID']);
                 $kod = (string)($sonuc->sonucKod ?? '');
                 if ($kod === '0' || $kod === '600') {
                     $kapatilan++;
+                    $arsivRaporModel->kapatildiOlarakIsaretle(
+                        $this->isyeriKodu,
+                        (string)$rapor['MEDULARAPORID']
+                    );
                 } else {
                     $hatalar[] = [
                         'medulaRaporId' => $rapor['MEDULARAPORID'],
@@ -1163,12 +1178,20 @@ XML;
         // çekip içinden filtreleme yapmamız gerekir.
         // Tarih parametresi olarak geleceği veriyoruz ki hiçbirini kaçırmayalım.
         $tumBekleyenRaporlar = $this->raporlariGetir(new DateTime('tomorrow'));
+        $arsivRaporModel = new ArsivRaporModel();
+        $arsivlenmisRaporlar = $arsivRaporModel->tarihAraligindaGetir(
+            $this->isyeriKodu,
+            $tarih1,
+            $tarih2
+        );
 
-        if (empty($tumBekleyenRaporlar)) {
-            return [];
+        $tekilRaporlar = [];
+        foreach ($arsivlenmisRaporlar as $rapor) {
+            $anahtar = (string)($rapor['MEDULARAPORID'] ?? '');
+            if ($anahtar !== '') {
+                $tekilRaporlar[$anahtar] = $rapor;
+            }
         }
-
-        $arsivlenmisRaporlar = [];
 
         foreach ($tumBekleyenRaporlar as $rapor) {
             // Filtreleme için birden çok koşulu kontrol edelim
@@ -1197,12 +1220,29 @@ XML;
                 try {
                     $raporTarihi = new DateTime($rapor['POLIKLINIKTAR']);
                     if ($raporTarihi >= $tarih1 && $raporTarihi <= $tarih2) {
-                        $arsivlenmisRaporlar[] = $rapor;
+                        // Henüz SGK kuyruğunda duran arşivleri de hemen yerel arşive
+                        // kaydet; sonraki bekleyen rapor sorgusu kapatsa bile kaybolmasın.
+                        $arsivRaporModel->arsivle(
+                            $rapor,
+                            $this->isyeriKodu,
+                            isset($_SESSION['isyeri_id']) ? (int)$_SESSION['isyeri_id'] : null,
+                            isset($_SESSION['kullanici_id']) ? (int)$_SESSION['kullanici_id'] : null
+                        );
+
+                        $anahtar = (string)($rapor['MEDULARAPORID'] ?? '');
+                        if ($anahtar !== '') {
+                            $tekilRaporlar[$anahtar] = $rapor;
+                        }
                     }
                 } catch (Exception $e) { /* Geçersiz tarih, atla */
                 }
             }
         }
+
+        $arsivlenmisRaporlar = array_values($tekilRaporlar);
+        usort($arsivlenmisRaporlar, static function (array $a, array $b): int {
+            return strcmp((string)($b['POLIKLINIKTAR'] ?? ''), (string)($a['POLIKLINIKTAR'] ?? ''));
+        });
 
         return $arsivlenmisRaporlar;
     }

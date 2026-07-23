@@ -41,7 +41,7 @@ if ($isQueried) {
         <i data-lucide="info" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
         <div>
             <span class="font-bold">Bilgilendirme!</span>
-            <p class="mt-0.5 opacity-90">Bu liste, SGK web servisinden anlık çekilen ve işlemden geçirilmemiş 3 günden kısa arşiv kayıtlarıdır. Tüm tarihsel arşive ulaşmak için e-Vizite uygulamasını kullanabilirsiniz.</p>
+            <p class="mt-0.5 opacity-90">SGK'dan alınan ve yerel arşive kaydedilen kısa raporlar birlikte gösterilir. Yeni kayıtlar sonraki sorgularda da listelenir; özellik eklenmeden önce SGK'da kapatılmış eski kayıtlar tekrar alınamayabilir.</p>
         </div>
     </div>
 
