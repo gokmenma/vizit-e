@@ -1186,11 +1186,11 @@ XML;
             $tarih2
         );
 
-        // SGK'nın bu tür bir metodu olmadığı için, geniş bir aralıktaki TÜM onay bekleyenleri
-        // çekip içinden filtreleme yapmamız gerekir.
-        // Tarih parametresi olarak geleceği veriyoruz ki hiçbirini kaçırmayalım.
+        // raporAramaTarihile verilen tarihten küçük kayıtları döndürür. Seçilen bitiş
+        // gününü de dahil etmek için servise bir sonraki günü gönder.
+        $sgkSorguTarihi = (clone $tarih2)->modify('+1 day');
         try {
-            $tumBekleyenRaporlar = $this->raporlariGetir(new DateTime('tomorrow'));
+            $tumBekleyenRaporlar = $this->raporlariGetir($sgkSorguTarihi);
         } catch (Exception $e) {
             // SGK oturumu geçici olarak kullanılamasa bile daha önce kalıcı arşive
             // alınan kayıtları göstermeye devam et.
@@ -1207,48 +1207,38 @@ XML;
         }
 
         foreach ($tumBekleyenRaporlar as $rapor) {
-            // Filtreleme için birden çok koşulu kontrol edelim
-            $isArsiv = false;
-
-            // 1. Koşul: SGK'dan doğrudan "ARSIV" bilgisi geliyor mu?
-            if (isset($rapor['ARSIV']) && $rapor['ARSIV'] == '1') {
-                $isArsiv = true;
+            // Arşiv listesine yalnızca SGK'nın ARSIV=1 olarak işaretlediği ve süresi
+            // 3 günden küçük olan kayıtlar alınır. İki koşul birlikte zorunludur.
+            if ((string)($rapor['ARSIV'] ?? '0') !== '1') {
+                continue;
             }
 
-
-            // 2. Koşul: Rapor süresi 3 günden kısa mı? (Ek güvence)
-            if (isset($rapor['POLIKLINIKTAR']) && isset($rapor['ISBASKONTTAR'])) {
-                try {
-                    $baslangic = new DateTime($rapor['POLIKLINIKTAR']);
-                    $iseBasi = new DateTime($rapor['ISBASKONTTAR']);
-                    if ($baslangic->diff($iseBasi)->days < 3) {
-                        $isArsiv = true;
-                    }
-                } catch (Exception $e) { /* Geçersiz tarih, atla */
+            try {
+                $baslangic = new DateTime($rapor['POLIKLINIKTAR'] ?? '');
+                $iseBasi = new DateTime($rapor['ISBASKONTTAR'] ?? '');
+                if ($baslangic->diff($iseBasi)->days >= 3) {
+                    continue;
                 }
-            }
 
-            // 3. Tarih Aralığı Kontrolü: Rapor, kullanıcının seçtiği tarih aralığında mı?
-            if ($isArsiv) {
-                try {
-                    $raporTarihi = new DateTime($rapor['POLIKLINIKTAR']);
-                    if ($raporTarihi >= $tarih1 && $raporTarihi <= $tarih2) {
-                        // Henüz SGK kuyruğunda duran arşivleri de hemen yerel arşive
-                        // kaydet; sonraki bekleyen rapor sorgusu kapatsa bile kaybolmasın.
-                        $arsivRaporModel->arsivle(
-                            $rapor,
-                            $this->isyeriKodu,
-                            isset($_SESSION['isyeri_id']) ? (int)$_SESSION['isyeri_id'] : null,
-                            isset($_SESSION['kullanici_id']) ? (int)$_SESSION['kullanici_id'] : null
-                        );
-
-                        $anahtar = (string)($rapor['MEDULARAPORID'] ?? '');
-                        if ($anahtar !== '') {
-                            $tekilRaporlar[$anahtar] = $rapor;
-                        }
-                    }
-                } catch (Exception $e) { /* Geçersiz tarih, atla */
+                if ($baslangic < $tarih1 || $baslangic > $tarih2) {
+                    continue;
                 }
+
+                // Henüz SGK kuyruğunda duran arşivleri de hemen yerel arşive
+                // kaydet; sonraki bekleyen rapor sorgusu kapatsa bile kaybolmasın.
+                $arsivRaporModel->arsivle(
+                    $rapor,
+                    $this->isyeriKodu,
+                    isset($_SESSION['isyeri_id']) ? (int)$_SESSION['isyeri_id'] : null,
+                    isset($_SESSION['kullanici_id']) ? (int)$_SESSION['kullanici_id'] : null
+                );
+
+                $anahtar = (string)($rapor['MEDULARAPORID'] ?? '');
+                if ($anahtar !== '') {
+                    $tekilRaporlar[$anahtar] = $rapor;
+                }
+            } catch (Exception $e) {
+                // Tarihi eksik veya geçersiz kayıt arşiv listesine alınmaz.
             }
         }
 
