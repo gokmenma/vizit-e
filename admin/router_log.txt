@@ -2323,3 +2323,11 @@
 21:51:04 - admin.vizite.com - /ayarlar
 21:51:07 - admin.vizite.com - /ayarlar
 21:51:18 - admin.vizite.com - /ayarlar
+19:36:41 - admin.vizite.com - /dashboard
+19:36:43 - admin.vizite.com - /kampanyalar
+19:38:19 - admin.vizite.com - /kampanyalar
+19:39:02 - admin.vizite.com - /kampanya-kaydet
+19:39:02 - admin.vizite.com - /kampanyalar
+19:39:06 - admin.vizite.com - /kampanya-gonder
+19:39:07 - admin.vizite.com - /kampanyalar
+19:40:42 - admin.vizite.com - /kampanya-logs?id=3&action=logs

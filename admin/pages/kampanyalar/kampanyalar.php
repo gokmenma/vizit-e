@@ -145,132 +145,134 @@ $userModel = new \Models\UserModel();
     </div>
 
     <!-- Add/Edit Campaign Modal -->
-    <dialog id="add-campaign-modal" class="card modal-dialog" style="width: 850px;">
+    <dialog id="add-campaign-modal" class="card modal-dialog" style="width: 850px; max-width: calc(100vw - 2rem);">
         <div class="modal-header">
-            <h2 id="modal-title">
+            <h2 id="modal-title" style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                 <i data-lucide="megaphone" style="width: 20px;"></i> Yeni Kampanya Oluştur
             </h2>
-            <button onclick="document.getElementById('add-campaign-modal').close()" class="modal-close-btn"><i data-lucide="x" style="width: 20px;"></i></button>
+            <button type="button" onclick="document.getElementById('add-campaign-modal').close()" class="modal-close-btn"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
-        <form id="add-campaign-form" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); window.CampaignApp.submitAddCampaign(this);">
-            <input type="hidden" name="id" id="campaign-id" value="">
-            <div class="form-group">
-                <label class="form-label">Kampanya Başlığı (E-posta Konusu)</label>
-                <input type="text" name="title" id="campaign-title" class="form-input" placeholder="Örn: Yeni Özelliklerimiz Hakkında" required>
-            </div>
-            
-            <div class="dt-tabs" style="margin-bottom: 0.5rem; background: var(--muted); padding: 0.25rem; border-radius: 8px; align-self: flex-start;">
-                <button type="button" class="dt-tab active" id="tab-filter" onclick="window.CampaignApp.switchTargetMode('filter')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Filtreleme Kullan</button>
-                <button type="button" class="dt-tab" id="tab-users" onclick="window.CampaignApp.switchTargetMode('users')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Alıcı Seçimi (Kullanıcı veya E-posta)</button>
-            </div>
-
-            <div id="target-mode-filter" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <form id="add-campaign-form" class="modal-form" onsubmit="event.preventDefault(); window.CampaignApp.submitAddCampaign(this);">
+            <div class="modal-body-scrollable" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+                <input type="hidden" name="id" id="campaign-id" value="">
                 <div class="form-group">
-                    <label class="form-label">Kullanıcı Durumu</label>
-                    <div class="custom-select" id="criteria-status-select">
-                        <input type="hidden" name="criteria[status]" value="">
-                        <div class="select-trigger">
-                            <span class="select-label">Tüm Kullanıcılar</span>
-                            <i data-lucide="chevron-down" style="width: 16px; color: #71717a; margin-left: auto;"></i>
+                    <label class="form-label">Kampanya Başlığı (E-posta Konusu)</label>
+                    <input type="text" name="title" id="campaign-title" class="form-input" placeholder="Örn: Yeni Özelliklerimiz Hakkında" required>
+                </div>
+                
+                <div class="dt-tabs" style="margin-bottom: 0.5rem; background: var(--muted); padding: 0.25rem; border-radius: 8px; align-self: flex-start;">
+                    <button type="button" class="dt-tab active" id="tab-filter" onclick="window.CampaignApp.switchTargetMode('filter')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Filtreleme Kullan</button>
+                    <button type="button" class="dt-tab" id="tab-users" onclick="window.CampaignApp.switchTargetMode('users')" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8125rem;">Alıcı Seçimi (Kullanıcı veya E-posta)</button>
+                </div>
+
+                <div id="target-mode-filter" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Kullanıcı Durumu</label>
+                        <div class="custom-select" id="criteria-status-select">
+                            <input type="hidden" name="criteria[status]" value="">
+                            <div class="select-trigger">
+                                <span class="select-label">Tüm Kullanıcılar</span>
+                                <i data-lucide="chevron-down" style="width: 16px; color: #71717a; margin-left: auto;"></i>
+                            </div>
+                            <div class="select-popover" popover="manual">
+                                <div class="select-options">
+                                    <div class="select-option selected" data-value="">Hepsi</div>
+                                    <div class="select-option" data-value="active">Aktif Kullanıcılar</div>
+                                    <div class="select-option" data-value="passive">Pasif Kullanıcılar</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="select-popover" popover="manual">
-                            <div class="select-options">
-                                <div class="select-option selected" data-value="">Hepsi</div>
-                                <div class="select-option" data-value="active">Aktif Kullanıcılar</div>
-                                <div class="select-option" data-value="passive">Pasif Kullanıcılar</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Paket Filtresi</label>
+                        <div class="custom-select" id="criteria-paket-select">
+                            <input type="hidden" name="criteria[paket_id]" value="">
+                            <div class="select-trigger">
+                                <span class="select-label">Tüm Paketler</span>
+                                <i data-lucide="chevron-down" style="width: 16px; color: #71717a; margin-left: auto;"></i>
+                            </div>
+                            <div class="select-popover" popover="manual">
+                                <div class="select-options">
+                                    <div class="select-option selected" data-value="">Hepsi</div>
+                                    <?php foreach($paketler as $p): ?>
+                                    <div class="select-option" data-value="<?php echo $p->id; ?>"><?php echo $p->ad; ?></div>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Paket Filtresi</label>
-                    <div class="custom-select" id="criteria-paket-select">
-                        <input type="hidden" name="criteria[paket_id]" value="">
-                        <div class="select-trigger">
-                            <span class="select-label">Tüm Paketler</span>
-                            <i data-lucide="chevron-down" style="width: 16px; color: #71717a; margin-left: auto;"></i>
-                        </div>
-                        <div class="select-popover" popover="manual">
-                            <div class="select-options">
-                                <div class="select-option selected" data-value="">Hepsi</div>
-                                <?php foreach($paketler as $p): ?>
-                                <div class="select-option" data-value="<?php echo $p->id; ?>"><?php echo $p->ad; ?></div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div id="target-mode-users" style="display: none;">
-                <div class="form-group">
-                    <label class="form-label">Alıcı Ekle (Kullanıcı ara veya direkt e-posta yaz)</label>
-                    <div class="custom-select" id="unified-recipient-select">
-                        <div class="select-trigger">
-                            <span class="select-label">Kullanıcı ismi veya e-posta adresi yazın...</span>
-                            <i data-lucide="search" style="width: 16px; color: #71717a; margin-left: auto;"></i>
-                        </div>
-                        <div class="select-popover" popover="manual">
-                            <header style="padding: 0.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem;">
-                                <i data-lucide="search" style="width: 14px; color: #a1a1aa;"></i>
-                                <input type="text" class="select-search" id="recipient-search-input" placeholder="Ara veya yeni e-posta yaz..." style="flex: 1; border: none; outline: none; background: transparent; font-size: 0.875rem;" onkeydown="window.CampaignApp.handleRecipientKeydown(event)">
-                            </header>
-                            <div class="select-options" id="unified-options-list" style="max-height: 250px; overflow-y: auto;">
-                                <div id="manual-email-option" class="select-option" style="display: none; background: #f0f9ff; border-bottom: 1px solid #bae6fd;" onclick="window.CampaignApp.addManualEmailFromSearch()">
-                                    <div style="display: flex; align-items: center; gap: 0.75rem; color: #0369a1;">
-                                        <i data-lucide="plus-circle" style="width: 16px;"></i>
-                                        <div style="display: flex; flex-direction: column;">
-                                            <span style="font-weight: 600;" id="manual-email-text">Harici E-posta Olarak Ekle</span>
-                                            <span style="font-size: 0.7rem; opacity: 0.8;">Sistem dışı alıcı</span>
+                <div id="target-mode-users" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Alıcı Ekle (Kullanıcı ara veya direkt e-posta yaz)</label>
+                        <div class="custom-select" id="unified-recipient-select">
+                            <div class="select-trigger">
+                                <span class="select-label">Kullanıcı ismi veya e-posta adresi yazın...</span>
+                                <i data-lucide="search" style="width: 16px; color: #71717a; margin-left: auto;"></i>
+                            </div>
+                            <div class="select-popover" popover="manual">
+                                <header style="padding: 0.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem;">
+                                    <i data-lucide="search" style="width: 14px; color: #a1a1aa;"></i>
+                                    <input type="text" class="select-search" id="recipient-search-input" placeholder="Ara veya yeni e-posta yaz..." style="flex: 1; border: none; outline: none; background: transparent; font-size: 0.875rem;" onkeydown="window.CampaignApp.handleRecipientKeydown(event)">
+                                </header>
+                                <div class="select-options" id="unified-options-list" style="max-height: 250px; overflow-y: auto;">
+                                    <div id="manual-email-option" class="select-option" style="display: none; background: #f0f9ff; border-bottom: 1px solid #bae6fd;" onclick="window.CampaignApp.addManualEmailFromSearch()">
+                                        <div style="display: flex; align-items: center; gap: 0.75rem; color: #0369a1;">
+                                            <i data-lucide="plus-circle" style="width: 16px;"></i>
+                                            <div style="display: flex; flex-direction: column;">
+                                                <span style="font-weight: 600;" id="manual-email-text">Harici E-posta Olarak Ekle</span>
+                                                <span style="font-size: 0.7rem; opacity: 0.8;">Sistem dışı alıcı</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <?php 
-                                    $allUsers = $userModel->AktifKullanicilarAltKullanici();
-                                    foreach($allUsers as $u): 
-                                ?>
-                                <div class="select-option recipient-option" data-value="<?php echo $u->id; ?>" data-name="<?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?>" data-email="<?php echo strtolower($u->email); ?>" onclick="window.CampaignApp.addUserToSelection(this)">
-                                    <div style="display: flex; flex-direction: column;">
-                                        <span style="font-weight: 500;"><?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?></span>
-                                        <span style="font-size: 0.7rem; color: #71717a;"><?php echo $u->email; ?></span>
+                                    <?php 
+                                        $allUsers = $userModel->AktifKullanicilarAltKullanici();
+                                        foreach($allUsers as $u): 
+                                    ?>
+                                    <div class="select-option recipient-option" data-value="<?php echo $u->id; ?>" data-name="<?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?>" data-email="<?php echo strtolower($u->email); ?>" onclick="window.CampaignApp.addUserToSelection(this)">
+                                        <div style="display: flex; flex-direction: column;">
+                                            <span style="font-weight: 500;"><?php echo htmlspecialchars($u->adi_soyadi ?: $u->kullanici_adi); ?></span>
+                                            <span style="font-size: 0.7rem; color: #71717a;"><?php echo $u->email; ?></span>
+                                        </div>
                                     </div>
+                                    <?php endforeach; ?>
                                 </div>
-                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
+                    <div id="selected-users-tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; border: 1px dashed var(--border); padding: 0.75rem; border-radius: 8px; min-height: 52px; background: #fafafa;">
+                        <span style="color: var(--muted-foreground); font-size: 0.8125rem; width: 100%; text-align: center; padding: 0.5rem;">Henüz alıcı seçilmedi.</span>
+                    </div>
+                    <div id="user-ids-inputs"></div>
                 </div>
-                <div id="selected-users-tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; border: 1px dashed var(--border); padding: 0.75rem; border-radius: 8px; min-height: 52px; background: #fafafa;">
-                    <span style="color: var(--muted-foreground); font-size: 0.8125rem; width: 100%; text-align: center; padding: 0.5rem;">Henüz alıcı seçilmedi.</span>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <label class="form-label" style="margin: 0;">E-posta İçeriği</label>
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="window.CampaignApp.previewEmail()" style="height: 28px; padding: 0 0.5rem; font-size: 0.75rem;">
+                            <i data-lucide="eye" style="width: 14px;"></i> Önizleme
+                        </button>
+                    </div>
+                    <textarea name="content" id="campaign-content" class="summernote" required></textarea>
+                    <p style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.5rem;">İpucu: Değişkenleri kullanabilirsiniz: {adi_soyadi}</p>
                 </div>
-                <div id="user-ids-inputs"></div>
             </div>
 
-            <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <label class="form-label" style="margin: 0;">E-posta İçeriği</label>
-                    <button type="button" class="btn btn-ghost btn-sm" onclick="window.CampaignApp.previewEmail()" style="height: 28px; padding: 0 0.5rem; font-size: 0.75rem;">
-                        <i data-lucide="eye" style="width: 14px;"></i> Önizleme
-                    </button>
-                </div>
-                <textarea name="content" id="campaign-content" class="summernote" required></textarea>
-                <p style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.5rem;">İpucu: Değişkenleri kullanabilirsiniz: {adi_soyadi}</p>
-            </div>
-
-            <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
-                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('add-campaign-modal').close()">Vazgeç</button>
-                <button type="submit" id="save-btn" class="btn btn-primary" style="flex: 1;">Kampanyayı Kaydet</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" style="min-width: 100px;" onclick="document.getElementById('add-campaign-modal').close()">Vazgeç</button>
+                <button type="submit" id="save-btn" class="btn btn-primary" style="min-width: 150px;">Kampanyayı Kaydet</button>
             </div>
         </form>
     </dialog>
 
     <!-- Logs Modal -->
-    <dialog id="view-logs-modal" class="card modal-dialog" style="width: 850px;">
+    <dialog id="view-logs-modal" class="card modal-dialog" style="width: 850px; max-width: calc(100vw - 2rem);">
         <div class="modal-header">
             <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                 <i data-lucide="history" style="width: 20px;"></i> Gönderim Logları: <span id="log-campaign-title" style="color: var(--muted-foreground); font-weight: 400;"></span>
             </h2>
-            <button onclick="document.getElementById('view-logs-modal').close()" class="modal-close-btn"><i data-lucide="x" style="width: 20px;"></i></button>
+            <button type="button" onclick="document.getElementById('view-logs-modal').close()" class="modal-close-btn"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
         <div id="logs-container" class="modal-body-scrollable" style="padding: 1.5rem; background: var(--card);">
             <div style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: white;">
@@ -289,20 +291,26 @@ $userModel = new \Models\UserModel();
                 </table>
             </div>
         </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" style="min-width: 100px;" onclick="document.getElementById('view-logs-modal').close()">Kapat</button>
+        </div>
     </dialog>
 
     <!-- Preview Modal -->
-    <dialog id="preview-modal" class="card modal-dialog" style="width: 800px;">
+    <dialog id="preview-modal" class="card modal-dialog" style="width: 800px; max-width: calc(100vw - 2rem);">
         <div class="modal-header">
             <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                 <i data-lucide="eye" style="width: 20px;"></i> E-posta Önizleme
             </h2>
-            <button onclick="document.getElementById('preview-modal').close()" class="modal-close-btn"><i data-lucide="x" style="width: 20px;"></i></button>
+            <button type="button" onclick="document.getElementById('preview-modal').close()" class="modal-close-btn"><i data-lucide="x" style="width: 20px;"></i></button>
         </div>
         <div class="modal-body-scrollable" style="background: #f8fafc; padding: 2rem;">
             <div id="preview-content-frame" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
                 <!-- Content goes here -->
             </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" style="min-width: 100px;" onclick="document.getElementById('preview-modal').close()">Kapat</button>
         </div>
     </dialog>
 
@@ -314,8 +322,8 @@ $userModel = new \Models\UserModel();
                 <p id="alert-description" style="color: var(--muted-foreground); font-size: 0.875rem; line-height: 1.5;">Bu işlem geri alınamaz.</p>
             </div>
             <div style="display: flex; gap: 0.75rem;">
-                <button onclick="document.getElementById('alert-dialog').close()" class="btn btn-outline" style="flex: 1; height: 44px; font-weight: 600; border-radius: 10px;">İptal</button>
-                <button id="alert-confirm-btn" class="btn btn-primary" style="flex: 1; height: 44px; font-weight: 600; border-radius: 10px; background: #000; color: #fff; border: none;">Devam Et</button>
+                <button type="button" onclick="document.getElementById('alert-dialog').close()" class="btn btn-outline" style="flex: 1; height: 44px; font-weight: 600; border-radius: 10px;">İptal</button>
+                <button type="button" id="alert-confirm-btn" class="btn btn-primary" style="flex: 1; height: 44px; font-weight: 600; border-radius: 10px; background: #000; color: #fff; border: none;">Devam Et</button>
             </div>
         </div>
     </dialog>
@@ -323,10 +331,79 @@ $userModel = new \Models\UserModel();
 
 <style>
     /* Standard Modal UI */
-    .modal-dialog { padding: 0; border: none; border-radius: 12px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); overflow: hidden; background: var(--card); }
-    .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card); }
-    .modal-close-btn { background: none; border: none; cursor: pointer; color: #71717a; display: flex; align-items: center; }
-    .modal-body-scrollable { max-height: 600px; overflow-y: auto; overflow-x: hidden; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+    .modal-dialog, dialog.card.modal-dialog {
+        padding: 0 !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+        overflow: hidden !important;
+        background: var(--card) !important;
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        margin: 0 !important;
+        max-height: calc(100vh - 3rem) !important;
+        display: none;
+        flex-direction: column;
+    }
+    .modal-dialog[open], dialog.card.modal-dialog[open] {
+        display: flex !important;
+    }
+    .modal-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--card);
+        flex-shrink: 0;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+    }
+    .modal-close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #71717a;
+        display: flex;
+        align-items: center;
+        padding: 0.25rem;
+        border-radius: 6px;
+        transition: background 0.15s;
+    }
+    .modal-close-btn:hover {
+        background: var(--muted);
+        color: var(--foreground);
+    }
+    .modal-form {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+    .modal-body-scrollable {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-height: 0;
+        max-height: none !important;
+    }
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        background: var(--card);
+        flex-shrink: 0;
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
     .dt-tab { border: none; background: transparent; cursor: pointer; color: var(--muted-foreground); transition: all 0.2s; }
     .dt-tab.active { background: var(--card) !important; color: var(--foreground) !important; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); }
     .user-tag { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.6rem; background: var(--primary); color: var(--primary-foreground); border-radius: 4px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s; }

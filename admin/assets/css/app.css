@@ -1438,16 +1438,19 @@ dialog:not([open]) {
 
 dialog[open] {
     display: flex !important;
-     /* flex-direction: column;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-    border: 1px solid #e4e4e7;
-    background-color: #ffffff; */
-    border-radius: 0.5rem;
-    padding: 1.5rem;
+    flex-direction: column;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    max-height: calc(100vh - 3rem);
+    max-width: calc(100vw - 2rem);
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    border-radius: 0.75rem;
+    padding: 0;
+    overflow: hidden;
     animation: dialogShow 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
 }
 
@@ -1821,9 +1824,10 @@ dialog[open] {
     color: #fff;
 }
 
-/* Fix for modal clipping */
+/* Fix for modal clipping and border radius */
 dialog.card {
-    overflow: visible !important;
+    overflow: hidden !important;
+    border-radius: 0.75rem !important;
 }
 .form-group {
     position: relative;
