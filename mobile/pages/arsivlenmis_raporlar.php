@@ -11,11 +11,18 @@ Security::hasActiveSubscription();
 $hataMesaji = '';
 $arsivlenmisRaporlar = [];
 
-$tarih1Str = !empty($_REQUEST['tarih1']) ? $_REQUEST['tarih1'] : date('Y-m-01');
-$tarih2Str = !empty($_REQUEST['tarih2']) ? $_REQUEST['tarih2'] : date('Y-m-d');
+$tarih1Str = !empty($_REQUEST['tarih1']) ? $_REQUEST['tarih1'] : date('01.m.Y');
+$tarih2Str = !empty($_REQUEST['tarih2']) ? $_REQUEST['tarih2'] : date('d.m.Y');
 
-$tarih1 = new DateTime($tarih1Str);
-$tarih2 = new DateTime($tarih2Str);
+$tarih1 = DateTime::createFromFormat('d.m.Y', $tarih1Str);
+if (!$tarih1) {
+    $tarih1 = new DateTime($tarih1Str);
+}
+
+$tarih2 = DateTime::createFromFormat('d.m.Y', $tarih2Str);
+if (!$tarih2) {
+    $tarih2 = new DateTime($tarih2Str);
+}
 
 $isQueried = !empty($_REQUEST['tarih1']) && !empty($_REQUEST['tarih2']);
 
@@ -63,11 +70,11 @@ if ($isQueried) {
             <div class="grid grid-cols-2 gap-2">
                 <div class="flex flex-col gap-1 text-left">
                     <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider" for="tarih1">Başlangıç</label>
-                    <input type="text" id="tarih1" name="tarih1" value="<?php echo htmlspecialchars($tarih1Str); ?>" class="h-9 w-full px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-semibold text-center">
+                    <input type="text" id="tarih1" name="tarih1" value="<?php echo htmlspecialchars($tarih1->format('d.m.Y')); ?>" class="h-9 w-full px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-semibold text-center">
                 </div>
                 <div class="flex flex-col gap-1 text-left">
                     <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider" for="tarih2">Bitiş</label>
-                    <input type="text" id="tarih2" name="tarih2" value="<?php echo htmlspecialchars($tarih2Str); ?>" class="h-9 w-full px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-semibold text-center">
+                    <input type="text" id="tarih2" name="tarih2" value="<?php echo htmlspecialchars($tarih2->format('d.m.Y')); ?>" class="h-9 w-full px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-semibold text-center">
                 </div>
             </div>
             <button type="submit" class="h-9 w-full bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
@@ -158,7 +165,7 @@ if ($isQueried) {
     if (window.flatpickr) {
         const fp1 = flatpickr("#tarih1", {
             locale: "tr",
-            dateFormat: "Y-m-d",
+            dateFormat: "d.m.Y",
             allowInput: true,
             onChange: function(selectedDates) {
                 if (selectedDates.length > 0) {
@@ -169,7 +176,7 @@ if ($isQueried) {
                     
                     let monthStr = String(month).padStart(2, '0');
                     let dayStr = String(lastDay).padStart(2, '0');
-                    let date2Str = `${year}-${monthStr}-${dayStr}`;
+                    let date2Str = `${dayStr}.${monthStr}.${year}`;
                     
                     if (window.arsivFp2Instance) {
                         window.arsivFp2Instance.setDate(date2Str, true);
@@ -180,7 +187,7 @@ if ($isQueried) {
 
         const fp2 = flatpickr("#tarih2", {
             locale: "tr",
-            dateFormat: "Y-m-d",
+            dateFormat: "d.m.Y",
             allowInput: true
         });
 

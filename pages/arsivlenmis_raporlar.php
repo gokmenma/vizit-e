@@ -12,11 +12,18 @@ $title = 'Arşivlenmiş Raporlar';
 $hataMesaji = '';
 $arsivlenmisRaporlar = [];
 
-$tarih1Str = !empty($_REQUEST['tarih1']) ? $_REQUEST['tarih1'] : date('Y-m-01');
-$tarih2Str = !empty($_REQUEST['tarih2']) ? $_REQUEST['tarih2'] : date('Y-m-d');
+$tarih1Str = !empty($_REQUEST['tarih1']) ? $_REQUEST['tarih1'] : date('01.m.Y');
+$tarih2Str = !empty($_REQUEST['tarih2']) ? $_REQUEST['tarih2'] : date('d.m.Y');
 
-$tarih1 = new DateTime($tarih1Str);
-$tarih2 = new DateTime($tarih2Str);
+$tarih1 = DateTime::createFromFormat('d.m.Y', $tarih1Str);
+if (!$tarih1) {
+    $tarih1 = new DateTime($tarih1Str);
+}
+
+$tarih2 = DateTime::createFromFormat('d.m.Y', $tarih2Str);
+if (!$tarih2) {
+    $tarih2 = new DateTime($tarih2Str);
+}
 
 $isQueried = !empty($_REQUEST['tarih1']) && !empty($_REQUEST['tarih2']);
 
@@ -61,12 +68,12 @@ if ($isQueried) {
             <form action="arsivlenmis-raporlar" method="POST" class="flex items-center gap-2">
                 <div class="relative flex items-center">
                     <i data-lucide="calendar" class="absolute left-2.5 top-2.5 w-4 h-4 text-zinc-400 z-10 pointer-events-none"></i>
-                    <input type="text" id="tarih1" name="tarih1" value="<?php echo htmlspecialchars($tarih1Str); ?>" class="h-9 w-[120px] pl-9 pr-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300">
+                    <input type="text" id="tarih1" name="tarih1" value="<?php echo htmlspecialchars($tarih1->format('d.m.Y')); ?>" class="h-9 w-[120px] pl-9 pr-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300">
                 </div>
                 <span class="text-zinc-400 dark:text-zinc-600 text-xs font-semibold">-</span>
                 <div class="relative flex items-center">
                     <i data-lucide="calendar" class="absolute left-2.5 top-2.5 w-4 h-4 text-zinc-400 z-10 pointer-events-none"></i>
-                    <input type="text" id="tarih2" name="tarih2" value="<?php echo htmlspecialchars($tarih2Str); ?>" class="h-9 w-[120px] pl-9 pr-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300">
+                    <input type="text" id="tarih2" name="tarih2" value="<?php echo htmlspecialchars($tarih2->format('d.m.Y')); ?>" class="h-9 w-[120px] pl-9 pr-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300">
                 </div>
                 <button type="submit" class="h-9 px-3 bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 shadow cursor-pointer">
                     <i data-lucide="search" class="w-3.5 h-3.5"></i>
@@ -196,11 +203,11 @@ if ($isQueried) {
 <?php include 'layouts/vendor-scripts.php'; ?>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
     if (window.flatpickr) {
         const fp1 = flatpickr("#tarih1", {
             locale: "tr",
-            dateFormat: "Y-m-d",
+            dateFormat: "d.m.Y",
             allowInput: true,
             onChange: function(selectedDates, dateStr, instance) {
                 if (selectedDates.length > 0) {
@@ -211,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     let ayStr = String(ay).padStart(2, '0');
                     let gunStr = String(sonGun).padStart(2, '0');
-                    let newDate2 = `${yil}-${ayStr}-${gunStr}`;
+                    let newDate2 = `${gunStr}.${ayStr}.${yil}`;
 
                     if (window.fp2Instance) {
                         window.fp2Instance.setDate(newDate2, true);
@@ -222,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const fp2 = flatpickr("#tarih2", {
             locale: "tr",
-            dateFormat: "Y-m-d",
+            dateFormat: "d.m.Y",
             allowInput: true
         });
 
@@ -232,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.lucide) {
         window.lucide.createIcons();
     }
-});
+})();
 </script>
 
 <?php include 'layouts/foot.php'; ?>
