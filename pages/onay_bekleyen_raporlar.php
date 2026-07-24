@@ -19,10 +19,10 @@ $basariMesaji = '';
 $toplamBulunanRaporSayisi = 0; // Filtrelemeden önceki toplam sayıyı tutmak için
 $kisaRaporlariGoster = isset($_POST['kisa_raporlari_goster']); // JavaScript için bu satır gerekmeyecek
 $uzunSureliRaporlar = []; // 3 günden uzun raporları tutmak için
+$tarih = !empty($_REQUEST["rapor_tarihi"]) ? $_REQUEST["rapor_tarihi"] : date('Y-m-d');
 try {
     $sgkClient = new SgkViziteService();
     $raporModel = new RaporModel();
-    $tarih = !empty($_REQUEST["rapor_tarihi"]) ? $_REQUEST["rapor_tarihi"] : date('Y-m-d');
 
     // 1. SGK'dan onay bekleyen raporları çek (arşivlenmiş olanları otomatik kapatma
     // ve onay/yerel-DB filtrelemesi dahil). Bu mantık SgkViziteService::bekleyenRaporlariGetir()

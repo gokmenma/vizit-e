@@ -205,7 +205,7 @@ XML;
         }
 
         $cacheFile = $this->tokenCacheFile($currentUserKey);
-        $lockHandle = fopen($cacheFile . '.lock', 'c');
+        $lockHandle = @fopen($cacheFile . '.lock', 'c');
         if ($lockHandle === false) {
             throw new Exception('SGK token kilit dosyası oluşturulamadı.');
         }
@@ -273,12 +273,23 @@ XML;
         $configuredDirectory = getenv('SGK_TOKEN_CACHE_DIR');
         $directory = $configuredDirectory !== false && trim($configuredDirectory) !== ''
             ? rtrim($configuredDirectory, DIRECTORY_SEPARATOR)
-            : '/opt/lampp/temp/sgk-vizite-tokens';
+            : rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR)
+                . DIRECTORY_SEPARATOR
+                . 'sgk-vizite-tokens-'
+                . substr(hash('sha256', dirname(__DIR__, 2)), 0, 12);
 
-        if (!is_dir($directory) && !mkdir($directory, 0700, true) && !is_dir($directory)) {
+        // mkdir uyarısını doğrudan HTML çıktısına sızdırma; aşağıda kontrollü
+        // bir exception ile hem oluşturma hem de yazılabilirlik durumunu bildir.
+        if (!is_dir($directory) && !@mkdir($directory, 0700, true) && !is_dir($directory)) {
             throw new Exception('Güvenli SGK token dizini oluşturulamadı.');
         }
         @chmod($directory, 0700);
+
+        if (!is_dir($directory) || !is_writable($directory)) {
+            throw new Exception(
+                'SGK token dizinine yazılamıyor. SGK_TOKEN_CACHE_DIR ayarını PHP kullanıcısının yazabildiği güvenli bir dizine yönlendirin.'
+            );
+        }
 
         return $directory;
     }
@@ -297,7 +308,12 @@ XML;
             return;
         }
 
-        $cacheData = json_decode((string)file_get_contents($cacheFile), true);
+        $cacheContents = @file_get_contents($cacheFile);
+        if ($cacheContents === false) {
+            return;
+        }
+
+        $cacheData = json_decode($cacheContents, true);
         if (
             is_array($cacheData)
             && isset($cacheData['wsToken'], $cacheData['tokenExpiresAt'])
@@ -316,12 +332,12 @@ XML;
     {
         $json = json_encode($cacheData, JSON_THROW_ON_ERROR);
         $temporaryFile = $cacheFile . '.tmp.' . bin2hex(random_bytes(6));
-        if (file_put_contents($temporaryFile, $json, LOCK_EX) === false) {
+        if (@file_put_contents($temporaryFile, $json, LOCK_EX) === false) {
             throw new Exception('SGK token önbelleği yazılamadı.');
         }
         @chmod($temporaryFile, 0600);
 
-        if (!rename($temporaryFile, $cacheFile)) {
+        if (!@rename($temporaryFile, $cacheFile)) {
             @unlink($temporaryFile);
             throw new Exception('SGK token önbelleği güvenli biçimde taşınamadı.');
         }
