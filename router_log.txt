@@ -1333,3 +1333,16 @@
 19:20:47 - vizite.com - /logout
 19:20:47 - vizite.com - /sign-in
 19:20:49 - vizite.com - /forgot-password
+11:49:44 - vizite.com - /sign-in
+11:49:46 - vizite.com - /sign-in
+11:49:46 - vizite.com - /
+11:49:48 - vizite.com - /isyerlerim
+11:49:56 - vizite.com - /isyerlerim
+11:49:58 - vizite.com - /isyeri-sec
+11:50:00 - vizite.com - /isyeri-sec
+11:50:12 - vizite.com - /arsivlenmis-raporlar
+11:50:22 - vizite.com - /onayli-raporlar
+11:50:24 - vizite.com - /onayli-raporlar
+11:50:27 - vizite.com - /onay-bekleyen-raporlar
+11:50:28 - vizite.com - /onay-bekleyen-raporlar
+11:52:49 - vizite.com - /onay-bekleyen-raporlar

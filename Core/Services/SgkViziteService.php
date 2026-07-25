@@ -270,13 +270,16 @@ XML;
 
     private function tokenCacheDirectory(): string
     {
-        $configuredDirectory = getenv('SGK_TOKEN_CACHE_DIR');
+        $configuredDirectory = $_ENV['SGK_TOKEN_CACHE_DIR'] ?? getenv('SGK_TOKEN_CACHE_DIR');
+        $processUserId = function_exists('posix_geteuid')
+            ? (string) posix_geteuid()
+            : PHP_SAPI;
         $directory = $configuredDirectory !== false && trim($configuredDirectory) !== ''
             ? rtrim($configuredDirectory, DIRECTORY_SEPARATOR)
             : rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR)
                 . DIRECTORY_SEPARATOR
                 . 'sgk-vizite-tokens-'
-                . substr(hash('sha256', dirname(__DIR__, 2)), 0, 12);
+                . substr(hash('sha256', dirname(__DIR__, 2) . '|' . $processUserId), 0, 12);
 
         // mkdir uyarısını doğrudan HTML çıktısına sızdırma; aşağıda kontrollü
         // bir exception ile hem oluşturma hem de yazılabilirlik durumunu bildir.

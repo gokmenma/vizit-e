@@ -181,7 +181,6 @@ $(document).off("submit.isyeriSec").on("submit.isyeriSec", ".isyeri-sec-form", f
   e.preventDefault();
   var form = $(this);
   var formData = new FormData(form[0]);
-  var isyeriId = form.find("input[name='isyeri_id']").val();
   var submitBtn = form.find("button[type='submit']");
   
   // Bulunduğu satırdan seçilen firmanın adını alalım
@@ -228,11 +227,31 @@ $(document).off("submit.isyeriSec").on("submit.isyeriSec", ".isyeri-sec-form", f
             window.lucide.createIcons();
         }
 
-        // 4. Ana sayfaya (dashboard) yönlendir
-        if (window.App && App.loadPage) {
-            App.loadPage('dashboard', true);
-        } else {
-            window.location.href = "dashboard";
+        // 4. Tablodaki seçim durumunu sayfayı yenilemeden güncelle
+        $(".isyeri-sec-form").each(function() {
+          var currentForm = $(this);
+          var button = currentForm.find("button[type='submit']");
+          var buttonText = button.find("span");
+          var isSelected = currentForm[0] === form[0];
+
+          button
+            .prop("disabled", isSelected)
+            .toggleClass("bg-emerald-600 dark:bg-emerald-500 text-white cursor-default opacity-90", isSelected)
+            .toggleClass("bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900 cursor-pointer shadow", !isSelected);
+
+          button.find("[data-lucide='check']").remove();
+          buttonText.text(isSelected ? "Seçili" : "Seç");
+
+          if (isSelected) {
+            button.prepend('<i data-lucide="check" class="w-3.5 h-3.5"></i>');
+          }
+        });
+
+        // Açık dropdown varsa kapat
+        $(".isyeri-dropdown").removeAttr("open");
+
+        if (window.lucide) {
+          window.lucide.createIcons();
         }
       } else {
         showToast(data.message || "İşyeri değiştirilemedi.", "error");
