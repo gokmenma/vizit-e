@@ -176,6 +176,13 @@ try {
                     'sgk_bildirim_id' => null
                 ];
 
+                // Önceki deneme başarısızsa yeni mükerrer satır eklemek yerine
+                // mevcut işlem kaydını bu denemenin sonucuyla güncelle.
+                $oncekiDeneme = $raporModel->findLatestAttemptByMedulaRaporId($rapor['MEDULARAPORID']);
+                if ($oncekiDeneme && ($oncekiDeneme->onay_durumu ?? null) === 'basarisiz') {
+                    $logData['id'] = $oncekiDeneme->id;
+                }
+
                //SGK'ya onayı gönder
                 $onayResponse = $sgkClient->raporuOnayla(
                     $rapor['MEDULARAPORID'], 

@@ -38,14 +38,45 @@ class RaporModel extends Model
             return false;
         }
 
-        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE MEDULARAPORID = :medula_rapor_id LIMIT 1");
+        // Başarısız otomatik onay denemeleri de bu tabloda tutulur. Bunları
+        // "onaylanmış rapor" kabul etmek raporun sonraki cron çalışmasında bir
+        // daha denenmeden atlanmasına neden olur.
+        $stmt = $this->db->prepare(
+            "SELECT * FROM {$this->table}
+             WHERE MEDULARAPORID = :medula_rapor_id
+               AND onay_durumu IN ('basarili', 'calisti', 'calismadi')
+             LIMIT 1"
+        );
         $stmt->bindValue(':medula_rapor_id', (string)$medulaRaporId, PDO::PARAM_STR);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
     /**
-     * Verilen Medula rapor kimliklerinden yerel veritabanında bulunanları topluca getirir.
+     * Başarılı veya başarısız son işlem kaydını döndürür.
+     * Otomatik onay yeniden denendiğinde aynı kayıt güncellenir.
+     */
+    public function findLatestAttemptByMedulaRaporId($medulaRaporId)
+    {
+        if ($medulaRaporId === null || $medulaRaporId === '') {
+            return false;
+        }
+
+        $stmt = $this->db->prepare(
+            "SELECT * FROM {$this->table}
+             WHERE MEDULARAPORID = :medula_rapor_id
+             ORDER BY id DESC
+             LIMIT 1"
+        );
+        $stmt->bindValue(':medula_rapor_id', (string)$medulaRaporId, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
+    /**
+     * Verilen Medula rapor kimliklerinden başarıyla onaylanmış olanları topluca getirir.
+     * Başarısız denemeler yeniden işlenebilmesi için sonuçlara dahil edilmez.
      *
      * @return string[]
      */
@@ -62,7 +93,10 @@ class RaporModel extends Model
 
         $placeholders = implode(', ', array_fill(0, count($medulaRaporIds), '?'));
         $stmt = $this->db->prepare(
-            "SELECT MEDULARAPORID FROM {$this->table} WHERE MEDULARAPORID IN ({$placeholders})"
+            "SELECT DISTINCT MEDULARAPORID
+             FROM {$this->table}
+             WHERE MEDULARAPORID IN ({$placeholders})
+               AND onay_durumu IN ('basarili', 'calisti', 'calismadi')"
         );
         $stmt->execute($medulaRaporIds);
 
