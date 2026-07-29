@@ -2333,3 +2333,5 @@
 19:40:42 - admin.vizite.com - /kampanya-logs?id=3&action=logs
 19:42:35 - admin.vizite.com - /paketler
 19:42:37 - admin.vizite.com - /satinalmalar
+12:13:52 - admin.vizite.com - /dashboard
+12:13:54 - admin.vizite.com - /sistem-hatalari

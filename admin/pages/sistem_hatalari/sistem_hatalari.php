@@ -154,7 +154,7 @@ foreach ($birlesikHatalar as $hata) {
 }
 ?>
 
-<div class="animate-in" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+<div class="animate-in">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-shrink: 0;">
         <div>
             <h1 style="font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; margin: 0;">Sistem Hataları</h1>
@@ -293,7 +293,7 @@ foreach ($birlesikHatalar as $hata) {
         </div>
     </div>
 
-    <div class="card dt-container" style="padding: 0; overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 430px;">
+    <div class="card dt-container" style="padding: 0; overflow: hidden; height: auto;">
         <div class="dt-header">
             <div class="dt-tabs">
                 <button class="dt-tab active" onclick="filterHata('ALL', this)">Hepsi <span class="dt-tab-count"><?php echo $sayaclar['ALL']; ?></span></button>
@@ -309,7 +309,7 @@ foreach ($birlesikHatalar as $hata) {
             </div>
         </div>
 
-        <div class="table-container" style="flex: 1; min-height: 340px;">
+        <div class="table-container" style="flex: none; overflow-x: auto; overflow-y: visible;">
             <table class="data-table" id="hatalar-table">
                 <thead>
                     <tr>
