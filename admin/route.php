@@ -12,6 +12,7 @@ $router->get('sign-in', 'login.php')
     ->get('satinalmalar', 'pages/satinalmalar/satinalmalar.php')
     ->get('ayarlar', 'pages/ayarlar/ayarlar.php')
     ->get('aktiviteler', 'pages/aktiviteler/aktiviteler.php')
+    ->get('sistem-hatalari', 'pages/sistem_hatalari/sistem_hatalari.php')
     ->get('profil', 'pages/profil/profil.php')
     ->get('kampanyalar', 'pages/kampanyalar/kampanyalar.php')
     // AJAX Routes

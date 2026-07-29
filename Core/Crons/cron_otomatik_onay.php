@@ -23,6 +23,7 @@ use Models\UserModel;
 use Models\KullaniciIsyeriModel;
 use Models\KullaniciAyarModel;
 use Models\RaporModel;
+use Models\CronCalismaModel;
 use App\Helper\Security;
 use App\Helper\Date;
 use Core\Services\MailGonderService;
@@ -33,6 +34,18 @@ use Core\Services\CronReporter;
 $logger = new Logger(__DIR__ . '/../../logs/crons', 'otomatik_onay');
 $reporter = new CronReporter();
 $raporModel = new RaporModel();
+
+$cronCalismaModel = null;
+$cronCalismaId = 0;
+$sayaclar = ['isyeri_sayisi' => 0, 'onaylanan' => 0, 'basarisiz' => 0, 'atlanan' => 0];
+$isyeriHatalari = [];
+
+try {
+    $cronCalismaModel = new CronCalismaModel();
+    $cronCalismaId = $cronCalismaModel->baslat('otomatik_onay');
+} catch (Exception $e) {
+    error_log('Cron çalışma kaydı oluşturulamadı: ' . $e->getMessage());
+}
 
 // Rapor Durum Kodları
 const RAPORDURUMU = [
@@ -70,7 +83,15 @@ $saat = date('H'); // Saat (00-23)
 
 // Sadece hafta içi ve belirtilen saatlerde çalış
 if ($gunNo > 5 || !in_array($saat, ['16','20'])) { // Örnek saatler
-    exit("Çalışma günü veya saati dışında. Cron işlemi atlanıyor. Tarih: " . date('Y-m-d H:i:s'));
+    $atlamaMesaji = "Çalışma günü veya saati dışında. Cron işlemi atlanıyor. Tarih: " . date('Y-m-d H:i:s');
+    if ($cronCalismaModel !== null && $cronCalismaId > 0) {
+        try {
+            $cronCalismaModel->tamamla($cronCalismaId, $sayaclar, $atlamaMesaji);
+        } catch (Exception $e) {
+            error_log('Cron çalışma kaydı güncellenemedi: ' . $e->getMessage());
+        }
+    }
+    exit($atlamaMesaji);
 }
 
 // TODO: Resmi tatilleri bir veritabanından veya API'den çekip kontrol et
@@ -89,9 +110,17 @@ try {
 
     // 1. ADIM: Otomatik onayı aktif olan TÜM BENZERSİZ işyerlerini al
     $aktifIsyerleri = $isyeriModel->findAllActiveForAutoOnay();
+    $sayaclar['isyeri_sayisi'] = count($aktifIsyerleri);
     if (empty($aktifIsyerleri)) {
         $reporter->log("Otomatik onayı aktif işyeri bulunamadı. Cron sonlandırılıyor.\n");
         $logger->info("Otomatik onayı aktif işyeri bulunamadı. Cron sonlandırılıyor.\n");
+        if ($cronCalismaModel !== null && $cronCalismaId > 0) {
+            try {
+                $cronCalismaModel->tamamla($cronCalismaId, $sayaclar, $reporter->getOutput());
+            } catch (Exception $e) {
+                error_log('Cron çalışma kaydı güncellenemedi: ' . $e->getMessage());
+            }
+        }
         exit;
     }
 
@@ -148,6 +177,7 @@ try {
 
                 $kontrolSonucu = raporOnayKontrol($baslangic, $iseBasi);
                 if ($kontrolSonucu['durum'] !== true) {
+                    $sayaclar['atlanan']++;
                     $reporter->log("   - [ATLANDI] Rapor ID: {$rapor['MEDULARAPORID']}. Sebep: {$kontrolSonucu['mesaj']}\n");
                     $logger->info("   - [ATLANDI] Rapor ID: {$rapor['MEDULARAPORID']}. Sebep: {$kontrolSonucu['mesaj']}\n");
                     continue;
@@ -172,6 +202,7 @@ try {
                     // Başlangıçta durumu başarısız olarak ayarlayalım
                     "onay_turu" => "Otomatik Onay",
                     'onay_durumu' => 'basarisiz',
+                    'hata_mesaji' => null,
                     'onay_tarihi' => date('Y-m-d H:i:s'),
                     'sgk_bildirim_id' => null
                 ];
@@ -199,6 +230,7 @@ try {
                 // $onayResponse->sonucAciklama = 'Test Onay';
 
                 if (isset($onayResponse->sonucKod) && $onayResponse->sonucKod == '0') {
+                    $sayaclar['onaylanan']++;
                     $sgkClient->raporuKapat($rapor['MEDULARAPORID']);
                     $rapor['ONAY_SONUC'] = 'Başarılı';
                     $reporter->log("   - [ONAYLANDI] Rapor ID: {$rapor['MEDULARAPORID']} onaylandı. Rapor bitiş Tarihi {$rapor['ABITTAR']}.\n");
@@ -216,11 +248,19 @@ try {
                     }
 
                 } else {
-                    $rapor['ONAY_SONUC'] = 'BAŞARISIZ: ' . ($onayResponse->sonucAciklama ?? 'Bilinmeyen hata');
+                    $sayaclar['basarisiz']++;
+                    $sgkHataMetni = $onayResponse->sonucAciklama ?? 'Bilinmeyen hata';
+                    if (is_array($sgkHataMetni) || is_object($sgkHataMetni)) {
+                        $sgkHataMetni = implode(' | ', array_map('strval', (array)$sgkHataMetni));
+                    }
+                    $sgkHataMetni = 'Sonuç kodu: ' . ($onayResponse->sonucKod ?? '-') . ' - ' . (string)$sgkHataMetni;
+
+                    $rapor['ONAY_SONUC'] = 'BAŞARISIZ: ' . $sgkHataMetni;
                     $reporter->log("   - [BAŞARISIZ] Rapor ID: {$rapor['MEDULARAPORID']} ONAYLANAMADI: {$rapor['ONAY_SONUC']}\n");
-                    $logger->info("   - [BAŞARISIZ] Rapor ID: {$rapor['MEDULARAPORID']} ONAYLANAMADI: {$rapor['ONAY_SONUC']}\n");
+                    $logger->error("   - [BAŞARISIZ] Rapor ID: {$rapor['MEDULARAPORID']} ONAYLANAMADI: {$rapor['ONAY_SONUC']}\n");
 
                     $logData['onay_durumu'] = 'basarisiz';
+                    $logData['hata_mesaji'] = mb_substr($sgkHataMetni, 0, 2000);
                     try {
                         $raporModel->saveWithAttr($logData);
                     } catch (Exception $e) {
@@ -243,6 +283,7 @@ try {
                 );
             }
         } catch (Exception $e) {
+            $isyeriHatalari[] = "{$isyeriAdi} (SGK Kodu: {$isyeriKodu}): " . $e->getMessage();
             $logger->error(" - HATA: {$isyeriAdi} işyeri işlenirken hata oluştu: " . $e->getMessage() . "\n");
             $reporter->log(" - HATA: {$isyeriAdi} işyeri işlenirken hata oluştu: " . $e->getMessage() . "\n");
         }
@@ -350,14 +391,41 @@ try {
     }
 } catch (Exception $e) {
     $reporter->log("!!! KRİTİK GENEL HATA !!!\n");
-    $logger->info("!!! KRİTİK GENEL HATA !!!\n");
+    $logger->error("!!! KRİTİK GENEL HATA !!!\n");
     $reporter->log("Hata: " . $e->getMessage() . "\n");
-    $logger->info("Hata: " . $e->getMessage() . "\n");
+    $logger->error("Hata: " . $e->getMessage() . "\n");
+
+    if ($cronCalismaModel !== null && $cronCalismaId > 0) {
+        try {
+            $cronCalismaModel->hataylaBitir($cronCalismaId, 'KRİTİK GENEL HATA: ' . $e->getMessage(), $sayaclar, $reporter->getOutput());
+            $cronCalismaId = 0;
+        } catch (Exception $kayitHatasi) {
+            error_log('Cron çalışma kaydı güncellenemedi: ' . $kayitHatasi->getMessage());
+        }
+    }
+
     MailGonderService::gonder('bilgi@vizit-e.com', 'SGK OTOMATİK ONAY CRON HATASI', 'Otomatik Onay Cron Job çalışırken genel bir hata oluştu: ' . $e->getMessage());
 }
 
 $reporter->log("Cron Job Tamamlandı: " . date('Y-m-d H:i:s') . "\n");
 $logger->info("Cron Job Tamamlandı: " . date('Y-m-d H:i:s') . "\n");
+
+if ($cronCalismaModel !== null && $cronCalismaId > 0) {
+    try {
+        if ($isyeriHatalari !== []) {
+            $cronCalismaModel->hataylaBitir(
+                $cronCalismaId,
+                count($isyeriHatalari) . " işyeri işlenemedi:\n" . implode("\n", $isyeriHatalari),
+                $sayaclar,
+                $reporter->getOutput()
+            );
+        } else {
+            $cronCalismaModel->tamamla($cronCalismaId, $sayaclar, $reporter->getOutput());
+        }
+    } catch (Exception $e) {
+        error_log('Cron çalışma kaydı güncellenemedi: ' . $e->getMessage());
+    }
+}
 
 
 // Mail gönder
@@ -416,25 +484,26 @@ function raporOnayKontrol(
 
 
 
-    // Ayın 1-26'i arası
     if ($raporBitis->format('Y-m-d') >= $now->format('Y-m-d')) {
         return ['durum' => false, 'mesaj' => 'Rapor bitiş tarihi gelecekte. (' . $raporBitis->format('Y-m-d') . ')'];
-    } else if ($gun <= 26) {
-        if ($raporBitis >= $oncekiAyin26si && $raporBitis <= $buAyin26si) {
-            return ['durum' => true, 'mesaj' => 'Rapor, onay dönemi içinde. (' . $raporBitis->format('Y-m-d') . ')'];
-        }
-        return ['durum' => false, 'mesaj' => 'Rapor, onay dönemi (Önceki Ay 27 - Bu Ay 26) dışında. (' . $raporBitis->format('Y-m-d') . ')'];
     }
-    // Ayın 26'sı ve sonrası
-    else {
-        $sonrakiAyin26si = (clone $ayBaslangic)->modify('+1 month')->setDate($ayBaslangic->format('Y'), $ayBaslangic->format('m') + 1, 25);
-        $buAyin26si = (clone $ayBaslangic)->setDate($ayBaslangic->format('Y'), $ayBaslangic->format('m'), 26);
 
-        if ($raporBitis >= $buAyin26si && $raporBitis <= $sonrakiAyin26si) {
-            return ['durum' => true, 'mesaj' => 'Rapor, onay dönemi içinde. (' . $raporBitis->format('Y-m-d') . ')'];
-        }
-        return ['durum' => false, 'mesaj' => 'Rapor, onay dönemi (Bu Ay 26 - Sonraki Ay 26) dışında. (' . $raporBitis->format('Y-m-d') . ')'];
+    // Onay döneminin alt sınırı her zaman önceki ayın 26'sıdır. Ayın 27'sinden sonra
+    // alt sınırın bu ayın 26'sına kaydırılması, dönem içinde bitmiş raporların hiçbir
+    // çalışmada pencereye girememesine ve kalıcı olarak atlanmasına yol açıyordu.
+    $donemBaslangici = $oncekiAyin26si;
+    $donemBitisi = $gun <= 26
+        ? $buAyin26si
+        : (clone $buAyin26si)->modify('+1 month');
+
+    if ($raporBitis >= $donemBaslangici && $raporBitis <= $donemBitisi) {
+        return ['durum' => true, 'mesaj' => 'Rapor, onay dönemi içinde. (' . $raporBitis->format('Y-m-d') . ')'];
     }
+
+    return [
+        'durum' => false,
+        'mesaj' => 'Rapor, onay dönemi (' . $donemBaslangici->format('Y-m-d') . ' - ' . $donemBitisi->format('Y-m-d') . ') dışında. (' . $raporBitis->format('Y-m-d') . ')'
+    ];
 }
 
 

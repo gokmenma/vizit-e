@@ -263,6 +263,12 @@ if ($currentRoute === '' || $currentRoute === 'index') $currentRoute = 'dashboar
                                 <span>Sistem Aktiviteleri</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="/sistem-hatalari" class="nav-link <?php echo $currentRoute === 'sistem-hatalari' ? 'active' : ''; ?>" data-route="sistem-hatalari">
+                                <i data-lucide="alert-triangle"></i>
+                                <span>Sistem Hataları</span>
+                            </a>
+                        </li>
                         <?php endif; ?>
                     </ul>
                 </div>
