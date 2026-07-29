@@ -293,7 +293,7 @@ foreach ($birlesikHatalar as $hata) {
         </div>
     </div>
 
-    <div class="card dt-container" style="padding: 0; overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+    <div class="card dt-container" style="padding: 0; overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 430px;">
         <div class="dt-header">
             <div class="dt-tabs">
                 <button class="dt-tab active" onclick="filterHata('ALL', this)">Hepsi <span class="dt-tab-count"><?php echo $sayaclar['ALL']; ?></span></button>
@@ -309,7 +309,7 @@ foreach ($birlesikHatalar as $hata) {
             </div>
         </div>
 
-        <div class="table-container" style="flex: 1; min-height: 0;">
+        <div class="table-container" style="flex: 1; min-height: 340px;">
             <table class="data-table" id="hatalar-table">
                 <thead>
                     <tr>

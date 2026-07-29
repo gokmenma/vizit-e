@@ -31,6 +31,7 @@ use App\Helper\Security;
 use Models\KullaniciIsyeriModel;
 use Models\KullaniciAyarModel;
 use Core\Services\CronReporter;
+use Core\Services\CronRunTracker;
 use Models\RaporModel;
 
 
@@ -41,6 +42,7 @@ $KullaniciAyarModel = new KullaniciAyarModel();
 
 
 $reporter = new CronReporter();
+$cronTracker = new CronRunTracker('otomatik_onay_bildirim', $reporter);
 
 
 
@@ -112,6 +114,7 @@ try {
             $reporter->log(" - Bu kullanıcıya ait işyeri bulunamadı. Sonraki kullanıcıya geçiliyor.\n\n");
             continue; // Döngünün bir sonraki adımına geç
         }
+        $cronTracker->sayacEkle('isyeri_sayisi', count($isyerleri));
 
         // 4. Bu kullanıcıya ait TÜM raporları toplayacağımız ana dizi
         $kullaniciRaporlariToplami = [];
@@ -235,8 +238,10 @@ try {
 
             // --- E-postayı Gönderme ---
             if (MailGonderService::gonder($kullaniciEmail, $konu, $icerik)) {
+                $cronTracker->sayacEkle('onaylanan');
                 $reporter->log(" - E-posta başarıyla gönderildi: {$kullaniciEmail}\n" . "**Gönderilen E-posta İçeriği:\n" . $icerik);
              } else {
+                 $cronTracker->sayacEkle('basarisiz');
                  $reporter->log(" - E-posta GÖNDERİLEMEDİ: {$kullaniciEmail}\n");
              }
         } else {
@@ -244,7 +249,8 @@ try {
         }
         $reporter->log("--------------------------------------------------\n");
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
+    $cronTracker->hata($e);
     $reporter->log("!!! KRİTİK GENEL HATA !!!\n");
     $reporter->log("Hata: " . $e->getMessage() . "\n");
     MailGonderService::gonder('beyzade83@gmail.com', 'SGK CRON JOB GENEL HATASI', 'SGK Cron Job çalışırken genel bir hata oluştu: ' . $e->getMessage());

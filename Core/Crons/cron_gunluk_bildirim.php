@@ -30,9 +30,11 @@ use App\Helper\Helper;
 use Core\Services\MailGonderService;
 use Core\Services\DatabaseLogger;
 use Core\Services\CronReporter;
+use Core\Services\CronRunTracker;
 use Core\Services\FileLogger;
 
 $reporter = new CronReporter();
+$cronTracker = new CronRunTracker('gunluk_bildirim', $reporter);
 $logger = new FileLogger(__DIR__ . '/../../logs/crons', 'cron_gunluk_bildirim');
 
 
@@ -114,6 +116,7 @@ try {
         if (empty($isyerleri)) {
             continue;
         }
+        $cronTracker->sayacEkle('isyeri_sayisi', count($isyerleri));
 
 
         $kullaniciyaGonderilecekRaporlar = [];
@@ -288,15 +291,18 @@ try {
                     </html>';
 
            if (MailGonderService::gonder($kullaniciEmail, $konu, $icerik)) {
+                $cronTracker->sayacEkle('onaylanan');
                 $reporter->log($kullaniciEmail . " adresine E-posta gönderildi." . "\n");
             } else {
+                $cronTracker->sayacEkle('basarisiz');
                 //$reporter->log($kullaniciEmail . " adresine E-posta gönderilemedi." . "\n");
             }
         } else {
             $reporter->log(" - Bu kullanıcı için bildirilecek YENİ rapor bulunmadı." . "\n" . "\n");
         }
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
+    $cronTracker->hata($e);
     $reporter->log("!!! KRİTİK GENEL HATA !!!");
     $reporter->log("Hata: " . $e->getMessage());
     MailGonderService::gonder('beyzade83@gmail.com', 'SGK GÜNLÜK BİLDİRİM CRON HATASI', 'Günlük bildirim cronu çalışırken hata oluştu: ' . $e->getMessage());
