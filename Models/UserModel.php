@@ -26,12 +26,11 @@ class UserModel extends Model
         $stmt = $this->db->prepare("SELECT * FROM {$this->table} 
                                             WHERE kullanici_adi = :kullanici_adi
                                             AND 
-                                            (silinme_tarihi IS NULL OR silinme_tarihi = '' )
-                                            ORDER BY admin_id ASC, id ASC");
+                                            (silinme_tarihi IS NULL OR silinme_tarihi = '' )");
 
         $stmt->bindParam(':kullanici_adi', $kullanici_adi);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
+        return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
     /**
@@ -111,25 +110,6 @@ class UserModel extends Model
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':userId', $userId);
         $stmt->execute();
-        return $stmt->fetchColumn();
-    }
-
-    /**
-     * Aynı üst kullanıcıya bağlı aktif kayıtlarda kullanıcı adı kullanımda mı?
-     */
-    public function checkUsernameExistsForAdmin($kullaniciAdi, $adminId, $userId = 0)
-    {
-        $stmt = $this->db->prepare("SELECT id FROM {$this->table}
-                                    WHERE kullanici_adi = :kullanici_adi
-                                    AND admin_id = :admin_id
-                                    AND id != :user_id
-                                    AND (silinme_tarihi IS NULL OR silinme_tarihi = '')
-                                    LIMIT 1");
-        $stmt->execute([
-            ':kullanici_adi' => $kullaniciAdi,
-            ':admin_id' => $adminId,
-            ':user_id' => $userId
-        ]);
         return $stmt->fetchColumn();
     }
 
