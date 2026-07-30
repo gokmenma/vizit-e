@@ -1,178 +1,182 @@
-<?php 
-//hata mesajını temizle
-    unset($_SESSION['hata']);
+<?php
+unset($_SESSION['hata']);
+http_response_code(403);
 ?>
 
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>403 - Yetkisiz Erişim</title>
-    
-    <style>
-        @import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap");
+<style>
+    .unauthorized-page {
+        width: 100%;
+        min-height: 100%;
+        flex: 1;
+        display: grid;
+        place-items: center;
+        padding: 2rem 1rem;
+        box-sizing: border-box;
+    }
 
-        /* Sayfa açılışında transition efekti */
-        body {
-            opacity: 0;
-            animation: fadeIn 0.3s ease-in-out forwards;
+    .unauthorized-card {
+        width: 100%;
+        max-width: 32rem;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        background: var(--card);
+        color: var(--foreground);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.04);
+    }
+
+    .unauthorized-card__content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2.5rem 2rem 2rem;
+        text-align: center;
+    }
+
+    .unauthorized-card__icon {
+        display: grid;
+        width: 3rem;
+        height: 3rem;
+        place-items: center;
+        margin-bottom: 1.25rem;
+        border: 1px solid #fecaca;
+        border-radius: 9999px;
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .dark .unauthorized-card__icon {
+        border-color: rgb(127 29 29 / 0.65);
+        background: rgb(69 10 10 / 0.35);
+        color: #f87171;
+    }
+
+    .unauthorized-card__icon svg {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    .unauthorized-card__badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 1.5rem;
+        margin-bottom: 0.75rem;
+        padding: 0 0.625rem;
+        border: 1px solid var(--border);
+        border-radius: 9999px;
+        background: color-mix(in srgb, var(--card) 88%, var(--foreground));
+        color: var(--muted-foreground);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+    }
+
+    .unauthorized-card h1 {
+        margin: 0;
+        color: var(--foreground);
+        font-size: 1.5rem;
+        font-weight: 650;
+        line-height: 2rem;
+        letter-spacing: -0.025em;
+    }
+
+    .unauthorized-card p {
+        max-width: 24rem;
+        margin: 0.625rem 0 0;
+        color: var(--muted-foreground);
+        font-size: 0.875rem;
+        line-height: 1.5rem;
+    }
+
+    .unauthorized-card__footer {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1.25rem 2rem;
+        border-top: 1px solid var(--border);
+        background: color-mix(in srgb, var(--muted) 35%, transparent);
+    }
+
+    .unauthorized-card__button {
+        display: inline-flex;
+        height: 2.5rem;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0 1rem;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        background: var(--background);
+        color: var(--foreground);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+    }
+
+    .unauthorized-card__button:hover {
+        background: var(--muted);
+    }
+
+    .unauthorized-card__button--primary {
+        border-color: hsl(var(--primary));
+        background: hsl(var(--primary));
+        color: hsl(var(--primary-foreground));
+    }
+
+    .unauthorized-card__button--primary:hover {
+        background: hsl(var(--primary) / 0.9);
+    }
+
+    .unauthorized-card__button svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    @media (max-width: 520px) {
+        .unauthorized-page {
+            padding: 1rem 0;
         }
 
-        @keyframes fadeIn {
-            from {
-            opacity: 0;
-            }
-
-            to {
-            opacity: 1;
-            }
-        }
-        /* --- TEMEL SAYFA AYARLARI --- */
-        body {
-            margin: 0;
-  font-family: "Source Sans 3", sans-serif;
-
-            background-color: #1F222D;
-            color: #E4DEFF;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            overflow: hidden;
-            position: relative;
-            background-image: radial-gradient(rgba(228, 222, 255, 0.07) 1px, transparent 1px);
-            background-size: 20px 20px;
+        .unauthorized-card__content {
+            padding: 2rem 1.25rem 1.5rem;
         }
 
-        /* Ana konteyner, kartı ve 403 yazısını dikey olarak hizalar */
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .unauthorized-card__footer {
+            flex-direction: column-reverse;
+            padding: 1rem 1.25rem;
         }
 
-        /* --- ANA KART --- */
-        .card {
-            position: relative;
-            width: 100vw; /* Mobil cihazlarda daha iyi görünür */
-            max-width: 600px; /* Maksimum genişlik */
-            padding: 50px; /* İçerik için boşluk */
-            box-sizing: border-box; /* Padding'i genişliğe dahil et */
-            color: #E4DEFF;
-            border-radius: 24px;
-            background-color: #1f222d;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            
-            /* 1. KART İÇİ DÜZENLEMESİ (EN ÖNEMLİ DÜZELTME) */
-            /* line-height kaldırıldı, yerine flexbox kullanıldı */
-            display: flex;
-            flex-direction: column;   /* Elementleri dikey olarak sırala */
-            justify-content: center; /* Dikeyde ortala */
-            align-items: center;     /* Yatayda ortala */
-        }
-        
-        /* 2. NEON EFEKTİ İYİLEŞTİRMESİ */
-        .card::after {
-            position: absolute;
-            content: "";
-            top: 48%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: -1;
+        .unauthorized-card__button {
             width: 100%;
-            height: 100%;
-            filter: blur(20px); /* Daha yumuşak bir parlama */
-            background: linear-gradient(to right, #7e0fff, #0fffc1); /* Mor -> Yeşil/Mavi geçişi */
-            opacity: 0.4;
         }
+    }
+</style>
 
-        /* --- KART İÇERİĞİ --- */
-        .lock-icon svg {
-            width: 48px; /* Biraz daha zarif bir boyut */
-            height: 48px;
-            stroke: rgba(255, 255, 255, 0.5);
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            margin: 0 0 10px 0;
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-        }
-
-        p {
-            font-size: 1rem;
-            line-height: 1.5; /* Sadece paragraflar için line-height */
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 30px;
-        }
-        
-        /* 3. "403" YAZISI KARTIN DIŞINA ALINDI */
-        .error-code {
-            font-size: 9rem;
-            font-weight: 700;
-            line-height: 1;
-            color: rgba(255, 255, 255, 0.15);
-            margin-top: 20px; /* Kart ile arasına boşluk koy */
-        }
-
-        /* --- BUTONLAR --- */
-        .actions a {
-            text-decoration: none;
-            padding: 12px 28px;
-            border-radius: 30px;
-            font-weight: 500;
-            font-size: 1rem;
-            margin: 0 8px;
-            transition: all 0.3s ease;
-            color: #fff;
-            border: 1px solid transparent;
-        }
-
-        .btn-primary {
-            background-color: rgba(138, 43, 226, 0.5);
-            border-color: rgba(138, 43, 226, 0.8);
-        }
-        .btn-primary:hover {
-            background-color: rgba(138, 43, 226, 0.7);
-        }
-
-        .btn-secondary {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-        .btn-secondary:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-    </style>
-</head>
-<body>
-
-
-    <div class="container">
-        <!-- KART BÖLÜMÜ -->
-        <div class="card">
-            <div class="lock-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
+<section class="unauthorized-page" aria-labelledby="unauthorized-title">
+    <div class="unauthorized-card">
+        <div class="unauthorized-card__content">
+            <div class="unauthorized-card__icon" aria-hidden="true">
+                <i data-lucide="shield-alert"></i>
             </div>
-            <div class="error-code">403</div>
-            <!-- Not: 403 yazısı buradan kaldırıldı -->
-            <h1>Erişim Engellendi</h1>
-            <p>Bu sayfayı görüntülemek için gerekli yetkilere sahip değilsiniz.</p>
-            <div class="actions">
-                <a href="javascript:history.back()" class="btn-secondary">Geri Dön</a>
-                <a href="/" class="btn-primary">Ana Sayfa'ya Git</a>
-            </div>
+            <span class="unauthorized-card__badge">HATA 403</span>
+            <h1 id="unauthorized-title">Bu sayfaya erişiminiz yok</h1>
+            <p>
+                Bu işlemi gerçekleştirmek için gerekli kullanıcı yetkisine sahip değilsiniz.
+                Erişime ihtiyacınız varsa hesap yöneticinizle iletişime geçin.
+            </p>
         </div>
 
-        <!-- 403 YAZISI ARTIK KARTIN DIŞINDA -->
+        <div class="unauthorized-card__footer">
+            <button type="button" class="unauthorized-card__button" onclick="history.back()">
+                <i data-lucide="arrow-left" aria-hidden="true"></i>
+                Önceki Sayfa
+            </button>
+            <a href="dashboard" class="unauthorized-card__button unauthorized-card__button--primary">
+                <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+                Kontrol Paneline Dön
+            </a>
+        </div>
     </div>
-    
-</body>
-</html>
+</section>

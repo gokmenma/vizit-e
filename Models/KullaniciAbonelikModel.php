@@ -5,8 +5,6 @@ namespace Models;
 
 
 use PDO;
-use Models\UserModel;
-
 class KullaniciAbonelikModel extends Model
 {
     protected $table = 'kullanici_abonelikleri';
@@ -23,8 +21,10 @@ class KullaniciAbonelikModel extends Model
      */
     public function getSubscriptionByUserId($kullaniciId)
     {
-        $stmt = $this->db->prepare("SELECT * FROM {$this->table} 
-                                        WHERE kullanici_id = :kullanici_id 
+        $kullaniciId = $this->getSubscriptionOwnerId($kullaniciId);
+
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table}
+                                        WHERE kullanici_id = :kullanici_id
                                         AND baslangic_tarihi <= :bugun 
                                         AND bitis_tarihi >= :bugun
                                         AND durum = 'aktif'
@@ -34,6 +34,24 @@ class KullaniciAbonelikModel extends Model
         $stmt->bindParam(':bugun', $bugun);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
+    /**
+     * Alt kullanıcılar kendi abonelikleri yerine bağlı oldukları ana
+     * kullanıcının aboneliğini kullanır.
+     */
+    private function getSubscriptionOwnerId($kullaniciId)
+    {
+        $stmt = $this->db->prepare("SELECT admin_id
+                                    FROM kullanicilar
+                                    WHERE id = :kullanici_id
+                                    LIMIT 1");
+        $stmt->execute([':kullanici_id' => $kullaniciId]);
+        $adminId = $stmt->fetchColumn();
+
+        return $adminId !== false && (int)$adminId > 0
+            ? (int)$adminId
+            : (int)$kullaniciId;
     }
 
 
@@ -62,13 +80,6 @@ class KullaniciAbonelikModel extends Model
      */
     public function hasActiveSubscription($kullaniciId)
     {
-        //kullanıcı türü user ise abonelik kontrolü yapma
-        $KullaniciModel = new UserModel();
-        $kullanici = $KullaniciModel->findById($kullaniciId);
-        if($kullanici->role == "user"){
-            return true;
-        }
-
         $abonelik = $this->getSubscriptionByUserId($kullaniciId);
         return $abonelik !== false;
     }
