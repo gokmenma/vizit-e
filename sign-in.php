@@ -23,10 +23,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // UserModel'den bir nesne oluştur
 
         // Modeldeki login fonksiyonunu çağır
-        $user = $UserModel->login($kullanici_adi);
+        $users = $UserModel->login($kullanici_adi);
+        $user = false;
+        foreach ($users as $candidate) {
+            if (password_verify($password, $candidate->sifre)) {
+                $user = $candidate;
+                break;
+            }
+        }
 
               // Fonksiyon bir kullanıcı döndürdüyse (giriş başarılıysa)
-        if ($user && password_verify($password, $user->sifre)) {
+        if ($user) {
 
        
             //Eğer kullanıcı pasif ise giriş yapamasın

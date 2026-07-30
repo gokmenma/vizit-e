@@ -633,10 +633,12 @@ window.showToast = function(message, type = 'success') {
         toaster = document.createElement('div');
         toaster.id = 'toaster';
         toaster.className = 'toaster';
-        toaster.setAttribute('data-align', 'end');
-        toaster.setAttribute('popover', 'manual');
         document.body.appendChild(toaster);
     }
+
+    // Mevcut HTML container'ı da popover yaparak dialog/backdrop üst katmanına taşı.
+    toaster.setAttribute('data-align', 'end');
+    toaster.setAttribute('popover', 'manual');
 
     // Ensure the toaster popover container is shown/open in the browser's top-layer.
     if (toaster.showPopover && !toaster.matches(':popover-open')) {

@@ -711,8 +711,12 @@ if ($_POST['action'] == "alt-kullanici-olustur") {
         validateUserInput($sifre, "Şifre");
     }
     //kullanıcı adı ve email kontrolü
-    $kullaniciAdiVarMi = $UserModel->findByUsername($kullanici_adi);
-    if ($kullaniciAdiVarMi && $kullanici_id == 0) {
+    $kullaniciAdiVarMi = $UserModel->checkUsernameExistsForAdmin(
+        $kullanici_adi,
+        $ust_kullanici_id,
+        $kullanici_id
+    );
+    if ($kullaniciAdiVarMi) {
         $status = "error";
         $response = [
             "status" => $status,
@@ -721,7 +725,11 @@ if ($_POST['action'] == "alt-kullanici-olustur") {
         echo json_encode($response);
         exit;
     }
-    $emailVarMi = $UserModel->checkEmailExists($email, $kullanici_id);
+    $emailVarMi = $UserModel->checkEmailExistsForAdmin(
+        $email,
+        $ust_kullanici_id,
+        $kullanici_id
+    );
     if ($emailVarMi) {
         $status = "error";
         $response = [
