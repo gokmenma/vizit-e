@@ -231,7 +231,8 @@ App.loadPage = async (rawRoute, pushState = true) => {
         }
     }
 
-    const route = normalizeRoute(rawRoute);
+    let route = normalizeRoute(rawRoute);
+    let historyRoute = rawRoute;
     
     // Show Modern Top Loading Progress Bar
     App.startLoadingBar();
@@ -243,7 +244,20 @@ App.loadPage = async (rawRoute, pushState = true) => {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         
-        if (!response.ok) throw new Error('Page not found');
+        // Yetki sayfası gerçek HTTP 403 kodu döndürür; içeriği hata kartına
+        // çevirmek yerine SPA içinde normal bir sayfa olarak göster.
+        if (!response.ok && response.status !== 403) {
+            throw new Error('Page not found');
+        }
+
+        if (response.status === 403 && response.redirected) {
+            const responseUrl = new URL(response.url);
+            const baseUrl = new URL(document.querySelector('base')?.href || window.location.origin + '/');
+            historyRoute = responseUrl.pathname.startsWith(baseUrl.pathname)
+                ? responseUrl.pathname.slice(baseUrl.pathname.length)
+                : responseUrl.pathname.replace(/^\/+/, '');
+            route = normalizeRoute(historyRoute);
+        }
         
         const html = await response.text();
         const parser = new DOMParser();
@@ -290,7 +304,7 @@ App.loadPage = async (rawRoute, pushState = true) => {
         App.stopLoadingBar();
 
         if (pushState) {
-            window.history.pushState({ route: rawRoute }, title, rawRoute);
+            window.history.pushState({ route: historyRoute }, title, historyRoute);
         }
 
         // Update sidebar active link
