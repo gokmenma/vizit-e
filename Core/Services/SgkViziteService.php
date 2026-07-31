@@ -493,6 +493,22 @@ XML;
             throw new Exception("Onaylı raporlar getirilemedi: " . $hataMesaji);
         }
 
+        // GEÇİCİ DEBUG: Ayhan Demirci (TC 20177526516) raporunun onaylı raporlar
+        // sorgusundaki ham verisini bekleyen raporlar sorgusuyla karşılaştırmak için
+        // loglanıyor. Teşhis bitince bu blok kaldırılacak.
+        $debugTc = '20177526516';
+        foreach ($sonucDizisi as $rapor) {
+            if ((string)($rapor['TCKIMLIKNO'] ?? '') === $debugTc) {
+                $debugLogger = new \Core\Services\FileLogger(__DIR__ . '/../../logs', 'debug_bekleyen_rapor');
+                $debugLogger->info('onayliRaporlariGetir ham kayit (onayli sorgusu)', [
+                    'isyeriKodu' => $this->isyeriKodu,
+                    'sorgu_tarih1' => $tarih1->format('Y-m-d'),
+                    'sorgu_tarih2' => $tarih2->format('Y-m-d'),
+                    'rapor' => $rapor,
+                ]);
+            }
+        }
+
         return $sonucDizisi; // Her zaman doğru yapıda ve sayıda eleman içeren PHP dizisini döndür
     }
 
@@ -742,6 +758,22 @@ XML;
     public function bekleyenRaporlariGetir(DateTime $tarih, RaporModel $raporModel): array
     {
         $tumRaporlar = $this->raporlariGetir($tarih);
+
+        // GEÇİCİ DEBUG: Ayhan Demirci (TC 20177526516) raporunun onay bekleyen
+        // listesinde neden hala göründüğünü teşhis etmek için ham veri loglanıyor.
+        // Teşhis bitince bu blok kaldırılacak.
+        $debugTc = '20177526516';
+        foreach ($tumRaporlar as $rapor) {
+            if ((string)($rapor['TCKIMLIKNO'] ?? '') === $debugTc) {
+                $debugLogger = new \Core\Services\FileLogger(__DIR__ . '/../../logs', 'debug_bekleyen_rapor');
+                $debugLogger->info('raporlariGetir ham kayit (bekleyen sorgusu)', [
+                    'isyeriKodu' => $this->isyeriKodu,
+                    'sorgu_tarihi' => $tarih->format('Y-m-d'),
+                    'rapor' => $rapor,
+                ]);
+            }
+        }
+
         $arsivKapatSonucu = [
             'kapatilan' => 0,
             'hatalar' => [],
