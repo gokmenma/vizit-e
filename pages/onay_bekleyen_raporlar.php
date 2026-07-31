@@ -291,11 +291,21 @@ $toplamRaporSayisi = count($raporlar);
                 <thead>
                     <tr class="bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800">
                         <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider w-[60px]">Sıra</th>
-                        <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Sigortalı Bilgileri</th>
-                        <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Vaka Türü</th>
-                        <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-center">Başlangıç</th>
-                        <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-center">İşbaşı / Bitiş</th>
-                        <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-center w-[80px]">Süre (Gün)</th>
+                        <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer select-none hover:text-zinc-800 dark:hover:text-zinc-200" data-sort-key="ad_soyad" onclick="sortByColumn(this)">
+                            <span class="inline-flex items-center gap-1">Sigortalı Bilgileri <span class="sort-arrow text-zinc-300 dark:text-zinc-600">↕</span></span>
+                        </th>
+                        <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer select-none hover:text-zinc-800 dark:hover:text-zinc-200" data-sort-key="vaka" onclick="sortByColumn(this)">
+                            <span class="inline-flex items-center gap-1">Vaka Türü <span class="sort-arrow text-zinc-300 dark:text-zinc-600">↕</span></span>
+                        </th>
+                        <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-center cursor-pointer select-none hover:text-zinc-800 dark:hover:text-zinc-200" data-sort-key="baslangic" onclick="sortByColumn(this)">
+                            <span class="inline-flex items-center gap-1 justify-center">Başlangıç <span class="sort-arrow text-zinc-300 dark:text-zinc-600">↕</span></span>
+                        </th>
+                        <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-center cursor-pointer select-none hover:text-zinc-800 dark:hover:text-zinc-200" data-sort-key="bitis" onclick="sortByColumn(this)">
+                            <span class="inline-flex items-center gap-1 justify-center">İşbaşı / Bitiş <span class="sort-arrow text-zinc-300 dark:text-zinc-600">↕</span></span>
+                        </th>
+                        <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-center w-[80px] cursor-pointer select-none hover:text-zinc-800 dark:hover:text-zinc-200" data-sort-key="sure" onclick="sortByColumn(this)">
+                            <span class="inline-flex items-center gap-1 justify-center">Süre (Gün) <span class="sort-arrow text-zinc-300 dark:text-zinc-600">↕</span></span>
+                        </th>
                         <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider w-[160px]">Nitelik Durumu</th>
                         <th class="py-3 px-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider text-right pr-6 w-[280px]">İşlemler</th>
                     </tr>
@@ -414,6 +424,66 @@ $toplamRaporSayisi = count($raporlar);
 <script>
 (function () {
 let activeTab = 'uzun'; // Varsayılan sekme '3 Gün ve Üzeri'
+
+const sortConfig = {
+    ad_soyad: { type: 'string', get: r => ((r.AD || '') + ' ' + (r.SOYAD || '')).toLocaleUpperCase('tr') },
+    vaka: { type: 'string', get: r => (r.VAKAADI || '').toLocaleUpperCase('tr') },
+    baslangic: { type: 'string', get: r => r.POLIKLINIKTAR || '' },
+    bitis: { type: 'string', get: r => (r.ABITTAR && r.ABITTAR !== '0001-01-01') ? r.ABITTAR : '' },
+    sure: { type: 'number', get: r => r.gun_farki || 0 }
+};
+let activeSortKey = null;
+let activeSortDir = 'asc';
+
+window.sortByColumn = function sortByColumn(th) {
+    const key = th.getAttribute('data-sort-key');
+    const config = sortConfig[key];
+    if (!config) return;
+
+    activeSortDir = (activeSortKey === key && activeSortDir === 'asc') ? 'desc' : 'asc';
+    activeSortKey = key;
+
+    document.querySelectorAll('[data-sort-key]').forEach(header => {
+        const arrow = header.querySelector('.sort-arrow');
+        if (header === th) {
+            arrow.textContent = activeSortDir === 'asc' ? '↑' : '↓';
+            arrow.className = 'sort-arrow text-zinc-900 dark:text-zinc-100 font-bold';
+        } else {
+            arrow.textContent = '↕';
+            arrow.className = 'sort-arrow text-zinc-300 dark:text-zinc-600';
+        }
+    });
+
+    const tbody = document.querySelector('#onay-bekleyen-table tbody');
+    const noReportRow = document.getElementById('rapor-yok-mesaji');
+    const rows = Array.from(tbody.querySelectorAll('.rapor-row'));
+
+    rows.sort((rowA, rowB) => {
+        const dataA = JSON.parse(rowA.getAttribute('data-rapor'));
+        const dataB = JSON.parse(rowB.getAttribute('data-rapor'));
+        const valA = config.get(dataA);
+        const valB = config.get(dataB);
+
+        let cmp;
+        if (config.type === 'number') {
+            cmp = valA - valB;
+        } else {
+            cmp = valA.localeCompare(valB, 'tr');
+        }
+
+        return activeSortDir === 'asc' ? cmp : -cmp;
+    });
+
+    rows.forEach(row => tbody.insertBefore(row, noReportRow));
+
+    // Sıra numaralarını sıralama sonrası güncelle
+    let sira = 0;
+    rows.forEach(row => {
+        sira++;
+        const siraCell = row.querySelector('td:first-child');
+        if (siraCell) siraCell.textContent = sira;
+    });
+};
 
 window.setFilterTab = function setFilterTab(tabName) {
     activeTab = tabName;
