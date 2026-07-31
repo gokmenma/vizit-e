@@ -493,22 +493,6 @@ XML;
             throw new Exception("Onaylı raporlar getirilemedi: " . $hataMesaji);
         }
 
-        // GEÇİCİ DEBUG: Ayhan Demirci (TC 20177526516) raporunun onaylı raporlar
-        // sorgusundaki ham verisini bekleyen raporlar sorgusuyla karşılaştırmak için
-        // loglanıyor. Teşhis bitince bu blok kaldırılacak.
-        $debugTc = '20177526516';
-        foreach ($sonucDizisi as $rapor) {
-            if ((string)($rapor['TCKIMLIKNO'] ?? '') === $debugTc) {
-                $debugLogger = new \Core\Services\FileLogger(__DIR__ . '/../../logs', 'debug_bekleyen_rapor');
-                $debugLogger->info('onayliRaporlariGetir ham kayit (onayli sorgusu)', [
-                    'isyeriKodu' => $this->isyeriKodu,
-                    'sorgu_tarih1' => $tarih1->format('Y-m-d'),
-                    'sorgu_tarih2' => $tarih2->format('Y-m-d'),
-                    'rapor' => $rapor,
-                ]);
-            }
-        }
-
         return $sonucDizisi; // Her zaman doğru yapıda ve sayıda eleman içeren PHP dizisini döndür
     }
 
@@ -742,6 +726,61 @@ XML;
     }
 
     /**
+     * raporAramaTarihile cevabındaki ONAYLI / ONAYDURUMU / RAPORDURUMADI alanları SGK
+     * tarafından boş string olarak dönmektedir; bu nedenle "SGK'da zaten onaylanmış"
+     * bilgisi bu alanlardan anlaşılamaz. Rapor SGK'nın kendi portalinden onaylandıysa
+     * yerel veritabanında da kaydı olmaz ve rapor onay bekleyen listesinde kalmaya
+     * devam eder. Tek güvenilir kaynak onayliRaporlarTarihile servisidir; bu metot
+     * bekleyen raporların poliklinik tarih aralığı için onaylı listesini çekip
+     * MEDULARAPORID kümesini döndürür.
+     *
+     * @param array $raporlar raporlariGetir()'dan dönen dizi
+     * @return array MEDULARAPORID => true biçiminde küme
+     */
+    private function sgkOnayliMedulaRaporIdleri(array $raporlar): array
+    {
+        $tarihler = [];
+        foreach ($raporlar as $rapor) {
+            // ARSIV=1 kayıtlar zaten elendiği için sorgu aralığını gereksiz genişletmesinler.
+            if (($rapor['ARSIV'] ?? '0') == 1) {
+                continue;
+            }
+            $poliklinikTarihi = trim((string)($rapor['POLIKLINIKTAR'] ?? ''));
+            if ($poliklinikTarihi !== '' && $poliklinikTarihi !== '0001-01-01') {
+                $tarihler[] = $poliklinikTarihi;
+            }
+        }
+
+        if ($tarihler === []) {
+            return [];
+        }
+
+        try {
+            $baslangic = new DateTime(min($tarihler));
+            $bitis = new DateTime(max($tarihler));
+            $onayliRaporlar = $this->onayliRaporlariGetir($baslangic, $bitis);
+        } catch (Exception $e) {
+            // Onaylı liste çekilemezse bekleyen raporlar ekranı çalışmaya devam etmeli.
+            $logger = new \Core\Services\FileLogger(__DIR__ . '/../../logs', 'bekleyen_rapor_capraz_kontrol');
+            $logger->error('SGK onaylı rapor listesi alınamadı, çapraz kontrol atlandı.', [
+                'isyeriKodu' => $this->isyeriKodu,
+                'mesaj' => $e->getMessage(),
+            ]);
+            return [];
+        }
+
+        $onayliIdler = [];
+        foreach ($onayliRaporlar as $onayliRapor) {
+            $medulaRaporId = trim((string)($onayliRapor['MEDULARAPORID'] ?? ''));
+            if ($medulaRaporId !== '') {
+                $onayliIdler[$medulaRaporId] = true;
+            }
+        }
+
+        return $onayliIdler;
+    }
+
+    /**
      * Onay Bekleyen Raporlar panel sayfaları ve otomatik onay cron'unun ortak kullandığı
      * merkezi metot: SGK'dan bekleyen raporları çeker ve sadece gerçekten işlem
      * gerektiren raporları döndürür. ARSIV=1 kayıtların SGK'da otomatik kapatılması,
@@ -758,22 +797,6 @@ XML;
     public function bekleyenRaporlariGetir(DateTime $tarih, RaporModel $raporModel): array
     {
         $tumRaporlar = $this->raporlariGetir($tarih);
-
-        // GEÇİCİ DEBUG: Ayhan Demirci (TC 20177526516) raporunun onay bekleyen
-        // listesinde neden hala göründüğünü teşhis etmek için ham veri loglanıyor.
-        // Teşhis bitince bu blok kaldırılacak.
-        $debugTc = '20177526516';
-        foreach ($tumRaporlar as $rapor) {
-            if ((string)($rapor['TCKIMLIKNO'] ?? '') === $debugTc) {
-                $debugLogger = new \Core\Services\FileLogger(__DIR__ . '/../../logs', 'debug_bekleyen_rapor');
-                $debugLogger->info('raporlariGetir ham kayit (bekleyen sorgusu)', [
-                    'isyeriKodu' => $this->isyeriKodu,
-                    'sorgu_tarihi' => $tarih->format('Y-m-d'),
-                    'rapor' => $rapor,
-                ]);
-            }
-        }
-
         $arsivKapatSonucu = [
             'kapatilan' => 0,
             'hatalar' => [],
@@ -790,9 +813,10 @@ XML;
             $raporModel->findExistingMedulaRaporIds(array_column($tumRaporlar, 'MEDULARAPORID')),
             true
         );
+        $sgkOnayliIdler = $this->sgkOnayliMedulaRaporIdleri($tumRaporlar);
 
         foreach ($tumRaporlar as $rapor) {
-            // Arşivlenmiş (kısa süreli, SGK tarafından otomatik sonuçlandırılmış) raporları atla
+            // Arşivlenmiş (ARSIV=1) raporlar SGK tarafında onaylanmış/sonuçlanmış demektir.
             if (($rapor['ARSIV'] ?? '0') == 1) {
                 continue;
             }
@@ -814,6 +838,12 @@ XML;
             // tekil Medula rapor kimligi daha once kaydedildiyse bu satiri atla.
             $medulaRaporId = trim((string)($rapor['MEDULARAPORID'] ?? ''));
             if ($medulaRaporId !== '' && isset($mevcutMedulaRaporIds[$medulaRaporId])) {
+                continue;
+            }
+
+            // Rapor SGK'nın kendi portalinden onaylanmış olabilir; bu durumda ARSIV hâlâ 0
+            // gelir, yerel kayıt da bulunmaz. SGK'nın onaylı listesiyle çapraz kontrol et.
+            if ($medulaRaporId !== '' && isset($sgkOnayliIdler[$medulaRaporId])) {
                 continue;
             }
 
