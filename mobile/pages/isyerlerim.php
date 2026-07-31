@@ -221,6 +221,10 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                     <input id="otomatik_rapor_onay" type="checkbox" name="otomatik_rapor_onay">
                     <span>Otomatik Rapor Onaylama</span>
                 </label>
+                <label class="flex items-center gap-2 cursor-pointer py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300" title="İşyerinin SGK ile mahsuplaşma protokolü varsa işaretleyin.">
+                    <input id="mahsuplasma_protokolu" type="checkbox" name="mahsuplasma_protokolu">
+                    <span>Mahsuplaşma Protokolü</span>
+                </label>
 
                 <div class="otomatik-onay-eposta d-none flex flex-col gap-1 text-left">
                     <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider" for="otomatik_onay_eposta">E-posta Adresleri (Virgülle Ayırın)</label>

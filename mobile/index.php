@@ -189,6 +189,16 @@ if (isset($_SESSION['kullanici_id'])) {
     }
 }
 
+$mahsuplasmaProtokoluVar = false;
+if (!empty($_SESSION['isyeri_id'])) {
+    foreach ($header_isyerleri as $header_isyeri) {
+        if ((int)$header_isyeri->id === (int)$_SESSION['isyeri_id']) {
+            $mahsuplasmaProtokoluVar = (int)($header_isyeri->mahsuplasma_protokolu ?? 0) === 1;
+            break;
+        }
+    }
+}
+
 $KullaniciAbonelikModel = new KullaniciAbonelikModel();
 $abonelik_varmi = $KullaniciAbonelikModel->hasActiveSubscription($_SESSION['kullanici_id'] ?? 0);
 
@@ -333,19 +343,21 @@ if (isset($_SESSION['kullanici_id'])) {
         <div class="bottom-sheet-content">
             <nav class="bottom-sheet-menu-list">
                 <?php if ($abonelik_varmi): ?>
-                <div class="bottom-sheet-menu-section">Mahsuplaşma İşlemleri</div>
-                <a href="#prim-borcuna-mahsup-edilen-odemeler" class="bottom-sheet-menu-item">
-                    <i data-lucide="coins"></i>
-                    <span>Prim Borcuna Mahsup Edilenler</span>
-                </a>
-                <a href="#mahsuplastirilan-raporlar" class="bottom-sheet-menu-item">
-                    <i data-lucide="check-square"></i>
-                    <span>Onaylanan Ödeme Listesi</span>
-                </a>
-                <a href="#mahsuplastirilacak-raporlar" class="bottom-sheet-menu-item">
-                    <i data-lucide="file-text"></i>
-                    <span>Mahsuplaştırılacak Raporlar</span>
-                </a>
+                <div id="mahsuplasma-menu-group" <?php echo $mahsuplasmaProtokoluVar ? '' : 'style="display: none;"'; ?>>
+                    <div class="bottom-sheet-menu-section">Mahsuplaşma İşlemleri</div>
+                    <a href="#prim-borcuna-mahsup-edilen-odemeler" class="bottom-sheet-menu-item">
+                        <i data-lucide="coins"></i>
+                        <span>Prim Borcuna Mahsup Edilenler</span>
+                    </a>
+                    <a href="#mahsuplastirilan-raporlar" class="bottom-sheet-menu-item">
+                        <i data-lucide="check-square"></i>
+                        <span>Onaylanan Ödeme Listesi</span>
+                    </a>
+                    <a href="#mahsuplastirilacak-raporlar" class="bottom-sheet-menu-item">
+                        <i data-lucide="file-text"></i>
+                        <span>Mahsuplaştırılacak Raporlar</span>
+                    </a>
+                </div>
 
                 <div class="bottom-sheet-menu-section">Rapor İşlemleri</div>
                 <a href="#is-kazasi-bildirimi" class="bottom-sheet-menu-item">
