@@ -1348,3 +1348,14 @@
 11:52:49 - vizite.com - /onay-bekleyen-raporlar
 13:55:12 - vizite.com - /sign-in
 18:19:22 - vizite.com - /sign-in
+21:07:37 - vizite.com - /sign-in
+21:07:41 - vizite.com - /sign-in
+21:07:43 - vizite.com - /
+21:07:46 - vizite.com - /onay-bekleyen-raporlar
+21:09:33 - vizite.com - /onay-bekleyen-raporlar
+21:11:10 - vizite.com - /onay-bekleyen-raporlar
+21:11:13 - vizite.com - /onayli-raporlar
+21:11:14 - vizite.com - /onayli-raporlar
+21:11:17 - vizite.com - /onay-bekleyen-raporlar
+21:11:24 - vizite.com - /onay-bekleyen-raporlar
+21:25:05 - vizite.com - /onay-bekleyen-raporlar

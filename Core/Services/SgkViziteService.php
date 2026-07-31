@@ -143,6 +143,18 @@ XML;
             throw new Exception("SGK sunucusundan geçerli bir XML cevabı alınamadı (Method: {$methodName}).");
         }
 
+        // GEÇİCİ TEŞHİS: raporAramaTarihile cevabının gerçek element adlarını görmek için
+        // ham XML diske yazılır. İnceleme bitince bu blok ve logs/ham_xml dizini silinecek.
+        if ($methodName === 'raporAramaTarihile') {
+            $hamXmlDizini = __DIR__ . '/../../logs/ham_xml';
+            if (is_dir($hamXmlDizini) || @mkdir($hamXmlDizini, 0750, true)) {
+                @file_put_contents(
+                    $hamXmlDizini . '/raporAramaTarihile_' . date('Ymd_His') . '_' . substr(bin2hex(random_bytes(3)), 0, 6) . '.xml',
+                    $responseXml
+                );
+            }
+        }
+
         $previousLibxmlSetting = libxml_use_internal_errors(true);
         $xml = simplexml_load_string($responseXml, SimpleXMLElement::class, LIBXML_NONET | LIBXML_NOCDATA);
 
