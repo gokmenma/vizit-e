@@ -57,6 +57,7 @@ if ($_POST["action"] == "isyeri_kaydet") {
             "kullanici_kodu"        => Security::escape($_POST["kullanici_adi"]),
             "isyeri_kodu"           => Security::escape($_POST["isyeri_kodu"]),
             "otomatik_rapor_onay"   => isset($_POST["otomatik_rapor_onay"]) ? 1 : 0,
+            "mahsuplasma_protokolu" => isset($_POST["mahsuplasma_protokolu"]) ? 1 : 0,
             "otomatik_onay_eposta"  => Security::escape($_POST["otomatik_onay_eposta"]),
             "varsayilan_mi"         => $varsayilan_mi,
             "aktif_mi"              => 1,
@@ -81,7 +82,9 @@ if ($_POST["action"] == "isyeri_kaydet") {
     $response = [
         "status" => $status,
         "message" => $message,
-        "lastInsertId" => $lastInsertId ?? 0
+        "lastInsertId" => $lastInsertId ?? 0,
+        "mahsuplasma_protokolu" => isset($_POST["mahsuplasma_protokolu"]) ? 1 : 0,
+        "is_selected" => $id > 0 && (int)($_SESSION["isyeri_id"] ?? 0) === (int)$id
 
     ];
 

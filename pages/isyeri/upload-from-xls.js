@@ -1,12 +1,38 @@
-let url = "App/Api/APIisyerlerim.php";
-document
-  .getElementById("excel_dosya")
-  .addEventListener("change", function (event) {
+const excelUploadUrl = "App/Api/APIisyerlerim.php";
+const excelFileInput = document.getElementById("excel_dosya");
+const excelUploadAlert = document.getElementById("excel-upload-alert");
+
+function showExcelUploadInfo(message) {
+  if (excelUploadAlert) {
+    excelUploadAlert.innerHTML = message;
+    excelUploadAlert.className =
+      "rounded-lg border border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-300 px-4 py-3 text-xs leading-relaxed";
+    return;
+  }
+
+  const legacyAlert = document.querySelector(".alert-description");
+  if (legacyAlert) {
+    $(legacyAlert).html(message).removeClass("d-none alert-danger").addClass("alert-info");
+  }
+}
+
+function clearExcelUploadInfo() {
+  if (excelUploadAlert) {
+    excelUploadAlert.innerHTML = "";
+    excelUploadAlert.classList.add("d-none");
+  }
+}
+
+if (excelFileInput) {
+  excelFileInput.addEventListener("change", function (event) {
     const fileInput = event.target;
     const file = fileInput.files[0];
     const allowedExtensions = /(\.xls|\.xlsx)$/i;
 
-    if (!allowedExtensions.exec(file.name)) {
+    clearExcelUploadInfo();
+    if (!file) return;
+
+    if (!allowedExtensions.test(file.name)) {
       swal.fire({
         title: "Hata",
         text: "Lütfen sadece Excel dosyası yükleyin.",
@@ -26,16 +52,6 @@ document
         // Satır sayısını hesapla
         const satir_sayisi = range.e.r - range.s.r;
 
-        //Tutarları Topla
-        let toplam_tutar = 0;
-        for (let row = range.s.r; row <= range.e.r; row++) {
-          const cellAddress = XLSX.utils.encode_cell({ r: row, c: 1 }); // 1. sütun (B sütunu) için
-          const cell = firstSheet[cellAddress];
-          if (cell && !isNaN(cell.v)) {
-            // Check if the cell value is a valid number
-            toplam_tutar += parseFloat(cell.v);
-          }
-        }
         //satır sayısı 1000'den fazla ise uyarı ver
         if (satir_sayisi > 1000) {
           swal.fire({
@@ -47,19 +63,16 @@ document
           fileInput.value = ""; // Dosya girişini temizle
           return;
         } else {
-          const alertDiv = $(".alert-description");
-          $(alertDiv).html(`
-                Yüklenen dosyada bulunan satır sayısı: <strong>${satir_sayisi}
-              `);
-              $(alertDiv).removeClass("d-none").addClass("alert-info");
-
-          $(".upload-info").removeClass("d-none").hide().fadeIn(400);
+          showExcelUploadInfo(
+            `Dosya hazır. Yüklenecek veri satırı: <strong>${satir_sayisi}</strong>`
+          );
         }
       };
       // Dosyayı oku
       reader.readAsBinaryString(file);
     }
   });
+}
 
 /*Excelden Yüklemek için*/
 $(document).on("click", "#excel_yukle_buton", function (e) {
@@ -67,7 +80,7 @@ $(document).on("click", "#excel_yukle_buton", function (e) {
   const fileInput = document.getElementById("excel_dosya");
   const loadingOverlay = document.getElementById("loading-overlay");
 
-  if (!fileInput.files.length) {
+  if (!fileInput || !fileInput.files.length) {
     swal.fire({
       title: "Hata",
       text: "Lütfen bir dosya seçin.",
@@ -81,9 +94,12 @@ $(document).on("click", "#excel_yukle_buton", function (e) {
   formData.append("action", "excel_upload_isyeri");
   formData.append("excelFile", fileInput.files[0]);
 
-  loadingOverlay.style.display = "flex"; // CSS'te flex kullandığımız için 'flex' yapıyoruz
+  if (loadingOverlay) {
+    loadingOverlay.classList.remove("hidden");
+    loadingOverlay.style.display = "flex";
+  }
 
-  fetch(url, {
+  fetch(excelUploadUrl, {
     method: "POST",
     body: formData,
   })
@@ -92,7 +108,7 @@ $(document).on("click", "#excel_yukle_buton", function (e) {
      
       // console.log(data); // Konsola yanıtı yazdır
       const title = data.status === "success" ? "Başarılı" : "Hata";
-      loadingOverlay.style.display = "none"; // Yükleme overlay'ini gizle
+      if (loadingOverlay) loadingOverlay.style.display = "none";
       swal.fire({
         title: title,
         html: data.message,
@@ -107,7 +123,7 @@ $(document).on("click", "#excel_yukle_buton", function (e) {
     })
     .catch((error) => {
       console.error("Error:", error);
-      loadingOverlay.style.display = "none"; // Yükleme overlay'ini gizle
+      if (loadingOverlay) loadingOverlay.style.display = "none";
 
       swal.fire({
         title: "Hata",
@@ -123,19 +139,18 @@ $(document).on("click", "#excel_yukle_buton", function (e) {
 });
 $(document).on("click", "#form_temizle_buton", function () {
   const fileInput = document.getElementById("excel_dosya");
+  if (!fileInput) return;
   fileInput.value = "";
 
-  const alertDiv = document.querySelector(".alert-description");
-
-  $(alertDiv)
-    .html(
-      "Yüklenen dosya bilgileri temizlendi. Lütfen yeni bir dosya yükleyin."
-    )
-    .fadeIn(400);
-    $(alertDiv).removeClass("d-none").addClass("alert-info");
-
-  setTimeout(() => {
-    $(alertDiv).fadeOut(400);
-  }, 4000);
-
+  showExcelUploadInfo("Dosya seçimi temizlendi. Yeni bir dosya seçebilirsiniz.");
 });
+
+const excelUploadModal = document.getElementById("excelUploadModal");
+if (excelUploadModal) {
+  excelUploadModal.addEventListener("hidden.bs.modal", function () {
+    if (excelFileInput) excelFileInput.value = "";
+    clearExcelUploadInfo();
+    const loadingOverlay = document.getElementById("loading-overlay");
+    if (loadingOverlay) loadingOverlay.style.display = "none";
+  });
+}

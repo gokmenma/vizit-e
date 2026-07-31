@@ -30,6 +30,7 @@ $_SESSION['firma_adi'] = $isyeri->firma_adi;
 $_SESSION['kullaniciAdi'] = $isyeri->kullanici_kodu; // İşyeri kodu 1 için
 $_SESSION['isyeriKodu'] = $isyeri->isyeri_kodu; // İşyeri kodu 1 için
 $_SESSION['wsSifre'] = $isyeri->isyeri_sifre;
+$_SESSION['mahsuplasma_protokolu'] = (int)($isyeri->mahsuplasma_protokolu ?? 0);
 
 
 //Hata mesajlarını temizle
@@ -43,7 +44,8 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
     echo json_encode([
         'status' => 'success',
         'message' => 'İşyeri başarıyla değiştirildi.',
-        'firma_adi' => $isyeri->firma_adi
+        'firma_adi' => $isyeri->firma_adi,
+        'mahsuplasma_protokolu' => (int)($isyeri->mahsuplasma_protokolu ?? 0)
     ]);
     exit();
 }

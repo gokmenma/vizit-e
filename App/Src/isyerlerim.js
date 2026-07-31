@@ -62,6 +62,9 @@ $(document).off("click.isyeriKaydet").on("click.isyeriKaydet", ".isyeri-kaydet",
       $btn.stopLoading();
       showToast(data.message, data.status);
       if (data.status === "success") {
+        if (data.is_selected) {
+          $("#mahsuplasma-menu-group").toggle(data.mahsuplasma_protokolu == 1);
+        }
         $("#defaultModal").modal("hide");
         if (window.App && App.refreshContent) {
           App.refreshContent();
@@ -107,6 +110,10 @@ $(document).off("click.isyeriDuzenle").on("click.isyeriDuzenle", ".isyeri-duzenl
         $("#varsayilan_mi").prop(
           "checked",
           isyeri.varsayilan_mi == 1
+        );
+        $("#mahsuplasma_protokolu").prop(
+          "checked",
+          isyeri.mahsuplasma_protokolu == 1
         );
         if (isyeri.otomatik_rapor_onay == 1) {
           $(".otomatik-onay-eposta").removeClass("d-none");
@@ -201,6 +208,7 @@ $(document).off("submit.isyeriSec").on("submit.isyeriSec", ".isyeri-sec-form", f
       submitBtn.stopLoading();
       if (data.status === "success") {
         showToast(data.message || "İşyeri başarıyla değiştirildi.", "success");
+        $("#mahsuplasma-menu-group").toggle(data.mahsuplasma_protokolu == 1);
         
         // 1. Üst bardaki seçili firma adını yenilemeden güncelle
         $(".isyeri-dropdown summary span").text(firmaAdi);

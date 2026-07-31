@@ -158,6 +158,16 @@ if (isset($_SESSION['kullanici_id'])) {
     }
 }
 
+$mahsuplasmaProtokoluVar = false;
+if (!empty($_SESSION['isyeri_id'])) {
+    foreach ($header_isyerleri as $header_isyeri) {
+        if ((int)$header_isyeri->id === (int)$_SESSION['isyeri_id']) {
+            $mahsuplasmaProtokoluVar = (int)($header_isyeri->mahsuplasma_protokolu ?? 0) === 1;
+            break;
+        }
+    }
+}
+
 $KullaniciAbonelikModel = new KullaniciAbonelikModel();
 $aktif_abonelik = $KullaniciAbonelikModel->getSubscriptionByUserId($_SESSION['kullanici_id'] ?? 0);
 $abonelik_varmi = $KullaniciAbonelikModel->hasActiveSubscription($_SESSION['kullanici_id'] ?? 0);
@@ -570,7 +580,7 @@ if ($currentRoute !== 'dashboard') {
                 </div>
 
                 <!-- Grup 3: Mahsuplaşma İşlemleri -->
-                <div role="group" aria-labelledby="group-label-mahsup">
+                <div id="mahsuplasma-menu-group" role="group" aria-labelledby="group-label-mahsup" <?php echo $mahsuplasmaProtokoluVar ? '' : 'style="display: none;"'; ?>>
                     <h3 id="group-label-mahsup">Mahsuplaşma İşlemleri</h3>
                     <ul>
                         <li>

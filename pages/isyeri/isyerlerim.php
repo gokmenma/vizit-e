@@ -291,10 +291,10 @@ $hataMesaji = $_SESSION['hata'] ?? '';
         <div class="flex items-center gap-2 text-nowrap self-start md:self-auto flex-shrink-0">
             <!-- Firma ekleme hakkı hala varsa -->
             <?php if ($kullanilan_firma_hakki < $firma_hakki && ($userRole == "admin" || $userRole == "superadmin")): ?>
-                <a href="excelden-yukle" class="inline-flex items-center gap-1.5 h-9 px-3 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-md text-xs font-semibold shadow-sm transition-all">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#excelUploadModal" class="inline-flex items-center gap-1.5 h-9 px-3 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-md text-xs font-semibold shadow-sm transition-all cursor-pointer">
                     <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
                     <span>Excel'den Yükle</span>
-                </a>
+                </button>
                 <button type="button" data-bs-toggle="modal" data-bs-target="#defaultModal" class="h-9 px-3 bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 shadow cursor-pointer">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     <span>Yeni Ekle</span>
@@ -451,6 +451,61 @@ $hataMesaji = $_SESSION['hata'] ?? '';
     </div>
 </div>
 
+<!-- Excel'den İşyeri Yükleme -->
+<div class="modal fixed inset-0 z-50 hidden items-center justify-center p-4 bg-zinc-950/45 backdrop-blur-sm animate-fade-in" id="excelUploadModal" tabindex="-1" role="dialog" aria-labelledby="excelUploadModalLabel" aria-hidden="true">
+    <div class="relative w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden" role="document">
+        <div id="loading-overlay" class="absolute inset-0 z-10 hidden items-center justify-center bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm">
+            <div class="flex flex-col items-center gap-3 text-zinc-700 dark:text-zinc-200">
+                <div class="spinner-border w-6 h-6" role="status"><span class="visually-hidden">Yükleniyor...</span></div>
+                <span class="text-xs font-semibold">Yükleniyor, lütfen bekleyiniz...</span>
+            </div>
+        </div>
+
+        <div class="modal-header border-b border-zinc-100 dark:border-zinc-800 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="file-spreadsheet" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                <div>
+                    <h4 class="font-bold text-sm text-zinc-900 dark:text-zinc-50" id="excelUploadModalLabel">Excel'den İşyeri Yükle</h4>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">İşyerlerinizi şablon dosyasını kullanarak topluca ekleyin.</p>
+                </div>
+            </div>
+            <button type="button" class="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer" data-bs-dismiss="modal" aria-label="Kapat">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="modal-body p-6 flex flex-col gap-4 overflow-y-auto">
+            <a href="pages/isyeri/isyeri-yukle.xlsx" download class="flex items-center justify-between gap-4 rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/20 p-4 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors">
+                <span class="flex items-center gap-3">
+                    <i data-lucide="download" class="w-5 h-5 flex-shrink-0"></i>
+                    <span>
+                        <strong class="block text-xs">Örnek Excel Şablonu</strong>
+                        <span class="block text-[11px] mt-0.5 opacity-80">Doğru sütun yapısını indirin.</span>
+                    </span>
+                </span>
+                <span class="text-xs font-bold">İndir</span>
+            </a>
+
+            <div id="excel-upload-alert" class="d-none rounded-lg border px-4 py-3 text-xs leading-relaxed" role="alert"></div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-bold text-zinc-900 dark:text-zinc-100" for="excel_dosya">Yüklenecek dosya</label>
+                <input type="file" id="excel_dosya" name="excel_dosya" accept=".xls,.xlsx"
+                    class="block w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 file:mr-3 file:rounded-md file:border-0 file:bg-zinc-100 dark:file:bg-zinc-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-zinc-700 dark:file:text-zinc-200 hover:file:bg-zinc-200 dark:hover:file:bg-zinc-700 cursor-pointer">
+                <p class="text-[11px] text-zinc-500 dark:text-zinc-400">Yalnızca .xls veya .xlsx dosyaları; en fazla 1000 veri satırı.</p>
+            </div>
+        </div>
+
+        <div class="modal-footer border-t border-zinc-100 dark:border-zinc-800 px-6 py-4 flex items-center justify-end gap-2.5">
+            <button type="button" id="form_temizle_buton" class="h-10 px-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg text-xs font-bold shadow-sm transition-all cursor-pointer">TEMİZLE</button>
+            <button type="button" id="excel_yukle_buton" class="h-10 px-5 bg-zinc-950 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-950 rounded-lg text-xs font-bold shadow transition-all inline-flex items-center gap-2 cursor-pointer">
+                <i data-lucide="upload" class="w-4 h-4"></i>
+                <span>YÜKLE</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Dialogs ========= -->
 <!-- Default Size -->
 <div class="modal fixed inset-0 z-50 hidden items-center justify-center p-4 bg-zinc-950/45 backdrop-blur-sm animate-fade-in" id="defaultModal" tabindex="-1" role="dialog">
@@ -514,6 +569,11 @@ $hataMesaji = $_SESSION['hata'] ?? '';
                     <span>Otomatik Rapor Onaylama</span>
                 </label>
 
+                <label class="label gap-3 cursor-pointer select-none py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center" title="İşyerinin SGK ile mahsuplaşma protokolü varsa işaretleyin.">
+                    <input id="mahsuplasma_protokolu" type="checkbox" name="mahsuplasma_protokolu">
+                    <span>Mahsuplaşma Protokolü</span>
+                </label>
+
                 <div class="otomatik-onay-eposta d-none flex flex-col gap-1.5">
                     <label class="text-xs font-bold text-zinc-900 dark:text-zinc-100" for="otomatik_onay_eposta">Bildirim E-posta Adresleri</label>
                     <textarea class="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 min-h-[70px] text-left placeholder-zinc-400" id="otomatik_onay_eposta" name="otomatik_onay_eposta" placeholder="Birden fazla ise aralarına virgül koyun"></textarea>
@@ -547,6 +607,8 @@ $hataMesaji = $_SESSION['hata'] ?? '';
 
 <!-- sayfanın js kodu -->
 <script src="App/Src/isyerlerim.js?v=<?php echo filemtime('App/Src/isyerlerim.js'); ?>"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
+<script src="pages/isyeri/upload-from-xls.js?v=<?php echo filemtime('pages/isyeri/upload-from-xls.js'); ?>"></script>
 
 <!-- Body ve Html kapatmayı dahil ediyoruz -->
 <?php include 'layouts/foot.php'; ?>
