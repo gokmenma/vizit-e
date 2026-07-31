@@ -15,13 +15,6 @@ class SgkViziteService
 
     private const TOKEN_TTL_SECONDS = 1740;
 
-    /**
-     * onayliRaporlarTarihile servisi SGK tarafında "1 dakika aralıklar ile sorgulama
-     * yapabilirsiniz" kuralıyla sınırlandırılmıştır. Onay bekleyen ekranı her açılışta
-     * bu servisi çağıramayacağı için sonuç bu süre boyunca önbellekten okunur.
-     */
-    private const ONAYLI_RAPOR_CACHE_TTL_SECONDS = 300;
-
     private string $serviceUrl = 'https://uyg.sgk.gov.tr/Ws_Vizite/services/ViziteGonder';
     private $kullaniciAdi;
     private $isyeriKodu;
@@ -143,13 +136,14 @@ XML;
             throw new Exception("SGK sunucusundan geçerli bir XML cevabı alınamadı (Method: {$methodName}).");
         }
 
-        // GEÇİCİ TEŞHİS: raporAramaTarihile cevabının gerçek element adlarını görmek için
-        // ham XML diske yazılır. İnceleme bitince bu blok ve logs/ham_xml dizini silinecek.
+        // GEÇİCİ TEŞHİS: 151546714 numaralı raporun güncel ARSIV değerini tespit etmek için
+        // ham XML işyeri kodu ile birlikte diske yazılır. İnceleme bitince silinecek.
         if ($methodName === 'raporAramaTarihile') {
             $hamXmlDizini = __DIR__ . '/../../logs/ham_xml';
             if (is_dir($hamXmlDizini) || @mkdir($hamXmlDizini, 0750, true)) {
                 @file_put_contents(
-                    $hamXmlDizini . '/raporAramaTarihile_' . date('Ymd_His') . '_' . substr(bin2hex(random_bytes(3)), 0, 6) . '.xml',
+                    $hamXmlDizini . '/isyeri' . preg_replace('/[^A-Za-z0-9]/', '', $this->isyeriKodu)
+                        . '_' . date('Ymd_His') . '.xml',
                     $responseXml
                 );
             }
@@ -744,127 +738,6 @@ XML;
         return ['kapatilan' => $kapatilan, 'hatalar' => $hatalar];
     }
 
-    private function onayliRaporCacheFile(): string
-    {
-        return $this->tokenCacheDirectory()
-            . DIRECTORY_SEPARATOR
-            . 'sgk_onayli_' . hash('sha256', $this->currentUserKey()) . '.json';
-    }
-
-    private function onayliRaporCacheOku(): ?array
-    {
-        try {
-            $cacheFile = $this->onayliRaporCacheFile();
-        } catch (Exception $e) {
-            return null;
-        }
-
-        if (!is_file($cacheFile) || !is_readable($cacheFile)) {
-            return null;
-        }
-
-        $cacheContents = @file_get_contents($cacheFile);
-        if ($cacheContents === false) {
-            return null;
-        }
-
-        $cacheData = json_decode($cacheContents, true);
-        if (
-            !is_array($cacheData)
-            || !isset($cacheData['idler'], $cacheData['baslangic'], $cacheData['bitis'], $cacheData['zaman'])
-            || !is_array($cacheData['idler'])
-        ) {
-            return null;
-        }
-
-        return $cacheData;
-    }
-
-    private function onayliRaporCacheYaz(array $idler, string $baslangic, string $bitis): void
-    {
-        try {
-            $this->writeTokenCache($this->onayliRaporCacheFile(), [
-                'idler' => array_keys($idler),
-                'baslangic' => $baslangic,
-                'bitis' => $bitis,
-                'zaman' => time(),
-            ]);
-        } catch (Exception $e) {
-            // Önbellek yazılamazsa akış bozulmamalı; bir sonraki istekte tekrar denenir.
-        }
-    }
-
-    /**
-     * raporAramaTarihile cevabındaki ONAYLI / ONAYDURUMU / RAPORDURUMADI alanları SGK
-     * tarafından boş string olarak dönmektedir; bu nedenle "SGK'da zaten onaylanmış"
-     * bilgisi bu alanlardan anlaşılamaz. Rapor SGK'nın kendi portalinden onaylandıysa
-     * yerel veritabanında da kaydı olmaz ve rapor onay bekleyen listesinde kalmaya
-     * devam eder. Tek güvenilir kaynak onayliRaporlarTarihile servisidir.
-     *
-     * Bu servis dakikada bir sorguyla sınırlı olduğundan sonuç ONAYLI_RAPOR_CACHE_TTL_SECONDS
-     * süresince önbellekten okunur. Sorgu limite takılırsa filtreleme kapatılmaz; en son
-     * başarılı sonuç kullanılır, aksi halde SGK'da onaylanmış raporlar tekrar bekleyen
-     * listesinde görünür.
-     *
-     * @param array $raporlar raporlariGetir()'dan dönen dizi
-     * @return array MEDULARAPORID => true biçiminde küme
-     */
-    private function sgkOnayliMedulaRaporIdleri(array $raporlar): array
-    {
-        $tarihler = [];
-        foreach ($raporlar as $rapor) {
-            if (($rapor['ARSIV'] ?? '0') == 1) {
-                continue;
-            }
-            $poliklinikTarihi = trim((string)($rapor['POLIKLINIKTAR'] ?? ''));
-            if ($poliklinikTarihi !== '' && $poliklinikTarihi !== '0001-01-01') {
-                $tarihler[] = $poliklinikTarihi;
-            }
-        }
-
-        if ($tarihler === []) {
-            return [];
-        }
-
-        $baslangicStr = min($tarihler);
-        $bitisStr = max($tarihler);
-        $cache = $this->onayliRaporCacheOku();
-        $cacheIdler = $cache !== null ? array_fill_keys($cache['idler'], true) : [];
-        $cacheAraligiYeterli = $cache !== null
-            && $cache['baslangic'] <= $baslangicStr
-            && $cache['bitis'] >= $bitisStr;
-
-        if ($cacheAraligiYeterli && (time() - (int)$cache['zaman']) < self::ONAYLI_RAPOR_CACHE_TTL_SECONDS) {
-            return $cacheIdler;
-        }
-
-        $logger = new \Core\Services\FileLogger(__DIR__ . '/../../logs', 'bekleyen_rapor_capraz_kontrol');
-
-        try {
-            $onayliRaporlar = $this->onayliRaporlariGetir(new DateTime($baslangicStr), new DateTime($bitisStr));
-        } catch (Exception $e) {
-            $logger->warning('SGK onaylı rapor listesi alınamadı, en son önbellek kullanılıyor.', [
-                'isyeriKodu' => $this->isyeriKodu,
-                'onbellek_kayit_sayisi' => count($cacheIdler),
-                'onbellek_yasi_sn' => $cache !== null ? time() - (int)$cache['zaman'] : null,
-                'mesaj' => $e->getMessage(),
-            ]);
-            return $cacheIdler;
-        }
-
-        $onayliIdler = [];
-        foreach ($onayliRaporlar as $onayliRapor) {
-            $medulaRaporId = trim((string)($onayliRapor['MEDULARAPORID'] ?? ''));
-            if ($medulaRaporId !== '') {
-                $onayliIdler[$medulaRaporId] = true;
-            }
-        }
-
-        $this->onayliRaporCacheYaz($onayliIdler, $baslangicStr, $bitisStr);
-
-        return $onayliIdler;
-    }
-
     /**
      * Onay Bekleyen Raporlar panel sayfaları ve otomatik onay cron'unun ortak kullandığı
      * merkezi metot: SGK'dan bekleyen raporları çeker ve sadece gerçekten işlem
@@ -898,7 +771,6 @@ XML;
             $raporModel->findExistingMedulaRaporIds(array_column($tumRaporlar, 'MEDULARAPORID')),
             true
         );
-        $sgkOnayliIdler = $this->sgkOnayliMedulaRaporIdleri($tumRaporlar);
 
         foreach ($tumRaporlar as $rapor) {
             // Arşivlenmiş (ARSIV=1) raporlar SGK tarafında onaylanmış/sonuçlanmış demektir.
@@ -906,29 +778,10 @@ XML;
                 continue;
             }
 
-            // "ONAY BEKLİYOR" gibi durumları yanlışlıkla elememek için metinde ONAY
-            // aramak yerine yalnızca kesin onay durumlarını kabul et.
-            $raporDurumAdi = mb_strtoupper(trim((string)($rapor['RAPORDURUMADI'] ?? '')), 'UTF-8');
-            $onayli = strtoupper(trim((string)($rapor['ONAYLI'] ?? '')));
-            $onayDurumu = strtoupper(trim((string)($rapor['ONAYDURUMU'] ?? '')));
-            if (
-                in_array($raporDurumAdi, ['ONAYLI', 'ONAYLANDI'], true)
-                || in_array($onayli, ['1', 'E'], true)
-                || in_array($onayDurumu, ['1', 'E'], true)
-            ) {
-                continue;
-            }
-
             // Takip numarasi birden fazla rapor sirasinda ortak olabilir. Yalnizca SGK'nin
             // tekil Medula rapor kimligi daha once kaydedildiyse bu satiri atla.
             $medulaRaporId = trim((string)($rapor['MEDULARAPORID'] ?? ''));
             if ($medulaRaporId !== '' && isset($mevcutMedulaRaporIds[$medulaRaporId])) {
-                continue;
-            }
-
-            // Rapor SGK'nın kendi portalinden onaylanmış olabilir; bu durumda ARSIV hâlâ 0
-            // gelir, yerel kayıt da bulunmaz. SGK'nın onaylı listesiyle çapraz kontrol et.
-            if ($medulaRaporId !== '' && isset($sgkOnayliIdler[$medulaRaporId])) {
                 continue;
             }
 

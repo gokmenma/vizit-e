@@ -155,13 +155,6 @@ try {
                         continue;
                     }
 
-                    // Eğer rapor durumu "ONAYLI" veya "ONAYLANDI" içeriyorsa bu raporu atla (SGK'dan gelen veri)
-                    if ((isset($rapor['RAPORDURUMADI']) && stripos($rapor['RAPORDURUMADI'], 'ONAY') !== false) ||
-                        (isset($rapor['ONAYLI']) && ($rapor['ONAYLI'] == '1' || $rapor['ONAYLI'] == 'E')) ||
-                        (isset($rapor['ONAYDURUMU']) && ($rapor['ONAYDURUMU'] == '1' || $rapor['ONAYDURUMU'] == 'E'))) {
-                        continue;
-                    }
-
                     // Takip numarasi birden fazla rapor sirasinda ortak olabilir; tekil
                     // Medula rapor kimligi daha once kaydedilmisse bu satiri atla.
                     if ($raporModel->findReportByMedulaRaporId($rapor['MEDULARAPORID'] ?? null)) {
