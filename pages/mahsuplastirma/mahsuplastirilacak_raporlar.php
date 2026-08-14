@@ -238,25 +238,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sorgula_buton'])) {
         <?php endif; ?>
     </div>
     <?php endif; ?>
+    <!-- Sonuçlar Bölümü sonu -->
 </div>
-
-<!-- HTML5 Custom Confirm Dialog Component -->
-<dialog id="alert-dialog" class="dialog w-full sm:max-w-[425px] max-h-[612px]" aria-labelledby="alert-dialog-title"
-    aria-describedby="alert-dialog-description" onclick="if(event.target === this) this.close()">
-    <div>
-        <header>
-            <h2 id="alert-dialog-title">Emin misiniz?</h2>
-            <p id="alert-dialog-description"></p>
-        </header>
-        <footer>
-            <button type="button" class="btn-outline" onclick="document.getElementById('alert-dialog').close()">Vazgeç</button>
-            <button type="button" id="dialog-confirm-btn" class="btn-primary">Devam Et</button>
-        </footer>
-    </div>
-</dialog>
-
-
-
 
 <!-- Script'leri dahil ediyoruz -->
 <?php include 'layouts/vendor-scripts.php'; ?>
@@ -305,7 +288,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sorgula_buton'])) {
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
 }
 
-
 .btn-icon-sm:hover {
     background: var(--muted) !important;
     border-color: var(--border) !important;
@@ -329,7 +311,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sorgula_buton'])) {
             lucide.createIcons();
         }
 
-        //Tarih1 alanında seçim yapınca tarih2 alanını o ayın son günü yap
+        // Tarih1 alanında seçim yapınca tarih2 alanını o ayın son günü yap
         const tarih1Input = $('#tarih1');
         const tarih2Input = $('#tarih2');
 
@@ -359,88 +341,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sorgula_buton'])) {
                 if (dtButton) {
                     dtButton.click();
                 } else {
-                    // Eğer buton yoksa manuel export (DataTables exportable zaten açık olmalı)
+                    // Eğer buton yoksa manuel export
                     $('.js-exportable').DataTable().button('.buttons-excel').trigger();
                 }
             });
         }
 
-        // Custom alert-dialog components reference
-        const alertDialog = document.getElementById('alert-dialog');
-        const dialogTitle = document.getElementById('alert-dialog-title');
-        const dialogDescription = document.getElementById('alert-dialog-description');
-        const dialogConfirmBtn = document.getElementById('dialog-confirm-btn');
-        let pendingConfirmAction = null;
-
-        if (dialogConfirmBtn) {
-            // Unbind any previous listener just in case
-            const newConfirmBtn = dialogConfirmBtn.cloneNode(true);
-            dialogConfirmBtn.parentNode.replaceChild(newConfirmBtn, dialogConfirmBtn);
-            newConfirmBtn.addEventListener('click', function() {
-                if (pendingConfirmAction) {
-                    const cancelBtn = alertDialog.querySelector('.btn-outline');
-                    if (cancelBtn) cancelBtn.disabled = true;
-                    
-                    newConfirmBtn.disabled = true;
-                    const originalHTML = newConfirmBtn.innerHTML;
-                    newConfirmBtn.innerHTML = '<span class="flex items-center gap-1.5"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> İşlem yapılıyor...</span>';
-                    if (window.lucide) lucide.createIcons();
-
-                    const promise = pendingConfirmAction();
-                    if (promise && typeof promise.finally === 'function') {
-                        promise.finally(() => {
-                            newConfirmBtn.disabled = false;
-                            newConfirmBtn.innerHTML = originalHTML;
-                            if (cancelBtn) cancelBtn.disabled = false;
-                            alertDialog.close();
-                        });
-                    } else {
-                        newConfirmBtn.disabled = false;
-                        newConfirmBtn.innerHTML = originalHTML;
-                        if (cancelBtn) cancelBtn.disabled = false;
-                        alertDialog.close();
-                    }
-                } else {
-                    alertDialog.close();
-                }
-            });
-        }
-
-        // Seçilenleri Mahsuplaştır Butonu
+        // Seçilenleri Mahsuplaştır Butonu ve Checkbox İşlemleri
         const secilenleriMahsuplastirBtn = document.querySelector('.secilenleri-mahsuplastir');
         const selectAllCheckbox = document.getElementById('select_all');
         const raporCheckboxes = document.querySelectorAll('.rapor-checkbox');
 
-        if (secilenleriMahsuplastirBtn) {
-            // Checkbox değişimlerini izle
-            function updateBulkButtonState() {
-                const checkedCount = document.querySelectorAll('.rapor-checkbox:checked').length;
+        function updateBulkButtonState() {
+            const checkedCount = document.querySelectorAll('.rapor-checkbox:checked').length;
+            if (secilenleriMahsuplastirBtn) {
                 secilenleriMahsuplastirBtn.disabled = checkedCount === 0;
                 if (checkedCount === 0) {
                     secilenleriMahsuplastirBtn.innerHTML =
-                        '<i data-lucide="check-check" class="w-4 h-4"></i> Seçilenleri Mahsuplaştır';
+                        '<i data-lucide="check-check" class="w-4 h-4"></i> <span>Seçilenleri Mahsuplaştır</span>';
                 } else {
                     secilenleriMahsuplastirBtn.innerHTML =
-                        `<i data-lucide="check-check" class="w-4 h-4"></i> Seçilenleri Mahsuplaştır (${checkedCount})`;
+                        `<i data-lucide="check-check" class="w-4 h-4"></i> <span>Seçilenleri Mahsuplaştır (${checkedCount})</span>`;
                 }
                 if (window.lucide) {
                     lucide.createIcons();
                 }
             }
+        }
 
-            if (selectAllCheckbox) {
-                selectAllCheckbox.addEventListener('change', function() {
-                    raporCheckboxes.forEach(cb => {
-                        cb.checked = this.checked;
-                    });
-                    updateBulkButtonState();
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                raporCheckboxes.forEach(cb => {
+                    cb.checked = this.checked;
                 });
-            }
-
-            raporCheckboxes.forEach(cb => {
-                cb.addEventListener('change', updateBulkButtonState);
+                updateBulkButtonState();
             });
+        }
 
+        raporCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateBulkButtonState);
+        });
+
+        if (secilenleriMahsuplastirBtn) {
             secilenleriMahsuplastirBtn.addEventListener('click', function() {
                 const checkedBoxes = document.querySelectorAll('.rapor-checkbox:checked');
                 const secilenRaporlar = [];
@@ -453,36 +395,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sorgula_buton'])) {
 
                 if (secilenRaporlar.length === 0) return;
 
-                dialogTitle.textContent = "Toplu Mahsuplaştırma Onayı";
-                dialogDescription.textContent =
-                    `${secilenRaporlar.length} adet raporu toplu olarak mahsuplaştırmak istediğinize emin misiniz?`;
+                const isDark = document.documentElement.classList.contains('dark');
 
-                pendingConfirmAction = function() {
-                    var formData = new FormData();
-                    formData.append('action', 'mahsuplastiOnaylaToplu');
-                    formData.append('raporData', JSON.stringify(secilenRaporlar));
+                Swal.fire({
+                    title: 'Toplu Mahsuplaştırma Onayı',
+                    text: `${secilenRaporlar.length} adet raporu toplu olarak mahsuplaştırmak istediğinize emin misiniz?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Evet, Mahsuplaştır',
+                    cancelButtonText: 'Vazgeç',
+                    reverseButtons: true,
+                    confirmButtonColor: '#09090b',
+                    cancelButtonColor: '#71717a',
+                    background: isDark ? '#09090b' : '#ffffff',
+                    color: isDark ? '#f4f4f5' : '#09090b'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'İşlem Yapılıyor',
+                            text: 'Lütfen bekleyin, mahsuplaştırma işlemi gerçekleştiriliyor...',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            background: isDark ? '#09090b' : '#ffffff',
+                            color: isDark ? '#f4f4f5' : '#09090b',
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
 
-                    return fetch('App/Api/APImahsuplastirma.php', {
+                        var formData = new FormData();
+                        formData.append('action', 'mahsuplastiOnaylaToplu');
+                        formData.append('raporData', JSON.stringify(secilenRaporlar));
+
+                        fetch('App/Api/APImahsuplastirma.php', {
                             method: 'POST',
                             body: formData,
                         })
                         .then(response => response.json())
                         .then(data => {
                             if (data.status === 'success') {
-                                showToast(data.message, "success");
-                                setTimeout(() => {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Başarılı',
+                                    text: data.message || 'Seçilen raporlar başarıyla mahsuplaştırıldı.',
+                                    confirmButtonColor: '#09090b',
+                                    background: isDark ? '#09090b' : '#ffffff',
+                                    color: isDark ? '#f4f4f5' : '#09090b'
+                                }).then(() => {
                                     location.reload();
-                                }, 1000);
+                                });
                             } else {
-                                showToast("İşlem başarısız oldu: " + data.message, "error");
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Hata',
+                                    text: data.message || 'İşlem başarısız oldu.',
+                                    confirmButtonColor: '#09090b',
+                                    background: isDark ? '#09090b' : '#ffffff',
+                                    color: isDark ? '#f4f4f5' : '#09090b'
+                                });
                             }
                         })
                         .catch(error => {
-                            showToast("Sunucuya ulaşılamadı: " + error, "error");
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Bağlantı Hatası',
+                                text: 'Sunucuya ulaşılamadı: ' + error,
+                                confirmButtonColor: '#09090b',
+                                background: isDark ? '#09090b' : '#ffffff',
+                                color: isDark ? '#f4f4f5' : '#09090b'
+                            });
                         });
-                };
-
-                alertDialog.showModal();
+                    }
+                });
             });
         }
 
@@ -491,42 +475,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sorgula_buton'])) {
 
         butonlar.forEach(buton => {
             buton.addEventListener('click', function(event) {
-                const satir = this.closest('tr'); // Butonun bulunduğu satırı bul
-                const raporData = JSON.parse(satir.dataset
-                    .rapor); // Satırın data-rapor özelliğindeki JSON verisini al
+                const satir = this.closest('tr');
+                const raporData = JSON.parse(satir.dataset.rapor);
+                const isDark = document.documentElement.classList.contains('dark');
 
-                dialogTitle.textContent = "Mahsuplaştırma Onayı";
-                dialogDescription.textContent =
-                    `${raporData.adiSoyadi} kişisine ait raporu mahsuplaştırmak istediğinize emin misiniz?`;
+                Swal.fire({
+                    title: 'Mahsuplaştırma Onayı',
+                    text: `${raporData.adiSoyadi} kişisine ait raporu mahsuplaştırmak istediğinize emin misiniz?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Evet, Onayla',
+                    cancelButtonText: 'Vazgeç',
+                    reverseButtons: true,
+                    confirmButtonColor: '#09090b',
+                    cancelButtonColor: '#71717a',
+                    background: isDark ? '#09090b' : '#ffffff',
+                    color: isDark ? '#f4f4f5' : '#09090b'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'İşlem Yapılıyor',
+                            text: 'Lütfen bekleyin, mahsuplaştırma işlemi gerçekleştiriliyor...',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            background: isDark ? '#09090b' : '#ffffff',
+                            color: isDark ? '#f4f4f5' : '#09090b',
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
 
-                pendingConfirmAction = function() {
-                    var formData = new FormData();
-                    formData.append('action', 'mahsuplastiOnayla');
-                    formData.append('raporData', JSON.stringify(raporData));
+                        var formData = new FormData();
+                        formData.append('action', 'mahsuplastiOnayla');
+                        formData.append('raporData', JSON.stringify(raporData));
 
-                    return fetch('App/Api/APImahsuplastirma.php', {
+                        fetch('App/Api/APImahsuplastirma.php', {
                             method: 'POST',
                             body: formData,
                         })
                         .then(response => response.json())
                         .then(data => {
                             if (data.status === 'success') {
-                                showToast(data.message, "success");
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Başarılı',
+                                    text: data.message || 'Rapor başarıyla mahsuplaştırıldı.',
+                                    timer: 1500,
+                                    showConfirmButton: false,
+                                    background: isDark ? '#09090b' : '#ffffff',
+                                    color: isDark ? '#f4f4f5' : '#09090b'
+                                });
                                 satir.style.transition = "opacity 0.5s ease";
                                 satir.style.opacity = "0";
                                 setTimeout(() => {
                                     satir.remove();
-                                }, 500); // 0.5 saniye bekle
+                                    updateBulkButtonState();
+                                }, 500);
                             } else {
-                                showToast("İşlem başarısız oldu: " + data.message, "error");
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Hata',
+                                    text: data.message || 'İşlem başarısız oldu.',
+                                    confirmButtonColor: '#09090b',
+                                    background: isDark ? '#09090b' : '#ffffff',
+                                    color: isDark ? '#f4f4f5' : '#09090b'
+                                });
                             }
                         })
                         .catch(error => {
-                            showToast("Sunucuya ulaşılamadı: " + error, "error");
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Bağlantı Hatası',
+                                text: 'Sunucuya ulaşılamadı: ' + error,
+                                confirmButtonColor: '#09090b',
+                                background: isDark ? '#09090b' : '#ffffff',
+                                color: isDark ? '#f4f4f5' : '#09090b'
+                            });
                         });
-                };
-
-                alertDialog.showModal();
+                    }
+                });
             });
         });
     }
