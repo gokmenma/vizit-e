@@ -299,10 +299,19 @@ if ($isQueried) {
                     .then(res => res.json())
                     .then(resData => {
                         if (resData.status === 'success') {
-                            Swal.fire('Başarılı', resData.message, 'success');
-                            setTimeout(() => {
-                                App.refreshMobilePage();
-                            }, 1200);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Başarılı',
+                                text: resData.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            document.querySelectorAll('.rapor-checkbox:checked').forEach(cb => {
+                                const card = cb.closest('.rapor-row');
+                                if (card) card.remove();
+                            });
+                            if (selectAllCb) selectAllCb.checked = false;
+                            updateBulkBtn();
                         } else {
                             Swal.fire('Hata', resData.message, 'error');
                         }

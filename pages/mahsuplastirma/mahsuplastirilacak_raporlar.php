@@ -369,10 +369,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sorgula_buton'])) {
             }
         }
 
+        function refreshTableState() {
+            const tbody = document.querySelector('tbody');
+            if (!tbody) return;
+            const rows = tbody.querySelectorAll('tr:not(#rapor-yok-mesaji)');
+            if (rows.length === 0) {
+                tbody.innerHTML = `
+                    <tr id="rapor-yok-mesaji">
+                        <td colspan="9" class="text-center py-10 text-zinc-400 dark:text-zinc-500 font-medium">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <i data-lucide="inbox" class="w-8 h-8 opacity-45"></i>
+                                <span>Belirtilen kriterlere uygun mahsuplaştırılacak rapor bulunamadı.</span>
+                            </div>
+                        </td>
+                    </tr>`;
+                if (window.lucide) lucide.createIcons();
+            } else {
+                rows.forEach((row, index) => {
+                    if (row.cells && row.cells[1]) {
+                        row.cells[1].textContent = index + 1;
+                    }
+                });
+            }
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+            }
+            updateBulkButtonState();
+        }
+
         if (selectAllCheckbox) {
             selectAllCheckbox.addEventListener('change', function() {
-                raporCheckboxes.forEach(cb => {
-                    cb.checked = this.checked;
+                const currentCheckboxes = document.querySelectorAll('.rapor-checkbox');
+                currentCheckboxes.forEach(cb => {
+                    cb.checked = selectAllCheckbox.checked;
                 });
                 updateBulkButtonState();
             });
@@ -438,12 +467,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sorgula_buton'])) {
                                     icon: 'success',
                                     title: 'Başarılı',
                                     text: data.message || 'Seçilen raporlar başarıyla mahsuplaştırıldı.',
-                                    confirmButtonColor: '#09090b',
+                                    timer: 1500,
+                                    showConfirmButton: false,
                                     background: isDark ? '#09090b' : '#ffffff',
                                     color: isDark ? '#f4f4f5' : '#09090b'
-                                }).then(() => {
-                                    location.reload();
                                 });
+
+                                checkedBoxes.forEach(cb => {
+                                    const tr = cb.closest('tr');
+                                    if (tr) {
+                                        tr.style.transition = "opacity 0.4s ease";
+                                        tr.style.opacity = "0";
+                                    }
+                                });
+
+                                setTimeout(() => {
+                                    checkedBoxes.forEach(cb => {
+                                        const tr = cb.closest('tr');
+                                        if (tr) tr.remove();
+                                    });
+                                    refreshTableState();
+                                }, 400);
                             } else {
                                 Swal.fire({
                                     icon: 'error',
@@ -525,12 +569,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sorgula_buton'])) {
                                     background: isDark ? '#09090b' : '#ffffff',
                                     color: isDark ? '#f4f4f5' : '#09090b'
                                 });
-                                satir.style.transition = "opacity 0.5s ease";
+                                satir.style.transition = "opacity 0.4s ease";
                                 satir.style.opacity = "0";
                                 setTimeout(() => {
                                     satir.remove();
-                                    updateBulkButtonState();
-                                }, 500);
+                                    refreshTableState();
+                                }, 400);
                             } else {
                                 Swal.fire({
                                     icon: 'error',

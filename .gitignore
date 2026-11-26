@@ -4,3 +4,4 @@ vendor/
 .agent/
 /scratch/
 /node_modules/
+.ssl/
