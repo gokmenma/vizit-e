@@ -1,8 +1,8 @@
+(function () {
 const excelUploadUrl = "App/Api/APIisyerlerim.php";
-const excelFileInput = document.getElementById("excel_dosya");
-const excelUploadAlert = document.getElementById("excel-upload-alert");
 
 function showExcelUploadInfo(message) {
+  const excelUploadAlert = document.getElementById("excel-upload-alert");
   if (excelUploadAlert) {
     excelUploadAlert.innerHTML = message;
     excelUploadAlert.className =
@@ -17,65 +17,64 @@ function showExcelUploadInfo(message) {
 }
 
 function clearExcelUploadInfo() {
+  const excelUploadAlert = document.getElementById("excel-upload-alert");
   if (excelUploadAlert) {
     excelUploadAlert.innerHTML = "";
     excelUploadAlert.classList.add("d-none");
   }
 }
 
-if (excelFileInput) {
-  excelFileInput.addEventListener("change", function (event) {
-    const fileInput = event.target;
-    const file = fileInput.files[0];
-    const allowedExtensions = /(\.xls|\.xlsx)$/i;
+$(document).off("change.excelUpload").on("change.excelUpload", "#excel_dosya", function (event) {
+  const fileInput = event.target;
+  const file = fileInput.files[0];
+  const allowedExtensions = /(\.xls|\.xlsx)$/i;
 
-    clearExcelUploadInfo();
-    if (!file) return;
+  clearExcelUploadInfo();
+  if (!file) return;
 
-    if (!allowedExtensions.test(file.name)) {
-      swal.fire({
-        title: "Hata",
-        text: "Lütfen sadece Excel dosyası yükleyin.",
-        icon: "error",
-        confirmButtonText: "Tamam",
-      });
-      fileInput.value = ""; // Dosya girişini temizle
-    } else {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const workbook = XLSX.read(e.target.result, { type: "binary" });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+  if (!allowedExtensions.test(file.name)) {
+    swal.fire({
+      title: "Hata",
+      text: "Lütfen sadece Excel dosyası yükleyin.",
+      icon: "error",
+      confirmButtonText: "Tamam",
+    });
+    fileInput.value = ""; // Dosya girişini temizle
+  } else {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const workbook = XLSX.read(e.target.result, { type: "binary" });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
 
-        // Hücre aralığını al
-        const range = XLSX.utils.decode_range(firstSheet["!ref"]);
+      // Hücre aralığını al
+      const range = XLSX.utils.decode_range(firstSheet["!ref"]);
 
-        // Satır sayısını hesapla
-        const satir_sayisi = range.e.r - range.s.r;
+      // Satır sayısını hesapla
+      const satir_sayisi = range.e.r - range.s.r;
 
-        //satır sayısı 1000'den fazla ise uyarı ver
-        if (satir_sayisi > 1000) {
-          swal.fire({
-            title: "Uyarı",
-            text: "Yüklenen dosyada bulunan satır sayısı 1000'den fazla. Lütfen daha az satır içeren bir dosya yükleyin.",
-            icon: "warning",
-            confirmButtonText: "Tamam",
-          });
-          fileInput.value = ""; // Dosya girişini temizle
-          return;
-        } else {
-          showExcelUploadInfo(
-            `Dosya hazır. Yüklenecek veri satırı: <strong>${satir_sayisi}</strong>`
-          );
-        }
-      };
-      // Dosyayı oku
-      reader.readAsBinaryString(file);
-    }
-  });
-}
+      //satır sayısı 1000'den fazla ise uyarı ver
+      if (satir_sayisi > 1000) {
+        swal.fire({
+          title: "Uyarı",
+          text: "Yüklenen dosyada bulunan satır sayısı 1000'den fazla. Lütfen daha az satır içeren bir dosya yükleyin.",
+          icon: "warning",
+          confirmButtonText: "Tamam",
+        });
+        fileInput.value = ""; // Dosya girişini temizle
+        return;
+      } else {
+        showExcelUploadInfo(
+          `Dosya hazır. Yüklenecek veri satırı: <strong>${satir_sayisi}</strong>`
+        );
+      }
+    };
+    // Dosyayı oku
+    reader.readAsBinaryString(file);
+  }
+});
 
 /*Excelden Yüklemek için*/
-$(document).on("click", "#excel_yukle_buton", function (e) {
+$(document).off("click.excelUpload").on("click.excelUpload", "#excel_yukle_buton", function (e) {
   e.preventDefault();
   const fileInput = document.getElementById("excel_dosya");
   const loadingOverlay = document.getElementById("loading-overlay");
@@ -105,7 +104,6 @@ $(document).on("click", "#excel_yukle_buton", function (e) {
   })
     .then((response) => response.json())
     .then((data) => {
-     
       // console.log(data); // Konsola yanıtı yazdır
       const title = data.status === "success" ? "Başarılı" : "Hata";
       if (loadingOverlay) loadingOverlay.style.display = "none";
@@ -115,11 +113,10 @@ $(document).on("click", "#excel_yukle_buton", function (e) {
         icon: data.status,
         confirmButtonText: "Tamam",
       }).then(() => {
-        if(data.status === "success"){
+        if (data.status === "success") {
           window.location.reload(); // Sayfayı yeniden yükle
         }
       });
-
     })
     .catch((error) => {
       console.error("Error:", error);
@@ -130,14 +127,13 @@ $(document).on("click", "#excel_yukle_buton", function (e) {
         text: "Dosya yüklenirken bir hata oluştu.!!",
         icon: "error",
         confirmButtonText: "Tamam",
-      })
-      .then(()=>{
+      }).then(() => {
         window.location.reload(); // Sayfayı yeniden yükle
-      })
-      ;
+      });
     });
 });
-$(document).on("click", "#form_temizle_buton", function () {
+
+$(document).off("click.excelUploadClear").on("click.excelUploadClear", "#form_temizle_buton", function () {
   const fileInput = document.getElementById("excel_dosya");
   if (!fileInput) return;
   fileInput.value = "";
@@ -145,12 +141,11 @@ $(document).on("click", "#form_temizle_buton", function () {
   showExcelUploadInfo("Dosya seçimi temizlendi. Yeni bir dosya seçebilirsiniz.");
 });
 
-const excelUploadModal = document.getElementById("excelUploadModal");
-if (excelUploadModal) {
-  excelUploadModal.addEventListener("hidden.bs.modal", function () {
-    if (excelFileInput) excelFileInput.value = "";
-    clearExcelUploadInfo();
-    const loadingOverlay = document.getElementById("loading-overlay");
-    if (loadingOverlay) loadingOverlay.style.display = "none";
-  });
-}
+$(document).off("hidden.bs.modal.excelUpload").on("hidden.bs.modal.excelUpload", "#excelUploadModal", function () {
+  const excelFileInput = document.getElementById("excel_dosya");
+  if (excelFileInput) excelFileInput.value = "";
+  clearExcelUploadInfo();
+  const loadingOverlay = document.getElementById("loading-overlay");
+  if (loadingOverlay) loadingOverlay.style.display = "none";
+});
+})();

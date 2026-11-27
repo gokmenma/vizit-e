@@ -114,39 +114,39 @@ if (isset($davetid)) {
             padding: 1rem;
         }
 
-        .logo-area {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            margin-bottom: 2rem;
-        }
-
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            color: #18181b;
-        }
-
         .login-card {
             background: #fff;
             border: 1px solid #e4e4e7;
-            border-radius: 12px;
-            padding: 2.5rem;
+            border-radius: 16px;
+            padding: 2.5rem 2.25rem;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
         }
 
         .card-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .card-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            margin: 0 auto 1.25rem;
+            display: block;
         }
 
         .card-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
+            letter-spacing: -0.02em;
             margin: 0;
             color: #18181b;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: #71717a;
+            margin: 0.375rem 0 0;
         }
 
         .form-group {
@@ -161,65 +161,89 @@ if (isset($davetid)) {
             color: #18181b;
         }
 
-        .form-group input {
-            height: 2.5rem;
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            height: 2.625rem;
             width: 100%;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid #e4e4e7;
             background: #fff;
-            padding: 0 0.75rem 0 2.25rem !important; /* make space for the icon */
+            padding: 0 0.75rem;
             font-size: 0.875rem;
             font-family: inherit;
             box-sizing: border-box;
-            transition: all 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        .form-group input:focus {
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="password"]:focus {
             outline: none;
             border-color: #18181b;
-            ring: 1px solid #18181b;
+            box-shadow: 0 0 0 1px #18181b;
         }
 
-        /* Custom Input Icon Styling */
-        .input-icon-wrapper {
+        .password-wrapper {
             position: relative;
             display: block;
             width: 100%;
         }
 
-        .input-icon-wrapper i,
-        .input-icon-wrapper svg {
+        .password-wrapper input {
+            padding-right: 2.5rem !important;
+        }
+
+        .password-toggle-btn {
             position: absolute;
-            left: 0.75rem;
+            right: 0.5rem;
             top: 50%;
             transform: translateY(-50%);
-            width: 1rem;
-            height: 1rem;
-            color: #a1a1aa; /* text-zinc-400 */
-            pointer-events: none;
-            transition: color 0.2s;
+            width: 1.75rem;
+            height: 1.75rem;
+            padding: 0;
+            border: none;
+            background: transparent;
+            color: #a1a1aa;
+            cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            border-radius: 4px;
+            transition: color 0.2s, background-color 0.2s;
         }
 
-        .form-group input:focus + i,
-        .form-group input:focus + svg {
-            color: #18181b; /* zinc-900 */
+        .password-toggle-btn:hover {
+            color: #18181b;
+            background-color: rgba(0, 0, 0, 0.05);
         }
 
-        .dark .form-group input:focus + i,
-        .dark .form-group input:focus + svg {
-            color: #f4f4f5; /* zinc-100 */
+        .password-toggle-btn:focus-visible {
+            outline: 2px solid #18181b;
+            outline-offset: 1px;
+        }
+
+        .password-toggle-btn svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .dark .password-toggle-btn:hover {
+            color: #f4f4f5;
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .dark .password-toggle-btn:focus-visible {
+            outline-color: #f4f4f5;
         }
 
         .btn-login {
             width: 100%;
-            height: 2.5rem;
+            height: 2.75rem;
             background: #18181b;
             color: #fff;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 500;
             font-size: 0.875rem;
             font-family: inherit;
@@ -301,14 +325,23 @@ if (isset($davetid)) {
             color: #f4f4f5;
         }
 
-        .dark .form-group input {
+        .dark .card-subtitle {
+            color: #a1a1aa;
+        }
+
+        .dark .form-group input[type="text"],
+        .dark .form-group input[type="email"],
+        .dark .form-group input[type="password"] {
             background: #09090b;
             border-color: #27272a;
             color: #f4f4f5;
         }
 
-        .dark .form-group input:focus {
+        .dark .form-group input[type="text"]:focus,
+        .dark .form-group input[type="email"]:focus,
+        .dark .form-group input[type="password"]:focus {
             border-color: #f4f4f5;
+            box-shadow: 0 0 0 1px #f4f4f5;
         }
 
         .dark .btn-login {
@@ -436,14 +469,11 @@ if (isset($davetid)) {
 <body>
 
     <div class="login-container">
-        <div class="logo-area">
-            <img src="<?php echo $base_path; ?>/assets/images/logo.svg?v=<?= filemtime(__DIR__ . '/assets/images/logo.svg') ?>" alt="Vizit-e" style="width: 40px; height: 40px; border-radius: 10px;">
-            <span class="logo-text">SGK Vizite</span>
-        </div>
-
         <div class="login-card">
             <header class="card-header">
+                <img src="<?php echo $base_path; ?>/assets/images/logo.svg?v=<?= filemtime(__DIR__ . '/assets/images/logo.svg') ?>" alt="SGK Vizite" class="card-logo">
                 <h2>Kayıt Ol</h2>
+                <p class="card-subtitle">Hesabınızı oluşturmak için bilgilerinizi girin</p>
             </header>
 
             <div class="info-banner d-none"></div>
@@ -457,38 +487,32 @@ if (isset($davetid)) {
                 <input type="hidden" name="gizlilik_sozlesmesi_id" value="<?php echo ($gizlilik_sozlesmesi_id); ?>">
                 <input type="hidden" name="acik_riza_beyani_id" value="<?php echo ($acik_riza_beyani_id); ?>">
                 <?php if (isset($referred_id)) : ?>
-                    <input type="hidden" name="referred_by" value="<?php echo htmlspecialchars($referred_id); ?>">
+                    <input type="hidden" name="referred_by" value="<?php echo htmlspecialchars($referred_id, ENT_QUOTES, 'UTF-8'); ?>">
                 <?php endif; ?>
 
                 <div class="form-group">
                     <label for="adi_soyadi">Adı Soyadı</label>
-                    <div class="input-icon-wrapper">
-                        <input type="text" id="adi_soyadi" name="adi_soyadi" placeholder="Ad ve soyadınızı giriniz" required autofocus>
-                        <i data-lucide="user"></i>
-                    </div>
+                    <input type="text" id="adi_soyadi" name="adi_soyadi" placeholder="Ad ve soyadınızı giriniz" required autofocus>
                 </div>
 
                 <div class="form-group">
                     <label for="kullanici_adi">Kullanıcı Adı</label>
-                    <div class="input-icon-wrapper">
-                        <input type="text" id="kullanici_adi" name="kullanici_adi" placeholder="Kullanıcı adı giriniz" required>
-                        <i data-lucide="at-sign"></i>
-                    </div>
+                    <input type="text" id="kullanici_adi" name="kullanici_adi" placeholder="Kullanıcı adı giriniz" required>
                 </div>
 
                 <div class="form-group">
                     <label for="email">E-Posta</label>
-                    <div class="input-icon-wrapper">
-                        <input type="email" id="email" name="email" placeholder="isim@sirket.com" required>
-                        <i data-lucide="mail"></i>
-                    </div>
+                    <input type="email" id="email" name="email" placeholder="isim@sirket.com" required>
                 </div>
 
                 <div class="form-group">
                     <label for="sifre">Şifre</label>
-                    <div class="input-icon-wrapper">
+                    <div class="password-wrapper">
                         <input type="password" id="sifre" name="sifre" placeholder="••••••••" required>
-                        <i data-lucide="lock"></i>
+                        <button type="button" class="password-toggle-btn" id="togglePasswordBtn" aria-label="Şifreyi göster" title="Şifreyi göster" aria-pressed="false">
+                            <i data-lucide="eye" id="togglePasswordIconShow"></i>
+                            <i data-lucide="eye-off" id="togglePasswordIconHide" style="display: none;"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -562,6 +586,24 @@ if (isset($davetid)) {
     <script>
         $(function() {
             if (window.lucide) lucide.createIcons();
+
+            const passwordInput = document.getElementById('sifre');
+            const toggleBtn = document.getElementById('togglePasswordBtn');
+            const iconShow = document.getElementById('togglePasswordIconShow');
+            const iconHide = document.getElementById('togglePasswordIconHide');
+
+            if (passwordInput && toggleBtn && iconShow && iconHide) {
+                toggleBtn.addEventListener('click', function() {
+                    const isPassword = passwordInput.type === 'password';
+                    passwordInput.type = isPassword ? 'text' : 'password';
+                    iconShow.style.display = isPassword ? 'none' : '';
+                    iconHide.style.display = isPassword ? '' : 'none';
+                    toggleBtn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+                    toggleBtn.setAttribute('aria-label', isPassword ? 'Şifreyi gizle' : 'Şifreyi göster');
+                    toggleBtn.setAttribute('title', isPassword ? 'Şifreyi gizle' : 'Şifreyi göster');
+                });
+            }
+
             const $form = $('#signupForm');
             const $adiSoyadiInput = $('#adi_soyadi');
             const $kullaniciAdiInput = $('#kullanici_adi');

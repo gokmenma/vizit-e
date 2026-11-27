@@ -160,7 +160,8 @@ class Router
 $router = new Router();
 
 // Subdomain tespiti
-$is_admin_host = (isset($_SERVER['HTTP_HOST']) && ($_SERVER['HTTP_HOST'] === 'admin.vizite.com' || $_SERVER['HTTP_HOST'] === 'admin.vizit-e.com'));
+$httpHost = strtolower(explode(':', $_SERVER['HTTP_HOST'] ?? '')[0]);
+$is_admin_host = in_array($httpHost, ['admin.vizite.com', 'admin.vizit-e.com', 'admin.vizite.site', 'admin.vizit-e.site'], true);
 
 if ($is_admin_host) {
     // Admin subdomain'indeysek prefix yok, ana dizin gibi çalışır

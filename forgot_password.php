@@ -205,49 +205,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .login-container {
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             padding: 1rem;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            margin-bottom: 2rem;
-        }
-
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            color: #18181b;
         }
 
         .login-card {
             background: #fff;
             border: 1px solid #e4e4e7;
-            border-radius: 12px;
-            padding: 2.5rem;
+            border-radius: 16px;
+            padding: 2.5rem 2.25rem;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
         }
 
         .card-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .card-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            margin: 0 auto 1.25rem;
+            display: block;
         }
 
         .card-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
+            letter-spacing: -0.02em;
             margin: 0;
             color: #18181b;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: #71717a;
+            margin: 0.375rem 0 0;
+            line-height: 1.5;
         }
 
         .form-group {
             display: grid;
             gap: 0.5rem;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
@@ -257,37 +258,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .form-group input {
-            height: 2.5rem;
+            height: 2.625rem;
             width: 100%;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid #e4e4e7;
             background: #fff;
             padding: 0 0.75rem;
             font-size: 0.875rem;
             font-family: inherit;
             box-sizing: border-box;
-            transition: all 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #18181b;
-            ring: 1px solid #18181b;
+            box-shadow: 0 0 0 1px #18181b;
         }
 
         .btn-login {
             width: 100%;
-            height: 2.5rem;
+            height: 2.75rem;
             background: #18181b;
             color: #fff;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 500;
             font-size: 0.875rem;
             font-family: inherit;
             cursor: pointer;
             transition: opacity 0.2s;
-            margin-top: 0.5rem;
         }
 
         .btn-login:hover {
@@ -340,10 +340,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: #09090b;
         }
 
-        .dark .logo-text {
-            color: #f4f4f5;
-        }
-
         .dark .login-card {
             background: #18181b;
             border-color: #27272a;
@@ -354,6 +350,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #f4f4f5;
         }
 
+        .dark .card-subtitle {
+            color: #a1a1aa;
+        }
+
         .dark .form-group input {
             background: #09090b;
             border-color: #27272a;
@@ -362,6 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .dark .form-group input:focus {
             border-color: #f4f4f5;
+            box-shadow: 0 0 0 1px #f4f4f5;
         }
 
         .dark .btn-login {
@@ -392,33 +393,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 
     <div class="login-container">
-        <div class="logo-area">
-            <img src="assets/images/logo.svg?v=<?= filemtime(__DIR__ . '/assets/images/logo.svg') ?>" alt="Vizit-e" style="width: 40px; height: 40px; border-radius: 10px;">
-            <span class="logo-text">SGK Vizite</span>
-        </div>
-
         <div class="login-card">
             <header class="card-header">
+                <img src="assets/images/logo.svg?v=<?= filemtime(__DIR__ . '/assets/images/logo.svg') ?>" alt="SGK Vizite" class="card-logo">
                 <h2>Şifre Sıfırlama</h2>
+                <?php if ($showForm): ?>
+                    <p class="card-subtitle">Kayıtlı e-posta adresinizi girdiğinizde size şifre sıfırlama bağlantısı göndereceğiz.</p>
+                <?php endif; ?>
             </header>
 
             <?php if (!empty($error_message)): ?>
-                <div class="error-banner"><?php echo htmlspecialchars($error_message); ?></div>
+                <div class="error-banner"><?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?></div>
             <?php endif; ?>
 
             <?php if (!empty($success_message)): ?>
-                <div class="success-banner"><?php echo htmlspecialchars($success_message); ?></div>
+                <div class="success-banner"><?php echo htmlspecialchars($success_message, ENT_QUOTES, 'UTF-8'); ?></div>
             <?php endif; ?>
 
             <?php if ($showForm): ?>
-                <p style="font-size: 0.875rem; color: #71717a; text-align: center; margin-top: -1rem; margin-bottom: 2rem;" class="dark:text-zinc-400">
-                    Kayıtlı e-posta adresinizi girdiğinizde size şifre sıfırlama talimatlarını içeren güvenli bir bağlantı göndereceğiz.
-                </p>
-
                 <form action="forgot-password" method="POST" autocomplete="off">
                     <div class="form-group">
                         <label for="email">E-Posta Adresi</label>
-                        <input type="email" id="email" name="email" placeholder="isim@sirket.com" value="<?php echo htmlspecialchars($email); ?>" required autofocus>
+                        <input type="email" id="email" name="email" placeholder="isim@sirket.com" value="<?php echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>" required autofocus>
                     </div>
 
                     <button type="submit" name="submitButton" class="btn-login">Sıfırlama Linki Gönder</button>

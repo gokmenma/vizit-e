@@ -65,7 +65,8 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit();
 }
 $config = require __DIR__ . '/../config.php';
-$is_admin_host = ($_SERVER['HTTP_HOST'] === 'admin.vizite.com' || $_SERVER['HTTP_HOST'] === 'admin.vizit-e.com');
+$httpHost = strtolower(explode(':', $_SERVER['HTTP_HOST'] ?? '')[0]);
+$is_admin_host = in_array($httpHost, ['admin.vizite.com', 'admin.vizit-e.com', 'admin.vizite.site', 'admin.vizit-e.site'], true);
 $basePath = $config['base_path'] ?? '/';
 
 // Kullanıcı bilgilerini tazeleyelim
