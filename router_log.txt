@@ -1444,3 +1444,5 @@
 06:34:14 - vizit-e.site - /sign-in
 06:34:15 - vizit-e.site - /
 06:34:24 - vizit-e.site - /onay-bekleyen-raporlar
+07:31:51 - vizit-e.site - /isyerlerim
+07:31:54 - vizit-e.site - /kullanicilar
